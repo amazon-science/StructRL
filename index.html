@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StructRL: Online Structured Reinforcement Learning for Long-Horizon Vision-Language-Action Tasks</title>
+<meta name="description" content="StructRL rewards verifiable subtask progress, gated by the task's prerequisite structure and paced by demonstration timing, for online RL of long-horizon VLA policies.">
+<meta property="og:title" content="StructRL: Online Structured Reinforcement Learning for Long-Horizon Vision-Language-Action Tasks"><meta property="og:type" content="website"><meta property="og:url" content="https://amazon-science.github.io/StructRL/"><meta property="og:image" content="https://amazon-science.github.io/StructRL/static/img/teaser.png"><meta property="og:description" content="StructRL rewards verifiable subtask progress, gated by the task's prerequisite structure and paced by demonstration timing, for online RL of long-horizon VLA policies."><meta name="twitter:card" content="summary_large_image"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%A4%96%3C/text%3E%3C/svg%3E">
+<style>
+:root{--fg:#1f2328;--muted:#57606a;--accent:#0b6bcb;--bg:#fff;--soft:#f6f8fa;--line:#d0d7de}
+*{box-sizing:border-box}body{margin:0;font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--fg);background:var(--bg)}
+main{max-width:1000px;margin:0 auto;padding:48px 24px 64px}
+h1{font-size:2.1rem;line-height:1.25;text-align:center;margin:0 0 20px}
+h2{font-size:1.45rem;margin:48px 0 14px;text-align:center}
+.authors{text-align:center;font-size:1.08rem}.authors span{margin:0 9px;white-space:nowrap}
+.affil{text-align:center;color:var(--muted);margin-top:6px}.affil span{margin:0 12px}
+.note{text-align:center;color:var(--muted);font-size:.9rem;margin-top:4px}
+.links{text-align:center;margin:22px 0 8px}
+.btn{display:inline-block;margin:4px 6px;padding:8px 20px;border-radius:999px;background:#24292f;color:#fff;text-decoration:none;font-weight:600}
+.btn:hover{background:#000}
+p.abs{text-align:justify}
+figure{margin:18px 0}figure img,figure video{width:100%;display:block;border-radius:6px}
+figcaption{color:var(--muted);font-size:.92rem;margin-top:8px;text-align:justify}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid figure{margin:0}figure.narrow{max-width:620px;margin:18px auto}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+ul.key{padding-left:22px}ul.key li{margin:6px 0}
+table{border-collapse:collapse;margin:8px auto;min-width:60%}th,td{padding:7px 16px;border-bottom:1px solid var(--line);text-align:center}
+td:first-child,th:first-child,td:nth-child(2),th:nth-child(2){text-align:left}tr.ours td{font-weight:700}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:14px;white-space:pre-wrap;word-break:break-word;font-size:.85rem;line-height:1.45;margin:0}
+.bib{position:relative}.copy{position:absolute;top:8px;right:8px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 10px;font-size:.8rem;cursor:pointer}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0 4px}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font-size:.85rem;cursor:pointer}.tab.on{background:#24292f;color:#fff;border-color:#24292f}figure.player{max-width:820px;margin:10px auto}
+.tldr{text-align:center;max-width:820px;margin:10px auto 26px;font-size:1.05rem}
+caption{caption-side:bottom;color:var(--muted);font-size:.88rem;padding-top:8px}
+footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:56px}
+</style></head><body><main>
+<h1>StructRL: Online Structured Reinforcement Learning for Long-Horizon Vision-Language-Action Tasks</h1>
+<div class="authors"><span>Ziyi Yin<sup>1&dagger;*</sup></span><span>Sangmin Woo<sup>2&dagger;</sup></span><span>Kang Zhou<sup>2</sup></span><span>Sungyeon Kim<sup>2</sup></span><span>Aosong Feng<sup>2</sup></span><span>Haibo Ding<sup>2</sup></span><span>Luke Huan<sup>2</sup></span></div>
+<div class="affil"><span><sup>1</sup>The Pennsylvania State University</span><span><sup>2</sup>Amazon AWS AI</span></div>
+<div class="note"><sup>&dagger;</sup>Co-first authors &nbsp; <sup>*</sup>Work done during an internship at Amazon</div>
+<div class="links"><a class="btn" href="https://arxiv.org/abs/2609.36352">Paper</a><a class="btn" href="https://arxiv.org/pdf/2609.36352">PDF</a><a class="btn" href="https://github.com/amazon-science/StructRL">Code</a><a class="btn" href="https://huggingface.co/papers/2609.36352">Hugging Face</a></div>
+<p class="tldr"><b>TL;DR:</b> StructRL rewards verifiable subtask progress, gated by the task's prerequisite structure and paced by demonstration timing, for online RL of long-horizon VLA policies.</p>
+<figure><img src="static/img/teaser.png" alt="Long-horizon task example and success rates" loading="lazy"><figcaption>(a) An example long-horizon VLA task from RoboCasa365. (b) Success rates (%) of GR00T-N1.5 on three representative composite tasks. StructRL consistently outperforms both the SFT policy and the RL baseline SimpleVLA-RL.</figcaption></figure>
+<h2>Abstract</h2><p class="abs">Vision-language-action (VLA) models perform well on shorter-horizon manipulation tasks but still struggle with long-horizon tasks that require multiple dependent manipulations from a single command. Online reinforcement learning (RL) can improve these policies through environment interaction, yet many existing methods provide reward only after the complete task succeeds. However, such terminal supervision is sparse and does not distinguish early failures from rollouts that make substantial partial progress. We propose StructRL, an online RL framework that constructs structured intermediate supervision from verifiable subtask completions. StructRL decomposes each task into verifiable subtasks, grants intermediate rewards only after the prerequisite subtasks have been completed, and scales each reward according to completion pace. Across RoboCasa365 and LIBERO-Long with GR00T-N1.5 and &pi;<sub>0.5</sub>, StructRL consistently outperforms evaluated online RL baselines. These results show that verifiable, structured intermediate rewards improve long-horizon VLA post-training.</p>
+<h2>Rollouts</h2>
+<p>Each video shows GR00T-N1.5 after SFT (top) and after online RL with StructRL (bottom), starting from the same RoboCasa365 scene. The demos use the decomposition with about five subtasks per task (N&#772; = 5), the best setting of the density study in the paper (Fig. 4). The panel scores both rollouts with that StructRL reward, computed after the fact from the simulator's subtask checks (GR00T-N1.5 itself is trained by imitation, without any reward): a subtask pays once it is completed after its prerequisites, sooner completions pay more, and completing the task adds 2.0.</p>
+<div class="tabs"><button class="tab on" data-task="StoreLeftoversInBowl" data-cap="StoreLeftoversInBowl (1,700-step horizon)">StoreLeftoversInBowl</button><button class="tab" data-task="SteamInMicrowave" data-cap="SteamInMicrowave (1,400-step horizon)">SteamInMicrowave</button><button class="tab" data-task="LoadDishwasher" data-cap="LoadDishwasher (1,200-step horizon)">LoadDishwasher</button><button class="tab" data-task="SetUpCuttingStation" data-cap="SetUpCuttingStation (1,600-step horizon)">SetUpCuttingStation</button><button class="tab" data-task="PrepareCoffee" data-cap="PrepareCoffee (1,200-step horizon)">PrepareCoffee</button></div><figure class="player"><video id="pv" src="static/videos/paired_StoreLeftoversInBowl.mp4" poster="static/videos/paired_StoreLeftoversInBowl.jpg" autoplay muted loop playsinline onclick="this.paused?this.play():this.pause()" preload="metadata"></video><figcaption><span id="pc">StoreLeftoversInBowl (1,700-step horizon)</span> &middot; click the video to pause</figcaption></figure><script>document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));b.classList.add("on");const v=document.getElementById("pv");v.src="static/videos/paired_"+b.dataset.task+".mp4";v.poster="static/videos/paired_"+b.dataset.task+".jpg";v.play();document.getElementById("pc").textContent=b.dataset.cap;});</script>
+<h2>Method</h2>
+<figure><img src="static/img/method.png" alt="StructRL overview" loading="lazy"><figcaption><b>Left:</b> An LLM decomposes the task command into candidate subtasks and assigns a dependency structure to the retained subtasks, represented by prerequisite sets X(v<sub>i</sub>). The verifiability check removes candidates without a reliable binary completion criterion (e.g., <i>Approach Box</i>), while the progress check removes candidates that do not by themselves indicate progress toward task completion (e.g., <i>Open Gripper</i>). <b>Right:</b> Structure-aware reward gating uses this dependency structure to determine whether a detected completion is eligible for reward, while dynamic reward pacing determines the magnitude of that reward. The resulting chunk-level rewards are used to optimize the VLA with PPO.</figcaption></figure>
+<ul class="key">
+<li><b>Subtask decomposition.</b> An LLM decomposes each task command into subtasks with verifiable completion criteria and a prerequisite structure.</li>
+<li><b>Structure-aware reward gating.</b> A detected completion is eligible for intermediate reward only after all of its prerequisites have been completed, and each subtask is rewarded at most once.</li>
+<li><b>Dynamic reward pacing.</b> Each eligible completion pays &beta; / (1 + T / T<sub>d</sub>), where T is the time since the previous rewarded completion and T<sub>d</sub> is a reference duration from the SFT demonstrations; the first full-task success adds &lambda;<sub>c</sub>.</li>
+</ul>
+<h2>Results</h2>
+<p style="text-align:center">Success rate (%). RoboCasa365: 16 Composite-Seen tasks, 100 episodes each. LIBERO-Long: 10 tasks, 50 episodes each.</p>
+<table><caption>Table 1 of the paper (overall success rate). Best per backbone in bold.</caption><thead><tr><th>Backbone</th><th>Method</th><th>RoboCasa365</th><th>LIBERO-Long</th></tr></thead><tbody><tr class=""><td>GR00T-N1.5</td><td>SFT</td><td>38.6</td><td>90.6</td></tr><tr class=""><td></td><td>Sparse-RL (PPO)</td><td>40.2</td><td>91.2</td></tr><tr class=""><td></td><td>SimpleVLA-RL (GRPO)</td><td>41.5</td><td>92.4</td></tr><tr class="ours"><td></td><td>StructRL (PPO)</td><td>49.1</td><td>96.6</td></tr><tr class=""><td>&pi;<sub>0.5</sub></td><td>SFT</td><td>39.3</td><td>90.6</td></tr><tr class=""><td></td><td>Sparse-RL (PPO)</td><td>41.1</td><td>92.6</td></tr><tr class=""><td></td><td>SimpleVLA-RL (GRPO)</td><td>41.9</td><td>94.0</td></tr><tr class="ours"><td></td><td>StructRL (PPO)</td><td>45.8</td><td>96.2</td></tr></tbody></table>
+<figure><img src="static/img/ablation.png" alt="Reward-component ablation" loading="lazy"><figcaption>Reward-component ablation with PPO and GR00T-N1.5, adding one component at a time to the terminal binary reward: fixed subtask rewards, dynamic reward pacing, and structure-aware gating, which together form StructRL. Panels report SR (%) by task-horizon bucket and overall on RoboCasa365 (a-d) and LIBERO-Long (e-h). Values are means over three evaluation runs.</figcaption></figure>
+<h2>BibTeX</h2><div class="bib"><button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('bibtex').innerText);this.textContent='Copied'">Copy</button><pre id="bibtex">@article{yin2026structrl,
+  title   = {StructRL: Online Structured Reinforcement Learning for Long-Horizon Vision-Language-Action Tasks},
+  author  = {Yin, Ziyi and Woo, Sangmin and Zhou, Kang and Kim, Sungyeon and Feng, Aosong and Ding, Haibo and Huan, Luke},
+  journal = {arXiv preprint arXiv:2609.36352},
+  year    = {2026}
+}</pre></div>
+<footer>Code: <a href="https://github.com/amazon-science/StructRL">https://github.com/amazon-science/StructRL</a></footer>
+</main></body></html>
