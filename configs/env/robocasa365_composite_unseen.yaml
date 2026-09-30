@@ -1,0 +1,89 @@
+env_type: robocasa365
+
+# Robot configuration (gym id: robocasa_panda_omron/<Task>_PandaOmron_Env)
+robot_name: PandaOmron
+robot_alias: panda_omron
+env_class_suffix: PandaOmron
+
+# 15 composite_UNSEEN tasks (robocasa dataset_registry.py). GatherTableware is
+# the 16th unseen task but is EXCLUDED: its success check is a continuous
+# geometric distance-ratio with no discrete subtask milestones, so it has no
+# stage_config / timing budget and cannot drive the StructRL / dense reward. The
+# 15 kept tasks are disjoint from the 16 composite_seen tasks.
+# Envs are assigned round-robin: task_idx = env_id % 15, so total_num_envs must
+# be a multiple of 15 (e.g. 240 = 15 * 16).
+task_names:
+  - ArrangeBreadBasket
+  - ArrangeTea
+  - BreadSelection
+  - CategorizeCondiments
+  - CuttingToolSelection
+  - GarnishPancake
+  - HeatKebabSandwich
+  - MakeIceLemonade
+  - PanTransfer
+  - PortionHotDogs
+  - RecycleBottlesByType
+  - SeparateFreezerRack
+  - WaffleReheat
+  - WashFruitColander
+  - WeighIngredients
+
+total_num_envs: null
+
+auto_reset: False
+ignore_terminations: False
+# horizon is a single global scalar (no per-task horizon mechanism). Use the
+# longest among the 15 tasks: ArrangeBreadBasket = 2900 (robocasa
+# dataset_registry.py) -- same global max as the seen set.
+# max_steps_per_rollout_epoch must be a multiple of 16; 2912 = 16*182 is the
+# smallest such value >= 2900 (n_chunk_steps = 182).
+max_steps_per_rollout_epoch: 2912
+max_episode_steps: 2900 # max episode steps for truncation
+use_fixed_reset_state_ids: False
+use_ordered_reset_state_ids: False
+
+use_rel_reward: True
+reward_coef: 1.0
+is_eval: False
+
+# Optional dense subtask-progress reward. When enabled, the env worker
+# replaces the sparse 0/1 outcome reward with the per-step TIMING reward
+# computed in the env subprocess via structrl.timing_reward.TimingReward
+# (stage-based, demo-timing-budgeted). Budgets are read from
+# STRUCTRL_TIMING_JSON (unseen: demo_timing_unseen15.json).
+dense_reward:
+  enabled: False
+
+# Final-only timing reward variant. Same per-step timing reward as dense_reward
+# (TimingReward in venv.py), but accumulated across the whole episode and
+# delivered as the FULL cumulative total at exactly one chunk (success chunk if
+# succeeded, else truncation chunk). Mutually exclusive with dense_reward.
+final_only_reward:
+  enabled: False
+
+# Credit-assignment fix for the chunk-level GAE (see seen config for full
+# rationale). Shifts success-driven termination forward by one chunk so the
+# success reward propagates back to the earning chunks. Applies to BOTH sparse
+# 0/1 and timing dense. Implemented in rlinf/workers/env/env_worker.py.
+done_shift:
+  enabled: False
+
+seed: 42
+group_size: 1
+
+video_cfg:
+  save_video: False
+  info_on_video: True
+  video_base_dir: ${runner.logger.log_path}/video/train
+
+# GrootRoboCasaEnv emits 256x256 images already (vflip + resize done internally);
+# camera sizes here are unused by the groot wrapper but kept for interface parity.
+init_params:
+  camera_heights: 256
+  camera_widths: 256
+
+# Action / state / image layout — must match the SFT spec (new_embodiment).
+action_space: 12d
+state_space: 16d
+image_space: 3views

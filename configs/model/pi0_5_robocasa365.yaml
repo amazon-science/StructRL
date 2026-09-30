@@ -1,0 +1,53 @@
+# openpi pi0.5 model config for RoboCasa365 Composite-Seen.
+# ===================================================================
+# Defaults aligned with the GR00T-N1.5 RoboCasa365 configs: action_dim=12,
+# num_action_chunks=16, denoising num_steps=4, 3 camera views. The openpi
+# config_name "pi05_robocasa365" (registered in
+# rlinf/models/embodiment/openpi/dataconfig/__init__.py) carries the SFT model
+# shape (pi05=True, action_horizon=50, max_token_len=200, discrete_state_input=
+# True, action_dim=32 internal) and the RoboCasa365 data transforms (16-D state pad,
+# 3 views, 12-D action). norm_stats are loaded from <model_path>/robocasa365/.
+model_type: "openpi"
+
+# Set in the training config / sbatch (converted pi05 PyTorch ckpt).
+model_path: "/path/to/model/openpi_pi05_robocasa365"
+
+precision: null # for openpi, precision is null, please do not change this value
+
+# Action and chunk defaults, as for GR00T-N1.5 (12-D actions, 16-step chunks, 4 denoising steps)
+num_action_chunks: 16
+action_dim: 12
+num_steps: 4
+
+# LoRA settings
+is_lora: False
+lora_rank: 32
+
+# Training settings
+use_proprio: True
+add_value_head: False  # overridden True for PPO, False for GRPO in training config
+
+# openpi specific parameters
+openpi:
+  config_name: "pi05_robocasa365"
+  num_images_in_input: 3
+  noise_level: 0.5
+  action_chunk: ${actor.model.num_action_chunks}
+  num_steps: ${actor.model.num_steps}
+  train_expert_only: True
+  action_env_dim: ${actor.model.action_dim}
+  noise_method: "flow_sde"
+  add_value_head: ${actor.model.add_value_head}
+  value_after_vlm: False
+  value_vlm_mode: "mean_token"
+  detach_critic_input: null
+
+  # DSRL specific configurations (disabled by default)
+  use_dsrl: False
+  dsrl_state_dim: 8
+  dsrl_action_noise_dim: 32
+  dsrl_num_q_heads: 10
+  dsrl_agg_q: "mean"
+  dsrl_image_latent_dim: 64
+  dsrl_state_latent_dim: 64
+  dsrl_hidden_dims: [128, 128, 128]

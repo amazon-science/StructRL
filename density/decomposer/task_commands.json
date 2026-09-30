@@ -1,0 +1,18 @@
+{
+ "DeliverStraw": "Take a straw from the drawer in front and place it inside the glass cup on the dining counter.",
+ "GetToastedBread": "Start the toaster. Once the lever pops up, take the bread to the plate on the dining counter.",
+ "KettleBoiling": "Pick the kettle from the counter and place it on a stove burner. Then turn the burner on.",
+ "LoadDishwasher": "Pick up the cup and bowl from the counter, place them in the dishwasher, and close the dishwasher door.",
+ "PackIdenticalLunches": "Place one eggplant and one chicken drumstick in each tupperware on the nearby counter, to pack two identical lunches.",
+ "PreSoakPan": "Pick the pan and sponge and place them into the sink. Then turn on the water.",
+ "PrepareCoffee": "Pick the mug from the cabinet, place it under the coffee machine dispenser, and press the start button.",
+ "RinseSinkBasin": "Turn on the sink and manuever the spout to wash all locations of the sink basin.",
+ "ScrubCuttingBoard": "Pick up the sponge from the counter and clean the cutting board by briefly scrubbing or pressing down on the cutting board. Once finished, release the sponge.",
+ "SearingMeat": "Grab the pan from the cabinet and place it on the rear right burner on the stove. Then place the chicken drumstick on the stove and turn the burner on.",
+ "SetUpCuttingStation": "Pick up the knife from the drawer and place it on the cutting board. Then place the meat from the plate to the cutting board.",
+ "StackBowlsCabinet": "Pick up the bowls on the counter and stack them on top of one another in the open cabinet. Place the smaller bowl on top of the larger bowl.",
+ "SteamInMicrowave": "Pick the onion from the sink and place it in the bowl. Then pick the bowl and place it in the microwave. Then close the microwave door and press the start button.",
+ "StirVegetables": "Put the corn and tomato in the pot. Retrieve the spatula and lightly stir the vegetables in the pot.",
+ "StoreLeftoversInBowl": "Pick the chicken drumstick and eggplant from their plates and place them in the bowl. Then put the bowl in the fridge.",
+ "WashLettuce": "Wash the lettuce in the sink by running water over it."
+}

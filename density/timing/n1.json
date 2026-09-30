@@ -1,0 +1,786 @@
+{
+  "DeliverStraw": {
+    "task": "DeliverStraw",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 846.5,
+      "mean": 867.81,
+      "min": 640,
+      "max": 1308
+    },
+    "success": {
+      "median": 830.5,
+      "mean": 851.13,
+      "std": 134.4753996089991,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "straw_in_glass_cup": {
+        "median": 743.5,
+        "mean": 763.88,
+        "std": 125.15264919289564,
+        "min": 573,
+        "max": 1236,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 743.5,
+          "mean": 763.88,
+          "std": 125.15264919289564,
+          "min": 573,
+          "max": 1236,
+          "n": 100,
+          "subtasks_in_stage": [
+            "straw_in_glass_cup"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 87.0,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "straw_in_glass_cup"
+  },
+  "GetToastedBread": {
+    "task": "GetToastedBread",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 1296.5,
+      "mean": 1315.14,
+      "min": 1122,
+      "max": 1951
+    },
+    "success": {
+      "median": 1274.5,
+      "mean": 1299.388888888889,
+      "std": 142.12900591008034,
+      "n_success": 72,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "toaster_on": {
+        "median": 96.5,
+        "mean": 101.125,
+        "std": 24.33615137791695,
+        "min": 63,
+        "max": 187,
+        "coverage": 0.72,
+        "n": 72
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 96.5,
+          "mean": 101.125,
+          "std": 24.33615137791695,
+          "min": 63,
+          "max": 187,
+          "n": 72,
+          "subtasks_in_stage": [
+            "toaster_on"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 1178.0,
+      "n": 72,
+      "approx": true
+    },
+    "v3_chosen_signal": "toaster_on"
+  },
+  "KettleBoiling": {
+    "task": "KettleBoiling",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 443.5,
+      "mean": 449.47,
+      "min": 289,
+      "max": 825
+    },
+    "success": {
+      "median": 427.5,
+      "mean": 433.47,
+      "std": 103.10988846856542,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "kettle_on_stove": {
+        "median": 210.5,
+        "mean": 213.13,
+        "std": 51.94721455477666,
+        "min": 119,
+        "max": 355,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 210.5,
+          "mean": 213.13,
+          "std": 51.94721455477666,
+          "min": 119,
+          "max": 355,
+          "n": 100,
+          "subtasks_in_stage": [
+            "kettle_on_stove"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 217.0,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "kettle_on_stove"
+  },
+  "LoadDishwasher": {
+    "task": "LoadDishwasher",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 713.0,
+      "mean": 753.7,
+      "min": 480,
+      "max": 1326
+    },
+    "success": {
+      "median": 697.0,
+      "mean": 737.15,
+      "std": 167.55604286327605,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "dish1_on_rack": {
+        "median": 412.5,
+        "mean": 414.26,
+        "std": 161.3332960055053,
+        "min": 162,
+        "max": 836,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 412.5,
+          "mean": 414.26,
+          "std": 161.3332960055053,
+          "min": 162,
+          "max": 836,
+          "n": 100,
+          "subtasks_in_stage": [
+            "dish1_on_rack"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 284.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "dish1_on_rack"
+  },
+  "PackIdenticalLunches": {
+    "task": "PackIdenticalLunches",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 1427.0,
+      "mean": 1425.54,
+      "min": 838,
+      "max": 2286
+    },
+    "success": {
+      "median": 1411.0,
+      "mean": 1408.24,
+      "std": 276.77424446649655,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "tupper1_complete": {
+        "median": 863.5,
+        "mean": 1019.34,
+        "std": 444.81210010520175,
+        "min": 420,
+        "max": 2228,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 863.5,
+          "mean": 1019.34,
+          "std": 444.81210010520175,
+          "min": 420,
+          "max": 2228,
+          "n": 100,
+          "subtasks_in_stage": [
+            "tupper1_complete"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 547.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "tupper1_complete"
+  },
+  "PreSoakPan": {
+    "task": "PreSoakPan",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 747.5,
+      "mean": 768.44,
+      "min": 479,
+      "max": 1442
+    },
+    "success": {
+      "median": 731.5,
+      "mean": 752.44,
+      "std": 147.05905752451972,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "sponge_in_sink": {
+        "median": 412.0,
+        "mean": 388.11,
+        "std": 134.22562311272762,
+        "min": 0,
+        "max": 646,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 412.0,
+          "mean": 388.11,
+          "std": 134.22562311272762,
+          "min": 0,
+          "max": 646,
+          "n": 100,
+          "subtasks_in_stage": [
+            "sponge_in_sink"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 319.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "sponge_in_sink"
+  },
+  "PrepareCoffee": {
+    "task": "PrepareCoffee",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 548.5,
+      "mean": 560.51,
+      "min": 316,
+      "max": 1092
+    },
+    "success": {
+      "median": 532.5,
+      "mean": 544.47,
+      "std": 143.12843567928772,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "mug_at_machine": {
+        "median": 300.0,
+        "mean": 310.69,
+        "std": 79.33431729081684,
+        "min": 147,
+        "max": 603,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 300.0,
+          "mean": 310.69,
+          "std": 79.33431729081684,
+          "min": 147,
+          "max": 603,
+          "n": 100,
+          "subtasks_in_stage": [
+            "mug_at_machine"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 232.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "mug_at_machine"
+  },
+  "RinseSinkBasin": {
+    "task": "RinseSinkBasin",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 402.0,
+      "mean": 402.83,
+      "min": 227,
+      "max": 661
+    },
+    "success": {
+      "median": 386.0,
+      "mean": 386.83,
+      "std": 80.66462111731512,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "washed_center": {
+        "median": 156.5,
+        "mean": 162.54,
+        "std": 38.395682048897115,
+        "min": 93,
+        "max": 283,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 156.5,
+          "mean": 162.54,
+          "std": 38.395682048897115,
+          "min": 93,
+          "max": 283,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_center"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 229.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "washed_center"
+  },
+  "ScrubCuttingBoard": {
+    "task": "ScrubCuttingBoard",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 429.5,
+      "mean": 452.34,
+      "min": 263,
+      "max": 801
+    },
+    "success": {
+      "median": 414.5,
+      "mean": 439.01063829787233,
+      "std": 124.38183272632115,
+      "n_success": 94,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "sweep_range_0p1m": {
+        "median": 215.0,
+        "mean": 232.76,
+        "std": 80.69301332829255,
+        "min": 98,
+        "max": 595,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 215.0,
+          "mean": 232.76,
+          "std": 80.69301332829255,
+          "min": 98,
+          "max": 595,
+          "n": 100,
+          "subtasks_in_stage": [
+            "sweep_range_0p1m"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 199.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "sweep_range_0p1m"
+  },
+  "SearingMeat": {
+    "task": "SearingMeat",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 865.0,
+      "mean": 871.32,
+      "min": 507,
+      "max": 1305
+    },
+    "success": {
+      "median": 849.0,
+      "mean": 854.04,
+      "std": 182.8940086498188,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "meat_in_pan": {
+        "median": 642.5,
+        "mean": 634.25,
+        "std": 123.65584296748779,
+        "min": 377,
+        "max": 897,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 642.5,
+          "mean": 634.25,
+          "std": 123.65584296748779,
+          "min": 377,
+          "max": 897,
+          "n": 100,
+          "subtasks_in_stage": [
+            "meat_in_pan"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 206.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "meat_in_pan"
+  },
+  "SetUpCuttingStation": {
+    "task": "SetUpCuttingStation",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 630.5,
+      "mean": 659.24,
+      "min": 369,
+      "max": 1157
+    },
+    "success": {
+      "median": 612.0,
+      "mean": 641.55,
+      "std": 175.56960870264535,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "knife_on_board": {
+        "median": 385.5,
+        "mean": 394.68,
+        "std": 106.40384203589642,
+        "min": 200,
+        "max": 703,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 385.5,
+          "mean": 394.68,
+          "std": 106.40384203589642,
+          "min": 200,
+          "max": 703,
+          "n": 100,
+          "subtasks_in_stage": [
+            "knife_on_board"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 226.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "knife_on_board"
+  },
+  "StackBowlsCabinet": {
+    "task": "StackBowlsCabinet",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 323.5,
+      "mean": 340.27,
+      "min": 218,
+      "max": 698
+    },
+    "success": {
+      "median": 307.5,
+      "mean": 324.25,
+      "std": 86.92345770849201,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "bowls_stacked": {
+        "median": 140.5,
+        "mean": 154.55,
+        "std": 67.67663924870973,
+        "min": 88,
+        "max": 624,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 140.5,
+          "mean": 154.55,
+          "std": 67.67663924870973,
+          "min": 88,
+          "max": 624,
+          "n": 100,
+          "subtasks_in_stage": [
+            "bowls_stacked"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 167.0,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "bowls_stacked"
+  },
+  "SteamInMicrowave": {
+    "task": "SteamInMicrowave",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 963.5,
+      "mean": 955.12,
+      "min": 578,
+      "max": 1388
+    },
+    "success": {
+      "median": 944.5,
+      "mean": 938.64,
+      "std": 177.3423536552958,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "bowl_in_micro": {
+        "median": 607.0,
+        "mean": 599.57,
+        "std": 102.25392461905803,
+        "min": 352,
+        "max": 821,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 607.0,
+          "mean": 599.57,
+          "std": 102.25392461905803,
+          "min": 352,
+          "max": 821,
+          "n": 100,
+          "subtasks_in_stage": [
+            "bowl_in_micro"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 337.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "bowl_in_micro"
+  },
+  "StirVegetables": {
+    "task": "StirVegetables",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 788.0,
+      "mean": 818.52,
+      "min": 481,
+      "max": 1558
+    },
+    "success": {
+      "median": 757.0,
+      "mean": 788.7894736842105,
+      "std": 208.94032866306173,
+      "n_success": 95,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "veg2_in_pot": {
+        "median": 337.5,
+        "mean": 349.19,
+        "std": 141.34084300017457,
+        "min": 126,
+        "max": 744,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 337.5,
+          "mean": 349.19,
+          "std": 141.34084300017457,
+          "min": 126,
+          "max": 744,
+          "n": 100,
+          "subtasks_in_stage": [
+            "veg2_in_pot"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 419.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "veg2_in_pot"
+  },
+  "StoreLeftoversInBowl": {
+    "task": "StoreLeftoversInBowl",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 777.5,
+      "mean": 759.7,
+      "min": 434,
+      "max": 1007
+    },
+    "success": {
+      "median": 760.5,
+      "mean": 742.85,
+      "std": 107.20348641718702,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "chicken_in_bowl": {
+        "median": 344.0,
+        "mean": 353.88,
+        "std": 83.14544846231811,
+        "min": 141,
+        "max": 548,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 344.0,
+          "mean": 353.88,
+          "std": 83.14544846231811,
+          "min": 141,
+          "max": 548,
+          "n": 100,
+          "subtasks_in_stage": [
+            "chicken_in_bowl"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 416.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "chicken_in_bowl"
+  },
+  "WashLettuce": {
+    "task": "WashLettuce",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 466.5,
+      "mean": 477.63,
+      "min": 335,
+      "max": 1072
+    },
+    "success": {
+      "median": 450.5,
+      "mean": 461.61,
+      "std": 104.17829860388392,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "water_on": {
+        "median": 166.0,
+        "mean": 178.69,
+        "std": 52.802593686295374,
+        "min": 101,
+        "max": 429,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 166.0,
+          "mean": 178.69,
+          "std": 52.802593686295374,
+          "min": 101,
+          "max": 429,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 284.5,
+      "n": 100,
+      "approx": true
+    },
+    "v3_chosen_signal": "water_on"
+  }
+}

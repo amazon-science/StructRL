@@ -1,0 +1,263 @@
+{
+  "DeliverStraw": {
+    "stages": [
+      [
+        "open drawer",
+        "grasp straw"
+      ],
+      [
+        "close drawer",
+        "place straw in/on glass cup"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"open drawer\",\n      \"grasp straw\"\n    ],\n    [\n      \"close drawer\",\n      \"place straw in/on glass cup\"\n    ]\n  ]\n}\n"
+  },
+  "GetToastedBread": {
+    "stages": [
+      [
+        "turn on toaster",
+        "wait for lever to pop up"
+      ],
+      [
+        "grasp bread",
+        "place bread on plate"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"turn on toaster\",\n      \"wait for lever to pop up\"\n    ],\n    [\n      \"grasp bread\",\n      \"place bread on plate\"\n    ]\n  ]\n}\n"
+  },
+  "KettleBoiling": {
+    "stages": [
+      [
+        "grasp kettle",
+        "lift kettle",
+        "move kettle to stove"
+      ],
+      [
+        "place kettle on stove burner"
+      ],
+      [
+        "turn on stove burner"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp kettle\",\n      \"lift kettle\",\n      \"move kettle to stove\"\n    ],\n    [\n      \"place kettle on stove burner\"\n    ],\n    [\n      \"turn on stove burner\"\n    ]\n  ]\n}\n"
+  },
+  "LoadDishwasher": {
+    "stages": [
+      [
+        "grasp cup",
+        "grasp bowl"
+      ],
+      [
+        "place cup in dishwasher",
+        "place bowl in dishwasher"
+      ],
+      [
+        "close dishwasher door"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp cup\",\n      \"grasp bowl\"\n    ],\n    [\n      \"place cup in dishwasher\",\n      \"place bowl in dishwasher\"\n    ],\n    [\n      \"close dishwasher door\"\n    ]\n  ]\n}\n"
+  },
+  "PackIdenticalLunches": {
+    "stages": [
+      [
+        "grasp eggplant",
+        "grasp chicken drumstick"
+      ],
+      [
+        "place eggplant in tupperware",
+        "place chicken drumstick in tupperware"
+      ],
+      [
+        "place eggplant in tupperware",
+        "place chicken drumstick in tupperware"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp eggplant\",\n      \"grasp chicken drumstick\"\n    ],\n    [\n      \"place eggplant in tupperware\",\n      \"place chicken drumstick in tupperware\"\n    ],\n    [\n      \"place eggplant in tupperware\",\n      \"place chicken drumstick in tupperware\"\n    ]\n  ]\n}\n"
+  },
+  "PreSoakPan": {
+    "stages": [
+      [
+        "grasp pan",
+        "grasp sponge"
+      ],
+      [
+        "place pan in sink",
+        "place sponge in sink"
+      ],
+      [
+        "turn on water"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp pan\",\n      \"grasp sponge\"\n    ],\n    [\n      \"place pan in sink\",\n      \"place sponge in sink\"\n    ],\n    [\n      \"turn on water\"\n    ]\n  ]\n}\n"
+  },
+  "PrepareCoffee": {
+    "stages": [
+      [
+        "open cabinet door",
+        "grasp mug"
+      ],
+      [
+        "place mug on counter",
+        "close cabinet door"
+      ],
+      [
+        "grasp mug",
+        "place mug under coffee machine dispenser"
+      ],
+      [
+        "press start button"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"open cabinet door\",\n      \"grasp mug\"\n    ],\n    [\n      \"place mug on counter\",\n      \"close cabinet door\"\n    ],\n    [\n      \"grasp mug\",\n      \"place mug under coffee machine dispenser\"\n    ],\n    [\n      \"press start button\"\n    ]\n  ]\n}\n"
+  },
+  "RinseSinkBasin": {
+    "stages": [
+      [
+        "turn on sink",
+        "maneuver spout to left side of basin",
+        "wash left side of basin",
+        "maneuver spout to center of basin",
+        "wash center of basin",
+        "maneuver spout to right side of basin",
+        "wash right side of basin"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"turn on sink\",\n      \"maneuver spout to left side of basin\",\n      \"wash left side of basin\",\n      \"maneuver spout to center of basin\",\n      \"wash center of basin\",\n      \"maneuver spout to right side of basin\",\n      \"wash right side of basin\"\n    ]\n  ]\n}\n"
+  },
+  "ScrubCuttingBoard": {
+    "stages": [
+      [
+        "grasp sponge",
+        "move to cutting board",
+        "scrub cutting board with sponge"
+      ],
+      [
+        "release sponge"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp sponge\",\n      \"move to cutting board\",\n      \"scrub cutting board with sponge\"\n    ],\n    [\n      \"release sponge\"\n    ]\n  ]\n}\n"
+  },
+  "SearingMeat": {
+    "stages": [
+      [
+        "open cabinet",
+        "grasp pan",
+        "close cabinet"
+      ],
+      [
+        "place pan on rear right burner"
+      ],
+      [
+        "grasp chicken drumstick",
+        "place chicken drumstick on stove"
+      ],
+      [
+        "turn on rear right burner"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"open cabinet\",\n      \"grasp pan\",\n      \"close cabinet\"\n    ],\n    [\n      \"place pan on rear right burner\"\n    ],\n    [\n      \"grasp chicken drumstick\",\n      \"place chicken drumstick on stove\"\n    ],\n    [\n      \"turn on rear right burner\"\n    ]\n  ]\n}\n"
+  },
+  "SetUpCuttingStation": {
+    "stages": [
+      [
+        "open drawer",
+        "grasp knife",
+        "close drawer"
+      ],
+      [
+        "place knife on cutting board"
+      ],
+      [
+        "grasp meat",
+        "place meat on cutting board"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"open drawer\",\n      \"grasp knife\",\n      \"close drawer\"\n    ],\n    [\n      \"place knife on cutting board\"\n    ],\n    [\n      \"grasp meat\",\n      \"place meat on cutting board\"\n    ]\n  ]\n}\n"
+  },
+  "StackBowlsCabinet": {
+    "stages": [
+      [
+        "grasp larger bowl",
+        "place larger bowl in open cabinet"
+      ],
+      [
+        "grasp smaller bowl",
+        "place smaller bowl in/on larger bowl"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp larger bowl\",\n      \"place larger bowl in open cabinet\"\n    ],\n    [\n      \"grasp smaller bowl\",\n      \"place smaller bowl in/on larger bowl\"\n    ]\n  ]\n}\n"
+  },
+  "SteamInMicrowave": {
+    "stages": [
+      [
+        "grasp onion",
+        "place onion in bowl"
+      ],
+      [
+        "grasp bowl",
+        "place bowl in microwave"
+      ],
+      [
+        "close microwave door",
+        "press start button"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp onion\",\n      \"place onion in bowl\"\n    ],\n    [\n      \"grasp bowl\",\n      \"place bowl in microwave\"\n    ],\n    [\n      \"close microwave door\",\n      \"press start button\"\n    ]\n  ]\n}\n"
+  },
+  "StirVegetables": {
+    "stages": [
+      [
+        "grasp corn",
+        "grasp tomato"
+      ],
+      [
+        "place corn in pot",
+        "place tomato in pot"
+      ],
+      [
+        "grasp spatula"
+      ],
+      [
+        "stir vegetables in pot for a while"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp corn\",\n      \"grasp tomato\"\n    ],\n    [\n      \"place corn in pot\",\n      \"place tomato in pot\"\n    ],\n    [\n      \"grasp spatula\"\n    ],\n    [\n      \"stir vegetables in pot for a while\"\n    ]\n  ]\n}\n"
+  },
+  "StoreLeftoversInBowl": {
+    "stages": [
+      [
+        "grasp chicken drumstick",
+        "grasp eggplant"
+      ],
+      [
+        "place chicken drumstick in bowl",
+        "place eggplant in bowl"
+      ],
+      [
+        "grasp bowl"
+      ],
+      [
+        "place bowl in fridge"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp chicken drumstick\",\n      \"grasp eggplant\"\n    ],\n    [\n      \"place chicken drumstick in bowl\",\n      \"place eggplant in bowl\"\n    ],\n    [\n      \"grasp bowl\"\n    ],\n    [\n      \"place bowl in fridge\"\n    ]\n  ]\n}\n"
+  },
+  "WashLettuce": {
+    "stages": [
+      [
+        "grasp lettuce",
+        "open faucet",
+        "turn on faucet"
+      ],
+      [
+        "place lettuce in sink",
+        "run water over lettuce"
+      ],
+      [
+        "turn off faucet",
+        "place lettuce in bowl"
+      ]
+    ],
+    "raw": "{\n  \"stages\": [\n    [\n      \"grasp lettuce\",\n      \"open faucet\",\n      \"turn on faucet\"\n    ],\n    [\n      \"place lettuce in sink\",\n      \"run water over lettuce\"\n    ],\n    [\n      \"turn off faucet\",\n      \"place lettuce in bowl\"\n    ]\n  ]\n}\n"
+  }
+}

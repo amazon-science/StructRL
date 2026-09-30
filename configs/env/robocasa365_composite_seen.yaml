@@ -1,0 +1,100 @@
+env_type: robocasa365
+
+# Robot configuration (gym id: robocasa_panda_omron/<Task>_PandaOmron_Env)
+robot_name: PandaOmron
+robot_alias: panda_omron
+env_class_suffix: PandaOmron
+
+# 16 composite_seen tasks (robocasa dataset_registry.py). Envs are assigned
+# round-robin: task_idx = env_id % 16, so total_num_envs must be a multiple of 16.
+task_names:
+  - DeliverStraw
+  - GetToastedBread
+  - KettleBoiling
+  - LoadDishwasher
+  - PackIdenticalLunches
+  - PreSoakPan
+  - PrepareCoffee
+  - RinseSinkBasin
+  - ScrubCuttingBoard
+  - SearingMeat
+  - SetUpCuttingStation
+  - StackBowlsCabinet
+  - SteamInMicrowave
+  - StirVegetables
+  - StoreLeftoversInBowl
+  - WashLettuce
+
+total_num_envs: null
+
+auto_reset: False
+ignore_terminations: False
+# horizon is a single global scalar (no per-task horizon mechanism). Use the
+# longest among the 16 tasks: SearingMeat = 2900 (robocasa dataset_registry.py).
+# per-rank rollout_size = bsz_per_rank(8) * (max_steps_per_rollout_epoch/16) *
+# rollout_epoch(1) = max_steps_per_rollout_epoch/2, and must be divisible by
+# batch_size_per_rank = global_batch(256)/world_size(32) = 8. That reduces to
+# max_steps_per_rollout_epoch being a multiple of 16. 2912 = 16*182 is the
+# smallest such value >= 2900 (n_chunk_steps = 182).
+max_steps_per_rollout_epoch: 2912
+max_episode_steps: 2900 # max episode steps for truncation
+use_fixed_reset_state_ids: False
+use_ordered_reset_state_ids: False
+
+use_rel_reward: True
+reward_coef: 1.0
+is_eval: False
+
+# Optional dense subtask-progress reward. When enabled, the env worker
+# replaces the sparse 0/1 outcome reward with the per-step TIMING reward
+# computed in the env subprocess via structrl.timing_reward.TimingReward
+# (stage-based, demo-timing-budgeted; same reward the offline video overlay
+# structrl/visualize_timing_reward.py renders). Per-step r_total =
+# r_event (subtask completion, ratio-banded vs demo budget) + r_persistent
+# (stuck/idle bleed) + r_outcome (one-shot +2.0 on success). Budgets are read
+# from STRUCTRL_TIMING_JSON (default demo_timing_composite_seen.json).
+dense_reward:
+  enabled: False
+
+# Final-only timing reward variant. Same per-step timing reward as dense_reward
+# (TimingReward in venv.py), but instead of feeding it per-step into chunk_rewards
+# we accumulate it across the whole episode and deliver the FULL cumulative
+# total at exactly one chunk: the success chunk if the env succeeded, otherwise
+# the truncation chunk. Every other chunk gets reward = 0. PPO/GAE then has to
+# propagate that one final number back along the 182-chunk horizon. Mutually
+# exclusive with dense_reward (enable at most one). Pairs with done_shift to
+# guarantee the success-chunk reward propagates back without leaking forward.
+final_only_reward:
+  enabled: False
+
+# Credit-assignment fix for the chunk-level GAE. robocasa_env sets
+# `terminations = success`, so the success chunk emits done=True and GAE's
+# `~dones[step+1]` flag cuts the boundary just before it — the success reward
+# (sparse +1 or timing's +2.0 outcome) never propagates back to the earlier
+# chunks that earned it. Enabling this shifts the success-driven termination
+# forward by exactly one chunk (success chunk stays not-done so chunk k-1 -> k
+# propagates; the NEXT chunk becomes done so k is isolated from k+1). Truncation
+# dones are untouched; success-rate metrics are unaffected (they read
+# episode.success_once, not chunk_terminations). Applies to BOTH sparse 0/1 and
+# timing dense. Implemented in rlinf/workers/env/env_worker.py (per-env latch).
+done_shift:
+  enabled: False
+
+seed: 42
+group_size: 1
+
+video_cfg:
+  save_video: False
+  info_on_video: True
+  video_base_dir: ${runner.logger.log_path}/video/train
+
+# GrootRoboCasaEnv emits 256x256 images already (vflip + resize done internally);
+# camera sizes here are unused by the groot wrapper but kept for interface parity.
+init_params:
+  camera_heights: 256
+  camera_widths: 256
+
+# Action / state / image layout — must match the SFT spec (new_embodiment).
+action_space: 12d
+state_space: 16d
+image_space: 3views

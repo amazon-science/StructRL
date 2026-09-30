@@ -1,0 +1,4533 @@
+{
+  "DeliverStraw": {
+    "task": "DeliverStraw",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 846.5,
+      "mean": 867.81,
+      "min": 640,
+      "max": 1308
+    },
+    "success": {
+      "median": 830.5,
+      "mean": 851.13,
+      "std": 134.4753996089991,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_straw__s2": {
+        "median": 215.0,
+        "mean": 228.46,
+        "std": 46.340785491832136,
+        "min": 161,
+        "max": 430,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_straw__s3": {
+        "median": 304.5,
+        "mean": 310.01,
+        "std": 58.993473367822645,
+        "min": 202,
+        "max": 549,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_straw__s5": {
+        "median": 365.5,
+        "mean": 371.94,
+        "std": 62.057686067077945,
+        "min": 263,
+        "max": 636,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_straw__s6": {
+        "median": 180.0,
+        "mean": 185.73,
+        "std": 35.06418543186195,
+        "min": 131,
+        "max": 325,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "straw_in_glass_cup__s1": {
+        "median": 537.5,
+        "mean": 539.6,
+        "std": 135.87140979617456,
+        "min": 0,
+        "max": 984,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "straw_in_glass_cup__s3": {
+        "median": 624.0,
+        "mean": 634.0,
+        "std": 99.18427294687399,
+        "min": 474,
+        "max": 1050,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "straw_in_glass_cup__s4": {
+        "median": 678.5,
+        "mean": 681.05,
+        "std": 112.56912320880892,
+        "min": 495,
+        "max": 1143,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "straw_in_glass_cup__s6": {
+        "median": 743.5,
+        "mean": 763.88,
+        "std": 125.15264919289564,
+        "min": 573,
+        "max": 1236,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 180.0,
+          "mean": 185.73,
+          "std": 35.06418543186195,
+          "min": 131,
+          "max": 325,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_straw__s2",
+            "grasp_straw__s3",
+            "grasp_straw__s5",
+            "grasp_straw__s6"
+          ]
+        },
+        "1": {
+          "median": 21.5,
+          "mean": 42.07,
+          "std": 36.41462755542064,
+          "min": 12,
+          "max": 133,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_straw__s2",
+            "grasp_straw__s3",
+            "grasp_straw__s5",
+            "grasp_straw__s6"
+          ]
+        },
+        "2": {
+          "median": 81.5,
+          "mean": 82.87,
+          "std": 37.49017337916697,
+          "min": 10,
+          "max": 199,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_straw__s2",
+            "grasp_straw__s3",
+            "grasp_straw__s5",
+            "grasp_straw__s6"
+          ]
+        },
+        "3": {
+          "median": 57.0,
+          "mean": 61.27,
+          "std": 22.288945690633284,
+          "min": 21,
+          "max": 136,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_straw__s2",
+            "grasp_straw__s3",
+            "grasp_straw__s5",
+            "grasp_straw__s6"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 183.0,
+          "mean": 191.93,
+          "std": 61.70190515697226,
+          "min": 77,
+          "max": 348,
+          "n": 100,
+          "subtasks_in_stage": [
+            "straw_in_glass_cup__s1",
+            "straw_in_glass_cup__s3",
+            "straw_in_glass_cup__s4",
+            "straw_in_glass_cup__s6"
+          ]
+        },
+        "1": {
+          "median": 63.0,
+          "mean": 72.83,
+          "std": 33.48882052267592,
+          "min": 37,
+          "max": 215,
+          "n": 100,
+          "subtasks_in_stage": [
+            "straw_in_glass_cup__s1",
+            "straw_in_glass_cup__s3",
+            "straw_in_glass_cup__s4",
+            "straw_in_glass_cup__s6"
+          ]
+        },
+        "2": {
+          "median": 47.5,
+          "mean": 47.74,
+          "std": 25.949034664125755,
+          "min": 8,
+          "max": 117,
+          "n": 100,
+          "subtasks_in_stage": [
+            "straw_in_glass_cup__s1",
+            "straw_in_glass_cup__s3",
+            "straw_in_glass_cup__s4",
+            "straw_in_glass_cup__s6"
+          ]
+        },
+        "3": {
+          "median": 79.0,
+          "mean": 83.62105263157895,
+          "std": 40.59431615577635,
+          "min": 28,
+          "max": 292,
+          "n": 95,
+          "subtasks_in_stage": [
+            "straw_in_glass_cup__s1",
+            "straw_in_glass_cup__s3",
+            "straw_in_glass_cup__s4",
+            "straw_in_glass_cup__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 72.5,
+      "mean": 87.25,
+      "std": 51.43585811474326,
+      "min": 27,
+      "max": 404,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "GetToastedBread": {
+    "task": "GetToastedBread",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 1296.5,
+      "mean": 1315.14,
+      "min": 1122,
+      "max": 1951
+    },
+    "success": {
+      "median": 1274.5,
+      "mean": 1299.388888888889,
+      "std": 142.12900591008034,
+      "n_success": 72,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "toaster_on__s1": {
+        "median": 1.0,
+        "mean": 9.55,
+        "std": 11.524213639116553,
+        "min": 0,
+        "max": 44,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "toaster_on__s2": {
+        "median": 63.0,
+        "mean": 144.84,
+        "std": 231.86594057773988,
+        "min": 32,
+        "max": 923,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "toaster_on__s7": {
+        "median": 96.5,
+        "mean": 101.125,
+        "std": 24.33615137791695,
+        "min": 63,
+        "max": 187,
+        "coverage": 0.72,
+        "n": 72
+      },
+      "grasp_toast__s1": {
+        "median": 840.5,
+        "mean": 841.7,
+        "std": 145.77678141597173,
+        "min": 189,
+        "max": 1454,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_toast__s3": {
+        "median": 884.0,
+        "mean": 898.05,
+        "std": 106.24503517812019,
+        "min": 727,
+        "max": 1490,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "toast_on_plate__s1": {
+        "median": 1112.5,
+        "mean": 1127.47,
+        "std": 116.34255068546503,
+        "min": 917,
+        "max": 1710,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "toast_on_plate__s3": {
+        "median": 1179.5,
+        "mean": 1200.09,
+        "std": 120.09755159868998,
+        "min": 998,
+        "max": 1781,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "toast_on_plate__s6": {
+        "median": 1225.5,
+        "mean": 1244.57,
+        "std": 125.33038378621522,
+        "min": 1048,
+        "max": 1861,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 1.0,
+          "mean": 9.55,
+          "std": 11.524213639116553,
+          "min": 0,
+          "max": 44,
+          "n": 100,
+          "subtasks_in_stage": [
+            "toaster_on__s1",
+            "toaster_on__s2",
+            "toaster_on__s7"
+          ]
+        },
+        "1": {
+          "median": 57.5,
+          "mean": 65.38,
+          "std": 80.55566770873419,
+          "min": 22,
+          "max": 842,
+          "n": 100,
+          "subtasks_in_stage": [
+            "toaster_on__s1",
+            "toaster_on__s2",
+            "toaster_on__s7"
+          ]
+        },
+        "2": {
+          "median": 42.5,
+          "mean": 130.51388888888889,
+          "std": 233.06776512515003,
+          "min": 5,
+          "max": 826,
+          "n": 72,
+          "subtasks_in_stage": [
+            "toaster_on__s1",
+            "toaster_on__s2",
+            "toaster_on__s7"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 720.0,
+          "mean": 636.5833333333334,
+          "std": 280.26593274166515,
+          "min": 15,
+          "max": 1346,
+          "n": 72,
+          "subtasks_in_stage": [
+            "grasp_toast__s1",
+            "grasp_toast__s3"
+          ]
+        },
+        "1": {
+          "median": 35.0,
+          "mean": 63.763888888888886,
+          "std": 101.3497098959225,
+          "min": 13,
+          "max": 613,
+          "n": 72,
+          "subtasks_in_stage": [
+            "grasp_toast__s1",
+            "grasp_toast__s3"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 235.5,
+          "mean": 227.70833333333334,
+          "std": 52.599756415785805,
+          "min": 117,
+          "max": 331,
+          "n": 72,
+          "subtasks_in_stage": [
+            "toast_on_plate__s1",
+            "toast_on_plate__s3",
+            "toast_on_plate__s6"
+          ]
+        },
+        "1": {
+          "median": 68.5,
+          "mean": 73.58333333333333,
+          "std": 24.783366958058338,
+          "min": 38,
+          "max": 164,
+          "n": 72,
+          "subtasks_in_stage": [
+            "toast_on_plate__s1",
+            "toast_on_plate__s3",
+            "toast_on_plate__s6"
+          ]
+        },
+        "2": {
+          "median": 46.0,
+          "mean": 45.111111111111114,
+          "std": 15.524671722737503,
+          "min": 16,
+          "max": 80,
+          "n": 72,
+          "subtasks_in_stage": [
+            "toast_on_plate__s1",
+            "toast_on_plate__s3",
+            "toast_on_plate__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 51.5,
+      "mean": 54.416666666666664,
+      "std": 17.164846181788068,
+      "min": 28,
+      "max": 114,
+      "n": 72
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "KettleBoiling": {
+    "task": "KettleBoiling",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 443.5,
+      "mean": 449.47,
+      "min": 289,
+      "max": 825
+    },
+    "success": {
+      "median": 427.5,
+      "mean": 433.47,
+      "std": 103.10988846856542,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_kettle__s1": {
+        "median": 53.0,
+        "mean": 55.57,
+        "std": 17.806321911051704,
+        "min": 18,
+        "max": 120,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_kettle__s3": {
+        "median": 100.5,
+        "mean": 102.78,
+        "std": 26.356623455974024,
+        "min": 53,
+        "max": 193,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_kettle__s4": {
+        "median": 107.0,
+        "mean": 112.37,
+        "std": 30.23794139818384,
+        "min": 62,
+        "max": 193,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_stove__s2": {
+        "median": 121.0,
+        "mean": 104.95,
+        "std": 66.34280292541158,
+        "min": 0,
+        "max": 243,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_stove__s6": {
+        "median": 210.5,
+        "mean": 213.13,
+        "std": 51.94721455477666,
+        "min": 119,
+        "max": 355,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_active_burner__s1": {
+        "median": 149.0,
+        "mean": 161.18,
+        "std": 43.93185177066862,
+        "min": 89,
+        "max": 286,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_active_burner__s4": {
+        "median": 398.5,
+        "mean": 405.4,
+        "std": 102.41044868566878,
+        "min": 205,
+        "max": 780,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_active_burner__s6": {
+        "median": 415.0,
+        "mean": 417.19,
+        "std": 106.32522701598148,
+        "min": 210,
+        "max": 809,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 53.0,
+          "mean": 55.57,
+          "std": 17.806321911051704,
+          "min": 18,
+          "max": 120,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_kettle__s1",
+            "grasp_kettle__s3",
+            "grasp_kettle__s4"
+          ]
+        },
+        "1": {
+          "median": 45.0,
+          "mean": 47.21,
+          "std": 19.4078824192646,
+          "min": 11,
+          "max": 117,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_kettle__s1",
+            "grasp_kettle__s3",
+            "grasp_kettle__s4"
+          ]
+        },
+        "2": {
+          "median": 5.5,
+          "mean": 9.59,
+          "std": 15.972535803685023,
+          "min": 0,
+          "max": 86,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_kettle__s1",
+            "grasp_kettle__s3",
+            "grasp_kettle__s4"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 26.0,
+          "mean": 40.82,
+          "std": 36.64352057322004,
+          "min": 5,
+          "max": 170,
+          "n": 100,
+          "subtasks_in_stage": [
+            "kettle_on_stove__s2",
+            "kettle_on_stove__s6"
+          ]
+        },
+        "1": {
+          "median": 80.5,
+          "mean": 78.86842105263158,
+          "std": 29.86960350082336,
+          "min": 26,
+          "max": 149,
+          "n": 76,
+          "subtasks_in_stage": [
+            "kettle_on_stove__s2",
+            "kettle_on_stove__s6"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 187.5,
+          "mean": 195.35526315789474,
+          "std": 76.47973655732685,
+          "min": 93,
+          "max": 480,
+          "n": 76,
+          "subtasks_in_stage": [
+            "kettle_on_active_burner__s1",
+            "kettle_on_active_burner__s4",
+            "kettle_on_active_burner__s6"
+          ]
+        },
+        "1": {
+          "median": 8.0,
+          "mean": 12.5,
+          "std": 16.18682049986151,
+          "min": 2,
+          "max": 107,
+          "n": 76,
+          "subtasks_in_stage": [
+            "kettle_on_active_burner__s1",
+            "kettle_on_active_burner__s4",
+            "kettle_on_active_burner__s6"
+          ]
+        },
+        "2": {
+          "median": 187.5,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "kettle_on_active_burner__s1",
+            "kettle_on_active_burner__s4",
+            "kettle_on_active_burner__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 0.0,
+      "mean": 16.28,
+      "std": 38.26462596184628,
+      "min": 0,
+      "max": 275,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "LoadDishwasher": {
+    "task": "LoadDishwasher",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 713.0,
+      "mean": 753.7,
+      "min": 480,
+      "max": 1326
+    },
+    "success": {
+      "median": 697.0,
+      "mean": 737.15,
+      "std": 167.55604286327605,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_dish0__s2": {
+        "median": 139.0,
+        "mean": 185.48,
+        "std": 116.31934318934233,
+        "min": 44,
+        "max": 636,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_dish0__s4": {
+        "median": 190.0,
+        "mean": 253.86,
+        "std": 137.35188531651104,
+        "min": 86,
+        "max": 682,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dish0_on_rack__s2": {
+        "median": 248.5,
+        "mean": 308.56,
+        "std": 144.9858834507691,
+        "min": 136,
+        "max": 802,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dish0_on_rack__s6": {
+        "median": 305.5,
+        "mean": 357.48,
+        "std": 151.82618219529857,
+        "min": 162,
+        "max": 921,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_dish1__s1": {
+        "median": 90.5,
+        "mean": 94.4,
+        "std": 44.37364082425511,
+        "min": 20,
+        "max": 266,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_dish1__s4": {
+        "median": 329.0,
+        "mean": 304.85,
+        "std": 144.86444525831726,
+        "min": 71,
+        "max": 687,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dish1_on_rack__s6": {
+        "median": 412.5,
+        "mean": 414.26,
+        "std": 161.3332960055053,
+        "min": 162,
+        "max": 836,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "door_half_closed__s6": {
+        "median": 687.0,
+        "mean": 726.75,
+        "std": 166.69747298624534,
+        "min": 460,
+        "max": 1302,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dishwasher_closed__s5": {
+        "median": 696.5,
+        "mean": 737.1,
+        "std": 167.56667329752656,
+        "min": 464,
+        "max": 1310,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 90.5,
+          "mean": 94.4,
+          "std": 44.37364082425511,
+          "min": 20,
+          "max": 266,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "grasp_dish0__s4",
+            "dish0_on_rack__s2",
+            "dish0_on_rack__s6",
+            "grasp_dish1__s1",
+            "grasp_dish1__s4",
+            "dish1_on_rack__s6"
+          ]
+        },
+        "1": {
+          "median": 22.5,
+          "mean": 31.17,
+          "std": 24.660111516373966,
+          "min": 0,
+          "max": 124,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "grasp_dish0__s4",
+            "dish0_on_rack__s2",
+            "dish0_on_rack__s6",
+            "grasp_dish1__s1",
+            "grasp_dish1__s4",
+            "dish1_on_rack__s6"
+          ]
+        },
+        "2": {
+          "median": 42.0,
+          "mean": 56.15,
+          "std": 35.77104275807458,
+          "min": 8,
+          "max": 173,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "grasp_dish0__s4",
+            "dish0_on_rack__s2",
+            "dish0_on_rack__s6",
+            "grasp_dish1__s1",
+            "grasp_dish1__s4",
+            "dish1_on_rack__s6"
+          ]
+        },
+        "3": {
+          "median": 60.0,
+          "mean": 76.0,
+          "std": 41.08868457373636,
+          "min": 30,
+          "max": 227,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "grasp_dish0__s4",
+            "dish0_on_rack__s2",
+            "dish0_on_rack__s6",
+            "grasp_dish1__s1",
+            "grasp_dish1__s4",
+            "dish1_on_rack__s6"
+          ]
+        },
+        "4": {
+          "median": 47.0,
+          "mean": 59.24,
+          "std": 40.401019789109284,
+          "min": 14,
+          "max": 225,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "grasp_dish0__s4",
+            "dish0_on_rack__s2",
+            "dish0_on_rack__s6",
+            "grasp_dish1__s1",
+            "grasp_dish1__s4",
+            "dish1_on_rack__s6"
+          ]
+        },
+        "5": {
+          "median": 110.5,
+          "mean": 111.21,
+          "std": 59.869407045669,
+          "min": 25,
+          "max": 293,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "grasp_dish0__s4",
+            "dish0_on_rack__s2",
+            "dish0_on_rack__s6",
+            "grasp_dish1__s1",
+            "grasp_dish1__s4",
+            "dish1_on_rack__s6"
+          ]
+        },
+        "6": {
+          "median": 81.0,
+          "mean": 86.18,
+          "std": 45.04805878170557,
+          "min": 11,
+          "max": 307,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "grasp_dish0__s4",
+            "dish0_on_rack__s2",
+            "dish0_on_rack__s6",
+            "grasp_dish1__s1",
+            "grasp_dish1__s4",
+            "dish1_on_rack__s6"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 189.0,
+          "mean": 212.4,
+          "std": 80.25920507954213,
+          "min": 97,
+          "max": 477,
+          "n": 100,
+          "subtasks_in_stage": [
+            "door_half_closed__s6"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 8.0,
+          "mean": 10.35,
+          "std": 8.94245492021067,
+          "min": 4,
+          "max": 73,
+          "n": 100,
+          "subtasks_in_stage": [
+            "dishwasher_closed__s5"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 0.0,
+      "mean": 0.05,
+      "std": 0.4974937185533101,
+      "min": 0,
+      "max": 5,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "PackIdenticalLunches": {
+    "task": "PackIdenticalLunches",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 1427.0,
+      "mean": 1425.54,
+      "min": 838,
+      "max": 2286
+    },
+    "success": {
+      "median": 1411.0,
+      "mean": 1408.24,
+      "std": 276.77424446649655,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_vegetable0__s2": {
+        "median": 391.0,
+        "mean": 421.95,
+        "std": 368.37047587992174,
+        "min": 34,
+        "max": 1335,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable0__s3": {
+        "median": 584.0,
+        "mean": 633.12,
+        "std": 439.84759360487584,
+        "min": 42,
+        "max": 1820,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable0__s6": {
+        "median": 519.0,
+        "mean": 615.5157894736842,
+        "std": 445.7233473605253,
+        "min": 55,
+        "max": 1855,
+        "coverage": 0.95,
+        "n": 95
+      },
+      "vegetable0_packed__s6": {
+        "median": 832.0,
+        "mean": 880.69,
+        "std": 455.8041179059268,
+        "min": 154,
+        "max": 2070,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable1__s2": {
+        "median": 92.5,
+        "mean": 313.48,
+        "std": 344.62906087560293,
+        "min": 32,
+        "max": 1576,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable1__s6": {
+        "median": 492.0,
+        "mean": 589.7319587628866,
+        "std": 460.60138894069934,
+        "min": 56,
+        "max": 1750,
+        "coverage": 0.97,
+        "n": 97
+      },
+      "vegetable1_packed__s6": {
+        "median": 761.0,
+        "mean": 812.81,
+        "std": 459.27193894249626,
+        "min": 166,
+        "max": 1967,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat0__s2": {
+        "median": 279.5,
+        "mean": 367.8,
+        "std": 366.11416252311244,
+        "min": 31,
+        "max": 1338,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat0__s3": {
+        "median": 444.0,
+        "mean": 519.42,
+        "std": 434.17098429075156,
+        "min": 38,
+        "max": 1457,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat0__s6": {
+        "median": 493.5,
+        "mean": 562.0816326530612,
+        "std": 435.55291328940217,
+        "min": 56,
+        "max": 1499,
+        "coverage": 0.98,
+        "n": 98
+      },
+      "meat0_packed__s6": {
+        "median": 665.0,
+        "mean": 746.84,
+        "std": 445.9948143196286,
+        "min": 179,
+        "max": 1678,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat1__s1": {
+        "median": 39.5,
+        "mean": 196.85,
+        "std": 303.6432240310987,
+        "min": 0,
+        "max": 1894,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat1__s2": {
+        "median": 326.5,
+        "mean": 401.56,
+        "std": 406.6070171553856,
+        "min": 35,
+        "max": 1921,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat1__s6": {
+        "median": 529.0,
+        "mean": 588.74,
+        "std": 466.882375336658,
+        "min": 52,
+        "max": 1972,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat1_packed__s6": {
+        "median": 751.0,
+        "mean": 790.8,
+        "std": 477.40148722013845,
+        "min": 171,
+        "max": 2228,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 38.5,
+          "mean": 40.92,
+          "std": 20.379244343203702,
+          "min": 0,
+          "max": 94,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "1": {
+          "median": 14.0,
+          "mean": 17.41,
+          "std": 17.278365084694794,
+          "min": 0,
+          "max": 149,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "2": {
+          "median": 9.0,
+          "mean": 20.64,
+          "std": 35.90028412143837,
+          "min": 0,
+          "max": 235,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "3": {
+          "median": 15.0,
+          "mean": 51.39,
+          "std": 64.8149512072639,
+          "min": 0,
+          "max": 254,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "4": {
+          "median": 96.5,
+          "mean": 89.04,
+          "std": 76.54409448154703,
+          "min": 0,
+          "max": 243,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "5": {
+          "median": 112.0,
+          "mean": 105.22,
+          "std": 100.2665028810719,
+          "min": 0,
+          "max": 415,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "6": {
+          "median": 38.0,
+          "mean": 85.53,
+          "std": 91.82194236673497,
+          "min": 0,
+          "max": 478,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "7": {
+          "median": 111.5,
+          "mean": 105.03,
+          "std": 90.44583517221785,
+          "min": 0,
+          "max": 311,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "8": {
+          "median": 105.5,
+          "mean": 96.34,
+          "std": 87.98547834728183,
+          "min": 0,
+          "max": 338,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "9": {
+          "median": 97.5,
+          "mean": 97.31,
+          "std": 86.10443600651479,
+          "min": 0,
+          "max": 331,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "10": {
+          "median": 35.0,
+          "mean": 105.62,
+          "std": 108.90920805882303,
+          "min": 0,
+          "max": 418,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "11": {
+          "median": 142.5,
+          "mean": 118.77,
+          "std": 84.69118667252219,
+          "min": 0,
+          "max": 386,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "12": {
+          "median": 156.0,
+          "mean": 138.94,
+          "std": 95.79664085968776,
+          "min": 0,
+          "max": 470,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "13": {
+          "median": 132.5,
+          "mean": 137.58163265306123,
+          "std": 110.50754184895125,
+          "min": 12,
+          "max": 494,
+          "n": 98,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        },
+        "14": {
+          "median": 171.5,
+          "mean": 192.42391304347825,
+          "std": 86.40730566129587,
+          "min": 9,
+          "max": 466,
+          "n": 92,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s2",
+            "grasp_vegetable0__s3",
+            "grasp_vegetable0__s6",
+            "vegetable0_packed__s6",
+            "grasp_vegetable1__s2",
+            "grasp_vegetable1__s6",
+            "vegetable1_packed__s6",
+            "grasp_meat0__s2",
+            "grasp_meat0__s3",
+            "grasp_meat0__s6",
+            "meat0_packed__s6",
+            "grasp_meat1__s1",
+            "grasp_meat1__s2",
+            "grasp_meat1__s6",
+            "meat1_packed__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 22.0,
+      "mean": 24.565217391304348,
+      "std": 10.646804325432369,
+      "min": 0,
+      "max": 64,
+      "n": 92
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "PreSoakPan": {
+    "task": "PreSoakPan",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 747.5,
+      "mean": 768.44,
+      "min": 479,
+      "max": 1442
+    },
+    "success": {
+      "median": 731.5,
+      "mean": 752.44,
+      "std": 147.05905752451972,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_pan__s6": {
+        "median": 117.0,
+        "mean": 155.95,
+        "std": 120.5293636422262,
+        "min": 77,
+        "max": 690,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_in_sink__s6": {
+        "median": 185.0,
+        "mean": 228.19,
+        "std": 132.13528635455407,
+        "min": 113,
+        "max": 757,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_sponge__s2": {
+        "median": 315.0,
+        "mean": 269.15,
+        "std": 135.5400586542591,
+        "min": 52,
+        "max": 495,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_sponge__s6": {
+        "median": 405.0,
+        "mean": 395.6701030927835,
+        "std": 117.93137281403877,
+        "min": 97,
+        "max": 605,
+        "coverage": 0.97,
+        "n": 97
+      },
+      "sponge_in_sink__s6": {
+        "median": 412.0,
+        "mean": 388.11,
+        "std": 134.22562311272762,
+        "min": 0,
+        "max": 646,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s1": {
+        "median": 534.0,
+        "mean": 529.29,
+        "std": 179.41149879536707,
+        "min": 137,
+        "max": 1118,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s2": {
+        "median": 648.5,
+        "mean": 674.4,
+        "std": 131.35790802231892,
+        "min": 426,
+        "max": 1239,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s5": {
+        "median": 731.5,
+        "mean": 752.44,
+        "std": 147.05905752451972,
+        "min": 463,
+        "max": 1426,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 103.0,
+          "mean": 99.97,
+          "std": 34.11200814962379,
+          "min": 0,
+          "max": 158,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s6",
+            "pan_in_sink__s6",
+            "grasp_sponge__s2",
+            "grasp_sponge__s6",
+            "sponge_in_sink__s6",
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s5"
+          ]
+        },
+        "1": {
+          "median": 55.5,
+          "mean": 62.67,
+          "std": 31.87445842677174,
+          "min": 13,
+          "max": 187,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s6",
+            "pan_in_sink__s6",
+            "grasp_sponge__s2",
+            "grasp_sponge__s6",
+            "sponge_in_sink__s6",
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s5"
+          ]
+        },
+        "2": {
+          "median": 134.0,
+          "mean": 122.07,
+          "std": 78.360736979689,
+          "min": 3,
+          "max": 350,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s6",
+            "pan_in_sink__s6",
+            "grasp_sponge__s2",
+            "grasp_sponge__s6",
+            "sponge_in_sink__s6",
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s5"
+          ]
+        },
+        "3": {
+          "median": 81.0,
+          "mean": 116.31,
+          "std": 93.60552280715065,
+          "min": 23,
+          "max": 489,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s6",
+            "pan_in_sink__s6",
+            "grasp_sponge__s2",
+            "grasp_sponge__s6",
+            "sponge_in_sink__s6",
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s5"
+          ]
+        },
+        "4": {
+          "median": 33.5,
+          "mean": 54.76,
+          "std": 56.47284657249004,
+          "min": 5,
+          "max": 313,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s6",
+            "pan_in_sink__s6",
+            "grasp_sponge__s2",
+            "grasp_sponge__s6",
+            "sponge_in_sink__s6",
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s5"
+          ]
+        },
+        "5": {
+          "median": 102.5,
+          "mean": 114.11,
+          "std": 71.65820190320156,
+          "min": 7,
+          "max": 361,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s6",
+            "pan_in_sink__s6",
+            "grasp_sponge__s2",
+            "grasp_sponge__s6",
+            "sponge_in_sink__s6",
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s5"
+          ]
+        },
+        "6": {
+          "median": 85.5,
+          "mean": 106.27,
+          "std": 73.37899631365913,
+          "min": 26,
+          "max": 361,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s6",
+            "pan_in_sink__s6",
+            "grasp_sponge__s2",
+            "grasp_sponge__s6",
+            "sponge_in_sink__s6",
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s5"
+          ]
+        },
+        "7": {
+          "median": 68.0,
+          "mean": 78.63917525773196,
+          "std": 31.88742620274117,
+          "min": 37,
+          "max": 199,
+          "n": 97,
+          "subtasks_in_stage": [
+            "grasp_pan__s6",
+            "pan_in_sink__s6",
+            "grasp_sponge__s2",
+            "grasp_sponge__s6",
+            "sponge_in_sink__s6",
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s5"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 0.0,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0,
+      "max": 0,
+      "n": 97
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "PrepareCoffee": {
+    "task": "PrepareCoffee",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 548.5,
+      "mean": 560.51,
+      "min": 316,
+      "max": 1092
+    },
+    "success": {
+      "median": 532.5,
+      "mean": 544.47,
+      "std": 143.12843567928772,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_mug__s1": {
+        "median": 45.0,
+        "mean": 44.94,
+        "std": 22.270976628787523,
+        "min": 0,
+        "max": 110,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_mug__s3": {
+        "median": 99.0,
+        "mean": 100.77,
+        "std": 27.278143265259093,
+        "min": 45,
+        "max": 188,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_mug__s6": {
+        "median": 135.5,
+        "mean": 143.75,
+        "std": 37.27180569814132,
+        "min": 67,
+        "max": 251,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "mug_at_machine__s3": {
+        "median": 181.0,
+        "mean": 176.67,
+        "std": 105.30147719761581,
+        "min": 0,
+        "max": 399,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "mug_at_machine__s6": {
+        "median": 300.0,
+        "mean": 310.69,
+        "std": 79.33431729081684,
+        "min": 147,
+        "max": 603,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "machine_turned_on__s3": {
+        "median": 230.5,
+        "mean": 231.98,
+        "std": 131.12741742290206,
+        "min": 0,
+        "max": 573,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "machine_turned_on__s4": {
+        "median": 423.0,
+        "mean": 453.62,
+        "std": 129.67280208278063,
+        "min": 160,
+        "max": 879,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "machine_turned_on__s6": {
+        "median": 490.5,
+        "mean": 498.81,
+        "std": 128.60285338980623,
+        "min": 275,
+        "max": 993,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 45.0,
+          "mean": 44.94,
+          "std": 22.270976628787523,
+          "min": 0,
+          "max": 110,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_mug__s1",
+            "grasp_mug__s3",
+            "grasp_mug__s6"
+          ]
+        },
+        "1": {
+          "median": 51.0,
+          "mean": 55.83,
+          "std": 19.596966602002468,
+          "min": 26,
+          "max": 134,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_mug__s1",
+            "grasp_mug__s3",
+            "grasp_mug__s6"
+          ]
+        },
+        "2": {
+          "median": 40.0,
+          "mean": 42.98,
+          "std": 18.643486798343275,
+          "min": 12,
+          "max": 119,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_mug__s1",
+            "grasp_mug__s3",
+            "grasp_mug__s6"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 96.0,
+          "mean": 94.38,
+          "std": 61.33902183765242,
+          "min": 14,
+          "max": 256,
+          "n": 100,
+          "subtasks_in_stage": [
+            "mug_at_machine__s3",
+            "mug_at_machine__s6"
+          ]
+        },
+        "1": {
+          "median": 74.5,
+          "mean": 90.7,
+          "std": 61.89434546063155,
+          "min": 21,
+          "max": 313,
+          "n": 80,
+          "subtasks_in_stage": [
+            "mug_at_machine__s3",
+            "mug_at_machine__s6"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 109.0,
+          "mean": 116.9125,
+          "std": 62.558611267754344,
+          "min": 0,
+          "max": 276,
+          "n": 80,
+          "subtasks_in_stage": [
+            "machine_turned_on__s3",
+            "machine_turned_on__s4",
+            "machine_turned_on__s6"
+          ]
+        },
+        "1": {
+          "median": 41.0,
+          "mean": 57.29113924050633,
+          "std": 56.596316894687625,
+          "min": 5,
+          "max": 305,
+          "n": 79,
+          "subtasks_in_stage": [
+            "machine_turned_on__s3",
+            "machine_turned_on__s4",
+            "machine_turned_on__s6"
+          ]
+        },
+        "2": {
+          "median": 39.0,
+          "mean": 35.53846153846154,
+          "std": 11.167365811667388,
+          "min": 19,
+          "max": 59,
+          "n": 13,
+          "subtasks_in_stage": [
+            "machine_turned_on__s3",
+            "machine_turned_on__s4",
+            "machine_turned_on__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 39.0,
+      "mean": 45.66,
+      "std": 21.491495992601354,
+      "min": 13,
+      "max": 135,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "RinseSinkBasin": {
+    "task": "RinseSinkBasin",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 402.0,
+      "mean": 402.83,
+      "min": 227,
+      "max": 661
+    },
+    "success": {
+      "median": 386.0,
+      "mean": 386.83,
+      "std": 80.66462111731512,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "water_on__s1": {
+        "median": 47.5,
+        "mean": 55.25,
+        "std": 21.885783056587215,
+        "min": 28,
+        "max": 142,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s2": {
+        "median": 84.0,
+        "mean": 89.52,
+        "std": 30.773521085504665,
+        "min": 49,
+        "max": 186,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s3": {
+        "median": 119.0,
+        "mean": 122.59,
+        "std": 34.65201148562664,
+        "min": 61,
+        "max": 235,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s4": {
+        "median": 134.0,
+        "mean": 137.51,
+        "std": 38.6288739157641,
+        "min": 62,
+        "max": 267,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s5": {
+        "median": 155.5,
+        "mean": 161.54,
+        "std": 38.395682048897115,
+        "min": 92,
+        "max": 282,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "washed_left__s6": {
+        "median": 314.5,
+        "mean": 316.0,
+        "std": 72.30269704513104,
+        "min": 169,
+        "max": 475,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "washed_center__s6": {
+        "median": 156.5,
+        "mean": 162.54,
+        "std": 38.395682048897115,
+        "min": 93,
+        "max": 283,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "washed_right__s6": {
+        "median": 359.5,
+        "mean": 366.59,
+        "std": 88.44423045060655,
+        "min": 212,
+        "max": 646,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 47.5,
+          "mean": 55.25,
+          "std": 21.885783056587215,
+          "min": 28,
+          "max": 142,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5"
+          ]
+        },
+        "1": {
+          "median": 30.0,
+          "mean": 34.27,
+          "std": 14.285555641976268,
+          "min": 14,
+          "max": 85,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5"
+          ]
+        },
+        "2": {
+          "median": 27.5,
+          "mean": 32.32,
+          "std": 16.20856563672431,
+          "min": 4,
+          "max": 88,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5"
+          ]
+        },
+        "3": {
+          "median": 20.0,
+          "mean": 16.42,
+          "std": 15.755113455637188,
+          "min": 0,
+          "max": 57,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5"
+          ]
+        },
+        "4": {
+          "median": 12.5,
+          "mean": 23.28,
+          "std": 21.118749963006806,
+          "min": 4,
+          "max": 127,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s2",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 1.0,
+          "mean": 1.0,
+          "std": 0.0,
+          "min": 1,
+          "max": 1,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left__s6",
+            "washed_center__s6",
+            "washed_right__s6"
+          ]
+        },
+        "1": {
+          "median": 131.0,
+          "mean": 132.22,
+          "std": 31.830984904649114,
+          "min": 50,
+          "max": 239,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left__s6",
+            "washed_center__s6",
+            "washed_right__s6"
+          ]
+        },
+        "2": {
+          "median": 80.5,
+          "mean": 93.07,
+          "std": 46.341397259901434,
+          "min": 40,
+          "max": 282,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left__s6",
+            "washed_center__s6",
+            "washed_right__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": null,
+      "mean": null,
+      "std": null,
+      "n": 0
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "ScrubCuttingBoard": {
+    "task": "ScrubCuttingBoard",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 429.5,
+      "mean": 452.34,
+      "min": 263,
+      "max": 801
+    },
+    "success": {
+      "median": 414.5,
+      "mean": 439.01063829787233,
+      "std": 124.38183272632115,
+      "n_success": 94,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_sponge__s1": {
+        "median": 17.5,
+        "mean": 19.28,
+        "std": 6.789815903248041,
+        "min": 9,
+        "max": 48,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_sponge__s2": {
+        "median": 40.5,
+        "mean": 41.95,
+        "std": 12.338861373724889,
+        "min": 22,
+        "max": 91,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_sponge__s3": {
+        "median": 56.0,
+        "mean": 58.0,
+        "std": 16.229602582934678,
+        "min": 27,
+        "max": 110,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_sponge__s6": {
+        "median": 95.5,
+        "mean": 104.14,
+        "std": 40.21691683856434,
+        "min": 59,
+        "max": 293,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "contact_1step__s3": {
+        "median": 134.5,
+        "mean": 136.45,
+        "std": 38.73638470482242,
+        "min": 69,
+        "max": 254,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "contact_1step__s4": {
+        "median": 173.5,
+        "mean": 180.15,
+        "std": 55.79594519317689,
+        "min": 77,
+        "max": 437,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "contact_1step__s6": {
+        "median": 152.0,
+        "mean": 162.7,
+        "std": 54.15764027355697,
+        "min": 76,
+        "max": 370,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "contact_3steps__s5": {
+        "median": 222.0,
+        "mean": 228.34343434343435,
+        "std": 72.51501573741265,
+        "min": 98,
+        "max": 595,
+        "coverage": 0.99,
+        "n": 99
+      },
+      "sweep_range_0p05m__s5": {
+        "median": 207.5,
+        "mean": 215.72,
+        "std": 69.67454054387441,
+        "min": 98,
+        "max": 463,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "contact_5steps__s5": {
+        "median": 257.5,
+        "mean": 278.2340425531915,
+        "std": 88.6746894171738,
+        "min": 114,
+        "max": 644,
+        "coverage": 0.94,
+        "n": 94
+      },
+      "sweep_range_0p1m__s5": {
+        "median": 215.0,
+        "mean": 232.76,
+        "std": 80.69301332829255,
+        "min": 98,
+        "max": 595,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 17.5,
+          "mean": 19.28,
+          "std": 6.789815903248041,
+          "min": 9,
+          "max": 48,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_sponge__s1",
+            "grasp_sponge__s2",
+            "grasp_sponge__s3",
+            "grasp_sponge__s6"
+          ]
+        },
+        "1": {
+          "median": 22.0,
+          "mean": 22.67,
+          "std": 7.561818564340195,
+          "min": 9,
+          "max": 45,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_sponge__s1",
+            "grasp_sponge__s2",
+            "grasp_sponge__s3",
+            "grasp_sponge__s6"
+          ]
+        },
+        "2": {
+          "median": 14.0,
+          "mean": 16.05,
+          "std": 6.561059365681734,
+          "min": 5,
+          "max": 42,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_sponge__s1",
+            "grasp_sponge__s2",
+            "grasp_sponge__s3",
+            "grasp_sponge__s6"
+          ]
+        },
+        "3": {
+          "median": 35.0,
+          "mean": 46.14,
+          "std": 34.422382253411804,
+          "min": 12,
+          "max": 232,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_sponge__s1",
+            "grasp_sponge__s2",
+            "grasp_sponge__s3",
+            "grasp_sponge__s6"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 28.5,
+          "mean": 36.78,
+          "std": 27.16673701422385,
+          "min": 0,
+          "max": 164,
+          "n": 100,
+          "subtasks_in_stage": [
+            "contact_1step__s3",
+            "contact_1step__s4",
+            "contact_1step__s6"
+          ]
+        },
+        "1": {
+          "median": 14.5,
+          "mean": 17.377551020408163,
+          "std": 11.289796102822907,
+          "min": 1,
+          "max": 50,
+          "n": 98,
+          "subtasks_in_stage": [
+            "contact_1step__s3",
+            "contact_1step__s4",
+            "contact_1step__s6"
+          ]
+        },
+        "2": {
+          "median": 27.0,
+          "mean": 34.95652173913044,
+          "std": 30.3841037684962,
+          "min": 1,
+          "max": 191,
+          "n": 92,
+          "subtasks_in_stage": [
+            "contact_1step__s3",
+            "contact_1step__s4",
+            "contact_1step__s6"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 29.0,
+          "mean": 40.973684210526315,
+          "std": 45.26180383531563,
+          "min": 0,
+          "max": 290,
+          "n": 76,
+          "subtasks_in_stage": [
+            "contact_3steps__s5",
+            "sweep_range_0p05m__s5"
+          ]
+        },
+        "1": {
+          "median": 10.0,
+          "mean": 16.12857142857143,
+          "std": 25.175340218198457,
+          "min": 0,
+          "max": 132,
+          "n": 70,
+          "subtasks_in_stage": [
+            "contact_3steps__s5",
+            "sweep_range_0p05m__s5"
+          ]
+        }
+      },
+      "3": {
+        "0": {
+          "median": 12.5,
+          "mean": 33.34848484848485,
+          "std": 51.08652565760293,
+          "min": 0,
+          "max": 234,
+          "n": 66,
+          "subtasks_in_stage": [
+            "contact_5steps__s5",
+            "sweep_range_0p1m__s5"
+          ]
+        },
+        "1": {
+          "median": 18.0,
+          "mean": 32.5,
+          "std": 37.2642590158452,
+          "min": 0,
+          "max": 168,
+          "n": 32,
+          "subtasks_in_stage": [
+            "contact_5steps__s5",
+            "sweep_range_0p1m__s5"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 127.5,
+      "mean": 159.0744680851064,
+      "std": 93.55442600281971,
+      "min": 35,
+      "max": 444,
+      "n": 94
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "SearingMeat": {
+    "task": "SearingMeat",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 865.0,
+      "mean": 871.32,
+      "min": 507,
+      "max": 1305
+    },
+    "success": {
+      "median": 849.0,
+      "mean": 854.04,
+      "std": 182.8940086498188,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_pan__s1": {
+        "median": 57.5,
+        "mean": 57.75,
+        "std": 16.57188884828763,
+        "min": 29,
+        "max": 106,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_pan__s6": {
+        "median": 130.5,
+        "mean": 134.64,
+        "std": 35.14612923210748,
+        "min": 71,
+        "max": 260,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_on_stove__s2": {
+        "median": 268.5,
+        "mean": 273.07,
+        "std": 78.43102128622323,
+        "min": 0,
+        "max": 469,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_on_stove__s4": {
+        "median": 322.0,
+        "mean": 329.16,
+        "std": 74.90042990530829,
+        "min": 183,
+        "max": 502,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_on_stove__s6": {
+        "median": 395.5,
+        "mean": 382.59,
+        "std": 81.9156999603861,
+        "min": 219,
+        "max": 550,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_on_active_knob__s6": {
+        "median": 840.5,
+        "mean": 842.21,
+        "std": 184.74686979756925,
+        "min": 463,
+        "max": 1288,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat__s1": {
+        "median": 446.5,
+        "mean": 446.05,
+        "std": 103.7859696683516,
+        "min": 234,
+        "max": 685,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat__s2": {
+        "median": 493.0,
+        "mean": 486.62,
+        "std": 101.8724476980896,
+        "min": 282,
+        "max": 700,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat__s6": {
+        "median": 546.0,
+        "mean": 542.37,
+        "std": 112.47174356254997,
+        "min": 314,
+        "max": 852,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat_in_pan__s6": {
+        "median": 642.5,
+        "mean": 634.25,
+        "std": 123.65584296748779,
+        "min": 377,
+        "max": 897,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 57.0,
+          "mean": 56.21,
+          "std": 19.072123636344223,
+          "min": 0,
+          "max": 106,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s1",
+            "grasp_pan__s6",
+            "pan_on_stove__s2",
+            "pan_on_stove__s4",
+            "pan_on_stove__s6",
+            "pan_on_active_knob__s6"
+          ]
+        },
+        "1": {
+          "median": 68.5,
+          "mean": 76.41,
+          "std": 30.831183889043253,
+          "min": 30,
+          "max": 197,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s1",
+            "grasp_pan__s6",
+            "pan_on_stove__s2",
+            "pan_on_stove__s4",
+            "pan_on_stove__s6",
+            "pan_on_active_knob__s6"
+          ]
+        },
+        "2": {
+          "median": 140.0,
+          "mean": 144.01,
+          "std": 52.99631968354028,
+          "min": 5,
+          "max": 345,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s1",
+            "grasp_pan__s6",
+            "pan_on_stove__s2",
+            "pan_on_stove__s4",
+            "pan_on_stove__s6",
+            "pan_on_active_knob__s6"
+          ]
+        },
+        "3": {
+          "median": 43.5,
+          "mean": 52.53,
+          "std": 39.79358114068147,
+          "min": 13,
+          "max": 262,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s1",
+            "grasp_pan__s6",
+            "pan_on_stove__s2",
+            "pan_on_stove__s4",
+            "pan_on_stove__s6",
+            "pan_on_active_knob__s6"
+          ]
+        },
+        "4": {
+          "median": 42.0,
+          "mean": 53.43,
+          "std": 32.24817979359455,
+          "min": 18,
+          "max": 191,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s1",
+            "grasp_pan__s6",
+            "pan_on_stove__s2",
+            "pan_on_stove__s4",
+            "pan_on_stove__s6",
+            "pan_on_active_knob__s6"
+          ]
+        },
+        "5": {
+          "median": 443.0,
+          "mean": 459.62,
+          "std": 129.10730265945455,
+          "min": 216,
+          "max": 738,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s1",
+            "grasp_pan__s6",
+            "pan_on_stove__s2",
+            "pan_on_stove__s4",
+            "pan_on_stove__s6",
+            "pan_on_active_knob__s6"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 100.0,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "grasp_meat__s1",
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_in_pan__s6"
+          ]
+        },
+        "1": {
+          "median": 100.0,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "grasp_meat__s1",
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_in_pan__s6"
+          ]
+        },
+        "2": {
+          "median": 100.0,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "grasp_meat__s1",
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_in_pan__s6"
+          ]
+        },
+        "3": {
+          "median": 100.0,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "grasp_meat__s1",
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_in_pan__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 0.0,
+      "mean": 11.83,
+      "std": 27.477283344610324,
+      "min": 0,
+      "max": 135,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "SetUpCuttingStation": {
+    "task": "SetUpCuttingStation",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 630.5,
+      "mean": 659.24,
+      "min": 369,
+      "max": 1157
+    },
+    "success": {
+      "median": 612.0,
+      "mean": 641.55,
+      "std": 175.56960870264535,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_meat__s2": {
+        "median": 474.0,
+        "mean": 479.98,
+        "std": 131.0353372186297,
+        "min": 257,
+        "max": 804,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat__s6": {
+        "median": 527.5,
+        "mean": 536.79,
+        "std": 136.92627907016242,
+        "min": 286,
+        "max": 840,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat_on_board__s6": {
+        "median": 592.0,
+        "mean": 618.62,
+        "std": 172.93876257218915,
+        "min": 331,
+        "max": 1117,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_knife__s1": {
+        "median": 145.0,
+        "mean": 149.82,
+        "std": 54.00303324814264,
+        "min": 36,
+        "max": 290,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_knife__s6": {
+        "median": 235.0,
+        "mean": 240.17,
+        "std": 56.469470512835514,
+        "min": 141,
+        "max": 381,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "knife_on_board__s2": {
+        "median": 293.5,
+        "mean": 246.99,
+        "std": 187.24750972976918,
+        "min": 0,
+        "max": 617,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "knife_on_board__s3": {
+        "median": 339.5,
+        "mean": 332.11,
+        "std": 142.81000630207956,
+        "min": 0,
+        "max": 658,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "knife_on_board__s6": {
+        "median": 385.5,
+        "mean": 394.68,
+        "std": 106.40384203589642,
+        "min": 200,
+        "max": 703,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 125.0,
+          "mean": 108.73,
+          "std": 88.73689818784517,
+          "min": 0,
+          "max": 290,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_on_board__s6",
+            "grasp_knife__s1",
+            "grasp_knife__s6",
+            "knife_on_board__s2",
+            "knife_on_board__s3",
+            "knife_on_board__s6"
+          ]
+        },
+        "1": {
+          "median": 81.5,
+          "mean": 86.86,
+          "std": 52.56691354835282,
+          "min": 0,
+          "max": 231,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_on_board__s6",
+            "grasp_knife__s1",
+            "grasp_knife__s6",
+            "knife_on_board__s2",
+            "knife_on_board__s3",
+            "knife_on_board__s6"
+          ]
+        },
+        "2": {
+          "median": 113.5,
+          "mean": 116.18,
+          "std": 53.12257147390363,
+          "min": 27,
+          "max": 266,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_on_board__s6",
+            "grasp_knife__s1",
+            "grasp_knife__s6",
+            "knife_on_board__s2",
+            "knife_on_board__s3",
+            "knife_on_board__s6"
+          ]
+        },
+        "3": {
+          "median": 28.5,
+          "mean": 41.23,
+          "std": 34.21311298318234,
+          "min": 5,
+          "max": 182,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_on_board__s6",
+            "grasp_knife__s1",
+            "grasp_knife__s6",
+            "knife_on_board__s2",
+            "knife_on_board__s3",
+            "knife_on_board__s6"
+          ]
+        },
+        "4": {
+          "median": 36.0,
+          "mean": 41.68,
+          "std": 21.86955875183585,
+          "min": 11,
+          "max": 131,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_on_board__s6",
+            "grasp_knife__s1",
+            "grasp_knife__s6",
+            "knife_on_board__s2",
+            "knife_on_board__s3",
+            "knife_on_board__s6"
+          ]
+        },
+        "5": {
+          "median": 62.0,
+          "mean": 85.3,
+          "std": 60.02974262813393,
+          "min": 23,
+          "max": 283,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_on_board__s6",
+            "grasp_knife__s1",
+            "grasp_knife__s6",
+            "knife_on_board__s2",
+            "knife_on_board__s3",
+            "knife_on_board__s6"
+          ]
+        },
+        "6": {
+          "median": 44.5,
+          "mean": 56.81,
+          "std": 34.204004151560966,
+          "min": 21,
+          "max": 215,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_on_board__s6",
+            "grasp_knife__s1",
+            "grasp_knife__s6",
+            "knife_on_board__s2",
+            "knife_on_board__s3",
+            "knife_on_board__s6"
+          ]
+        },
+        "7": {
+          "median": 69.0,
+          "mean": 81.83,
+          "std": 59.90409919195847,
+          "min": 0,
+          "max": 329,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "grasp_meat__s6",
+            "meat_on_board__s6",
+            "grasp_knife__s1",
+            "grasp_knife__s6",
+            "knife_on_board__s2",
+            "knife_on_board__s3",
+            "knife_on_board__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 21.0,
+      "mean": 22.93,
+      "std": 10.604013391164687,
+      "min": 7,
+      "max": 56,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "StackBowlsCabinet": {
+    "task": "StackBowlsCabinet",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 323.5,
+      "mean": 340.27,
+      "min": 218,
+      "max": 698
+    },
+    "success": {
+      "median": 307.5,
+      "mean": 324.25,
+      "std": 86.92345770849201,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_any_bowl__s1": {
+        "median": 12.0,
+        "mean": 19.24,
+        "std": 22.245053382718595,
+        "min": 0,
+        "max": 131,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_any_bowl__s2": {
+        "median": 35.0,
+        "mean": 41.53,
+        "std": 23.903746568268332,
+        "min": 17,
+        "max": 149,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_any_bowl__s3": {
+        "median": 57.5,
+        "mean": 64.97,
+        "std": 30.24647252160159,
+        "min": 26,
+        "max": 223,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_any_bowl__s6": {
+        "median": 76.0,
+        "mean": 80.5,
+        "std": 25.557190768940156,
+        "min": 45,
+        "max": 174,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowls_stacked__s3": {
+        "median": 110.0,
+        "mean": 124.96,
+        "std": 66.4889344176909,
+        "min": 68,
+        "max": 601,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowls_stacked__s6": {
+        "median": 140.5,
+        "mean": 154.55,
+        "std": 67.67663924870973,
+        "min": 88,
+        "max": 624,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "any_bowl_in_cabinet__s6": {
+        "median": 257.0,
+        "mean": 277.24,
+        "std": 69.50411786362014,
+        "min": 168,
+        "max": 501,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "both_bowls_in_cabinet__s5": {
+        "median": 275.0,
+        "mean": 287.41,
+        "std": 77.45658074043807,
+        "min": 175,
+        "max": 606,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 12.0,
+          "mean": 19.24,
+          "std": 22.245053382718595,
+          "min": 0,
+          "max": 131,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_any_bowl__s1",
+            "grasp_any_bowl__s2",
+            "grasp_any_bowl__s3",
+            "grasp_any_bowl__s6"
+          ]
+        },
+        "1": {
+          "median": 20.0,
+          "mean": 22.29,
+          "std": 10.412775806671341,
+          "min": 9,
+          "max": 64,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_any_bowl__s1",
+            "grasp_any_bowl__s2",
+            "grasp_any_bowl__s3",
+            "grasp_any_bowl__s6"
+          ]
+        },
+        "2": {
+          "median": 20.0,
+          "mean": 22.36,
+          "std": 11.172752570427754,
+          "min": 7,
+          "max": 65,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_any_bowl__s1",
+            "grasp_any_bowl__s2",
+            "grasp_any_bowl__s3",
+            "grasp_any_bowl__s6"
+          ]
+        },
+        "3": {
+          "median": 16.0,
+          "mean": 17.69,
+          "std": 12.01640129156812,
+          "min": 5,
+          "max": 108,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_any_bowl__s1",
+            "grasp_any_bowl__s2",
+            "grasp_any_bowl__s3",
+            "grasp_any_bowl__s6"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 31.0,
+          "mean": 43.38,
+          "std": 47.89943214694721,
+          "min": 16,
+          "max": 378,
+          "n": 100,
+          "subtasks_in_stage": [
+            "bowls_stacked__s3",
+            "bowls_stacked__s6"
+          ]
+        },
+        "1": {
+          "median": 27.0,
+          "mean": 29.59,
+          "std": 10.394320564616043,
+          "min": 7,
+          "max": 69,
+          "n": 100,
+          "subtasks_in_stage": [
+            "bowls_stacked__s3",
+            "bowls_stacked__s6"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 121.5,
+          "mean": 131.74489795918367,
+          "std": 39.80111556853391,
+          "min": 74,
+          "max": 271,
+          "n": 98,
+          "subtasks_in_stage": [
+            "any_bowl_in_cabinet__s6",
+            "both_bowls_in_cabinet__s5"
+          ]
+        },
+        "1": {
+          "median": 3.0,
+          "mean": 4.13265306122449,
+          "std": 4.381402615559712,
+          "min": 0,
+          "max": 28,
+          "n": 98,
+          "subtasks_in_stage": [
+            "any_bowl_in_cabinet__s6",
+            "both_bowls_in_cabinet__s5"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 33.0,
+      "mean": 36.54,
+      "std": 12.104065432737878,
+      "min": 19,
+      "max": 76,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "SteamInMicrowave": {
+    "task": "SteamInMicrowave",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 963.5,
+      "mean": 955.12,
+      "min": 578,
+      "max": 1388
+    },
+    "success": {
+      "median": 944.5,
+      "mean": 938.64,
+      "std": 177.3423536552958,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_vegetable__s1": {
+        "median": 36.0,
+        "mean": 37.9,
+        "std": 12.135485157174394,
+        "min": 20,
+        "max": 73,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable__s3": {
+        "median": 88.5,
+        "mean": 89.11,
+        "std": 23.131318596223604,
+        "min": 45,
+        "max": 145,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable__s6": {
+        "median": 124.0,
+        "mean": 134.77,
+        "std": 53.70993483518668,
+        "min": 62,
+        "max": 342,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg_in_bowl__s5": {
+        "median": 233.5,
+        "mean": 238.73,
+        "std": 54.49547779403351,
+        "min": 137,
+        "max": 380,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_bowl__s1": {
+        "median": 168.5,
+        "mean": 167.32,
+        "std": 56.519532906774806,
+        "min": 20,
+        "max": 284,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_bowl__s6": {
+        "median": 276.5,
+        "mean": 276.87,
+        "std": 61.543911965360145,
+        "min": 145,
+        "max": 475,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_micro__s1": {
+        "median": 320.0,
+        "mean": 327.5,
+        "std": 71.59504172776212,
+        "min": 181,
+        "max": 508,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_micro__s2": {
+        "median": 492.5,
+        "mean": 494.31,
+        "std": 88.74341609381509,
+        "min": 303,
+        "max": 712,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_micro__s3": {
+        "median": 530.0,
+        "mean": 530.42,
+        "std": 95.72566844895887,
+        "min": 330,
+        "max": 750,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_micro__s5": {
+        "median": 607.0,
+        "mean": 599.57,
+        "std": 102.25392461905803,
+        "min": 352,
+        "max": 821,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "door_half_closed__s1": {
+        "median": 769.0,
+        "mean": 753.61,
+        "std": 134.76638267758025,
+        "min": 438,
+        "max": 1094,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "door_half_closed__s6": {
+        "median": 802.5,
+        "mean": 796.2,
+        "std": 132.92907883529472,
+        "min": 493,
+        "max": 1124,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "door_closed__s6": {
+        "median": 824.0,
+        "mean": 815.96,
+        "std": 135.15583006293144,
+        "min": 509,
+        "max": 1149,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 36.0,
+          "mean": 37.9,
+          "std": 12.135485157174394,
+          "min": 20,
+          "max": 73,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s3",
+            "grasp_vegetable__s6",
+            "veg_in_bowl__s5"
+          ]
+        },
+        "1": {
+          "median": 50.0,
+          "mean": 51.21,
+          "std": 15.171878591657661,
+          "min": 24,
+          "max": 98,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s3",
+            "grasp_vegetable__s6",
+            "veg_in_bowl__s5"
+          ]
+        },
+        "2": {
+          "median": 29.5,
+          "mean": 45.66,
+          "std": 42.00314750110996,
+          "min": 5,
+          "max": 205,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s3",
+            "grasp_vegetable__s6",
+            "veg_in_bowl__s5"
+          ]
+        },
+        "3": {
+          "median": 110.0,
+          "mean": 103.96,
+          "std": 47.76063651167141,
+          "min": 0,
+          "max": 230,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s3",
+            "grasp_vegetable__s6",
+            "veg_in_bowl__s5"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 68.0,
+          "mean": 65.15,
+          "std": 32.815049900921984,
+          "min": 0,
+          "max": 156,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s1",
+            "grasp_bowl__s6",
+            "bowl_in_micro__s1",
+            "bowl_in_micro__s2",
+            "bowl_in_micro__s3",
+            "bowl_in_micro__s5"
+          ]
+        },
+        "1": {
+          "median": 20.0,
+          "mean": 71.14,
+          "std": 73.68310796919468,
+          "min": 6,
+          "max": 232,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s1",
+            "grasp_bowl__s6",
+            "bowl_in_micro__s1",
+            "bowl_in_micro__s2",
+            "bowl_in_micro__s3",
+            "bowl_in_micro__s5"
+          ]
+        },
+        "2": {
+          "median": 139.0,
+          "mean": 130.87,
+          "std": 66.6517299100331,
+          "min": 9,
+          "max": 259,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s1",
+            "grasp_bowl__s6",
+            "bowl_in_micro__s1",
+            "bowl_in_micro__s2",
+            "bowl_in_micro__s3",
+            "bowl_in_micro__s5"
+          ]
+        },
+        "3": {
+          "median": 38.0,
+          "mean": 44.94,
+          "std": 27.423282079284384,
+          "min": 8,
+          "max": 138,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s1",
+            "grasp_bowl__s6",
+            "bowl_in_micro__s1",
+            "bowl_in_micro__s2",
+            "bowl_in_micro__s3",
+            "bowl_in_micro__s5"
+          ]
+        },
+        "4": {
+          "median": 56.5,
+          "mean": 67.69444444444444,
+          "std": 35.85992768509506,
+          "min": 21,
+          "max": 171,
+          "n": 72,
+          "subtasks_in_stage": [
+            "grasp_bowl__s1",
+            "grasp_bowl__s6",
+            "bowl_in_micro__s1",
+            "bowl_in_micro__s2",
+            "bowl_in_micro__s3",
+            "bowl_in_micro__s5"
+          ]
+        },
+        "5": {
+          "median": 139.0,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "grasp_bowl__s1",
+            "grasp_bowl__s6",
+            "bowl_in_micro__s1",
+            "bowl_in_micro__s2",
+            "bowl_in_micro__s3",
+            "bowl_in_micro__s5"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 100.0,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "door_half_closed__s1",
+            "door_half_closed__s6",
+            "door_closed__s6"
+          ]
+        },
+        "1": {
+          "median": 100.0,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "door_half_closed__s1",
+            "door_half_closed__s6",
+            "door_closed__s6"
+          ]
+        },
+        "2": {
+          "median": 100.0,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "door_half_closed__s1",
+            "door_half_closed__s6",
+            "door_closed__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 119.0,
+      "mean": 122.68,
+      "std": 55.80302500761048,
+      "min": 38,
+      "max": 285,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "StirVegetables": {
+    "task": "StirVegetables",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 788.0,
+      "mean": 818.52,
+      "min": 481,
+      "max": 1558
+    },
+    "success": {
+      "median": 757.0,
+      "mean": 788.7894736842105,
+      "std": 208.94032866306173,
+      "n_success": 95,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_veg1__s1": {
+        "median": 33.0,
+        "mean": 45.38,
+        "std": 44.75528572135363,
+        "min": 16,
+        "max": 272,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_veg1__s6": {
+        "median": 114.0,
+        "mean": 172.1,
+        "std": 106.59272958321313,
+        "min": 55,
+        "max": 482,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg1_in_pot__s3": {
+        "median": 170.0,
+        "mean": 225.18,
+        "std": 109.1997600729965,
+        "min": 88,
+        "max": 494,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg1_in_pot__s5": {
+        "median": 217.0,
+        "mean": 267.41,
+        "std": 114.72786017354285,
+        "min": 118,
+        "max": 562,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_veg2__s6": {
+        "median": 265.5,
+        "mean": 257.26,
+        "std": 134.4164141762456,
+        "min": 56,
+        "max": 744,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg2_in_pot__s5": {
+        "median": 337.5,
+        "mean": 349.19,
+        "std": 141.34084300017457,
+        "min": 126,
+        "max": 744,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "spatula_grasped__s6": {
+        "median": 526.5,
+        "mean": 550.01,
+        "std": 147.0601574186564,
+        "min": 237,
+        "max": 1112,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "stir_t1__s1": {
+        "median": 576.5,
+        "mean": 613.7,
+        "std": 167.5094922683488,
+        "min": 330,
+        "max": 1289,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "stir_t1__s3": {
+        "median": 630.5,
+        "mean": 671.25,
+        "std": 182.46881240365434,
+        "min": 403,
+        "max": 1433,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "stir_t1__s5": {
+        "median": 673.5,
+        "mean": 703.5,
+        "std": 204.5530982410191,
+        "min": 109,
+        "max": 1470,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "stir_t1__s6": {
+        "median": 712.5,
+        "mean": 745.54,
+        "std": 198.838548576477,
+        "min": 444,
+        "max": 1471,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "stir_t3__s6": {
+        "median": 742.0,
+        "mean": 769.3737373737374,
+        "std": 203.27463563389466,
+        "min": 463,
+        "max": 1539,
+        "coverage": 0.99,
+        "n": 99
+      },
+      "task_complete__s5": {
+        "median": 757.0,
+        "mean": 788.7894736842105,
+        "std": 208.94032866306173,
+        "min": 467,
+        "max": 1541,
+        "coverage": 0.95,
+        "n": 95
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 33.0,
+          "mean": 38.87,
+          "std": 20.292685874472113,
+          "min": 16,
+          "max": 103,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s1",
+            "grasp_veg1__s6",
+            "veg1_in_pot__s3",
+            "veg1_in_pot__s5",
+            "grasp_veg2__s6",
+            "veg2_in_pot__s5"
+          ]
+        },
+        "1": {
+          "median": 67.0,
+          "mean": 72.75,
+          "std": 28.541329681708945,
+          "min": 35,
+          "max": 225,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s1",
+            "grasp_veg1__s6",
+            "veg1_in_pot__s3",
+            "veg1_in_pot__s5",
+            "grasp_veg2__s6",
+            "veg2_in_pot__s5"
+          ]
+        },
+        "2": {
+          "median": 58.0,
+          "mean": 61.29,
+          "std": 31.93690498467251,
+          "min": 0,
+          "max": 156,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s1",
+            "grasp_veg1__s6",
+            "veg1_in_pot__s3",
+            "veg1_in_pot__s5",
+            "grasp_veg2__s6",
+            "veg2_in_pot__s5"
+          ]
+        },
+        "3": {
+          "median": 46.0,
+          "mean": 62.02,
+          "std": 40.65021033155917,
+          "min": 0,
+          "max": 191,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s1",
+            "grasp_veg1__s6",
+            "veg1_in_pot__s3",
+            "veg1_in_pot__s5",
+            "grasp_veg2__s6",
+            "veg2_in_pot__s5"
+          ]
+        },
+        "4": {
+          "median": 92.5,
+          "mean": 106.68,
+          "std": 65.59159702278943,
+          "min": 22,
+          "max": 440,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s1",
+            "grasp_veg1__s6",
+            "veg1_in_pot__s3",
+            "veg1_in_pot__s5",
+            "grasp_veg2__s6",
+            "veg2_in_pot__s5"
+          ]
+        },
+        "5": {
+          "median": 70.5,
+          "mean": 74.97,
+          "std": 50.69565168729957,
+          "min": 0,
+          "max": 262,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s1",
+            "grasp_veg1__s6",
+            "veg1_in_pot__s3",
+            "veg1_in_pot__s5",
+            "grasp_veg2__s6",
+            "veg2_in_pot__s5"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 134.0,
+          "mean": 140.24742268041237,
+          "std": 53.19988197177727,
+          "min": 63,
+          "max": 368,
+          "n": 97,
+          "subtasks_in_stage": [
+            "spatula_grasped__s6"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 55.0,
+          "mean": 58.49484536082474,
+          "std": 41.58040867765526,
+          "min": 0,
+          "max": 192,
+          "n": 97,
+          "subtasks_in_stage": [
+            "stir_t1__s1",
+            "stir_t1__s3",
+            "stir_t1__s5",
+            "stir_t1__s6",
+            "stir_t3__s6"
+          ]
+        },
+        "1": {
+          "median": 50.0,
+          "mean": 57.72164948453608,
+          "std": 39.361853496516936,
+          "min": 10,
+          "max": 233,
+          "n": 97,
+          "subtasks_in_stage": [
+            "stir_t1__s1",
+            "stir_t1__s3",
+            "stir_t1__s5",
+            "stir_t1__s6",
+            "stir_t3__s6"
+          ]
+        },
+        "2": {
+          "median": 36.0,
+          "mean": 42.597938144329895,
+          "std": 29.043749365260165,
+          "min": 2,
+          "max": 204,
+          "n": 97,
+          "subtasks_in_stage": [
+            "stir_t1__s1",
+            "stir_t1__s3",
+            "stir_t1__s5",
+            "stir_t1__s6",
+            "stir_t3__s6"
+          ]
+        },
+        "3": {
+          "median": 12.0,
+          "mean": 30.783505154639176,
+          "std": 39.78686173971672,
+          "min": 0,
+          "max": 189,
+          "n": 97,
+          "subtasks_in_stage": [
+            "stir_t1__s1",
+            "stir_t1__s3",
+            "stir_t1__s5",
+            "stir_t1__s6",
+            "stir_t3__s6"
+          ]
+        },
+        "4": {
+          "median": 4.0,
+          "mean": 19.621052631578948,
+          "std": 36.59570839014019,
+          "min": 2,
+          "max": 214,
+          "n": 95,
+          "subtasks_in_stage": [
+            "stir_t1__s1",
+            "stir_t1__s3",
+            "stir_t1__s5",
+            "stir_t1__s6",
+            "stir_t3__s6"
+          ]
+        }
+      },
+      "3": {
+        "0": {
+          "median": 3.0,
+          "mean": 25.802197802197803,
+          "std": 59.58542114269297,
+          "min": 2,
+          "max": 316,
+          "n": 91,
+          "subtasks_in_stage": [
+            "task_complete__s5"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 0.0,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0,
+      "max": 0,
+      "n": 95
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "StoreLeftoversInBowl": {
+    "task": "StoreLeftoversInBowl",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 777.5,
+      "mean": 759.7,
+      "min": 434,
+      "max": 1007
+    },
+    "success": {
+      "median": 760.5,
+      "mean": 742.85,
+      "std": 107.20348641718702,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_chicken__s1": {
+        "median": 177.5,
+        "mean": 172.19,
+        "std": 69.16193967783147,
+        "min": 26,
+        "max": 342,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_chicken__s2": {
+        "median": 216.5,
+        "mean": 206.19,
+        "std": 70.01124124024655,
+        "min": 37,
+        "max": 354,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_chicken__s6": {
+        "median": 266.5,
+        "mean": 265.52,
+        "std": 85.85854412928278,
+        "min": 82,
+        "max": 526,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "chicken_in_bowl__s5": {
+        "median": 344.0,
+        "mean": 353.88,
+        "std": 83.14544846231811,
+        "min": 141,
+        "max": 548,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable__s1": {
+        "median": 18.0,
+        "mean": 38.64,
+        "std": 55.8124573908012,
+        "min": 0,
+        "max": 259,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable__s6": {
+        "median": 84.5,
+        "mean": 115.58,
+        "std": 84.17341385496967,
+        "min": 42,
+        "max": 438,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "vegetable_in_bowl__s5": {
+        "median": 143.5,
+        "mean": 169.41,
+        "std": 89.51928228041153,
+        "min": 82,
+        "max": 477,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_bowl__s6": {
+        "median": 396.0,
+        "mean": 354.2,
+        "std": 142.0970794914519,
+        "min": 97,
+        "max": 635,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_fridge__s1": {
+        "median": 459.0,
+        "mean": 450.88,
+        "std": 83.70642508194936,
+        "min": 242,
+        "max": 659,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_fridge__s2": {
+        "median": 614.5,
+        "mean": 605.4,
+        "std": 101.39023621631426,
+        "min": 332,
+        "max": 838,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_fridge__s4": {
+        "median": 667.0,
+        "mean": 655.93,
+        "std": 99.03093001683868,
+        "min": 351,
+        "max": 888,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_fridge__s6": {
+        "median": 718.0,
+        "mean": 703.58,
+        "std": 104.52322038666814,
+        "min": 390,
+        "max": 949,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 18.0,
+          "mean": 23.19,
+          "std": 17.176550876121784,
+          "min": 0,
+          "max": 80,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s1",
+            "grasp_chicken__s2",
+            "grasp_chicken__s6",
+            "chicken_in_bowl__s5",
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s6",
+            "vegetable_in_bowl__s5"
+          ]
+        },
+        "1": {
+          "median": 57.5,
+          "mean": 61.76,
+          "std": 29.03174813889098,
+          "min": 8,
+          "max": 154,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s1",
+            "grasp_chicken__s2",
+            "grasp_chicken__s6",
+            "chicken_in_bowl__s5",
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s6",
+            "vegetable_in_bowl__s5"
+          ]
+        },
+        "2": {
+          "median": 51.0,
+          "mean": 48.71,
+          "std": 23.89321870322205,
+          "min": 0,
+          "max": 146,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s1",
+            "grasp_chicken__s2",
+            "grasp_chicken__s6",
+            "chicken_in_bowl__s5",
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s6",
+            "vegetable_in_bowl__s5"
+          ]
+        },
+        "3": {
+          "median": 57.5,
+          "mean": 59.24,
+          "std": 39.03232506525841,
+          "min": 0,
+          "max": 172,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s1",
+            "grasp_chicken__s2",
+            "grasp_chicken__s6",
+            "chicken_in_bowl__s5",
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s6",
+            "vegetable_in_bowl__s5"
+          ]
+        },
+        "4": {
+          "median": 17.0,
+          "mean": 31.93,
+          "std": 29.558503006749174,
+          "min": 8,
+          "max": 133,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s1",
+            "grasp_chicken__s2",
+            "grasp_chicken__s6",
+            "chicken_in_bowl__s5",
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s6",
+            "vegetable_in_bowl__s5"
+          ]
+        },
+        "5": {
+          "median": 51.0,
+          "mean": 64.41,
+          "std": 41.62717742052661,
+          "min": 25,
+          "max": 261,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s1",
+            "grasp_chicken__s2",
+            "grasp_chicken__s6",
+            "chicken_in_bowl__s5",
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s6",
+            "vegetable_in_bowl__s5"
+          ]
+        },
+        "6": {
+          "median": 82.0,
+          "mean": 83.4,
+          "std": 36.16351752802816,
+          "min": 0,
+          "max": 175,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s1",
+            "grasp_chicken__s2",
+            "grasp_chicken__s6",
+            "chicken_in_bowl__s5",
+            "grasp_vegetable__s1",
+            "grasp_vegetable__s6",
+            "vegetable_in_bowl__s5"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 65.0,
+          "mean": 64.89,
+          "std": 25.978027253815867,
+          "min": 0,
+          "max": 139,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s6",
+            "bowl_in_fridge__s1",
+            "bowl_in_fridge__s2",
+            "bowl_in_fridge__s4",
+            "bowl_in_fridge__s6"
+          ]
+        },
+        "1": {
+          "median": 20.0,
+          "mean": 67.65,
+          "std": 76.13138314781888,
+          "min": 6,
+          "max": 293,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s6",
+            "bowl_in_fridge__s1",
+            "bowl_in_fridge__s2",
+            "bowl_in_fridge__s4",
+            "bowl_in_fridge__s6"
+          ]
+        },
+        "2": {
+          "median": 110.0,
+          "mean": 117.45,
+          "std": 67.22029083543154,
+          "min": 19,
+          "max": 291,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s6",
+            "bowl_in_fridge__s1",
+            "bowl_in_fridge__s2",
+            "bowl_in_fridge__s4",
+            "bowl_in_fridge__s6"
+          ]
+        },
+        "3": {
+          "median": 46.0,
+          "mean": 48.7,
+          "std": 22.451057881534222,
+          "min": 19,
+          "max": 125,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s6",
+            "bowl_in_fridge__s1",
+            "bowl_in_fridge__s2",
+            "bowl_in_fridge__s4",
+            "bowl_in_fridge__s6"
+          ]
+        },
+        "4": {
+          "median": 46.0,
+          "mean": 48.134328358208954,
+          "std": 16.46878143222291,
+          "min": 22,
+          "max": 118,
+          "n": 67,
+          "subtasks_in_stage": [
+            "grasp_bowl__s6",
+            "bowl_in_fridge__s1",
+            "bowl_in_fridge__s2",
+            "bowl_in_fridge__s4",
+            "bowl_in_fridge__s6"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 39.0,
+      "mean": 39.27,
+      "std": 10.842375201034134,
+      "min": 18,
+      "max": 89,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "WashLettuce": {
+    "task": "WashLettuce",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 466.5,
+      "mean": 477.63,
+      "min": 335,
+      "max": 1072
+    },
+    "success": {
+      "median": 450.5,
+      "mean": 461.61,
+      "std": 104.17829860388392,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "water_on__s1": {
+        "median": 15.0,
+        "mean": 18.12,
+        "std": 20.739469617133413,
+        "min": 0,
+        "max": 102,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s3": {
+        "median": 133.5,
+        "mean": 149.81,
+        "std": 52.34093904392622,
+        "min": 86,
+        "max": 412,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s4": {
+        "median": 138.0,
+        "mean": 153.5,
+        "std": 53.56575398517228,
+        "min": 86,
+        "max": 417,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s5": {
+        "median": 144.0,
+        "mean": 157.26,
+        "std": 54.830943818249196,
+        "min": 86,
+        "max": 423,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s6": {
+        "median": 166.0,
+        "mean": 178.69,
+        "std": 52.802593686295374,
+        "min": 101,
+        "max": 429,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "lettuce_under_water__s3": {
+        "median": 376.5,
+        "mean": 390.24,
+        "std": 100.858625808604,
+        "min": 104,
+        "max": 927,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "lettuce_under_water__s4": {
+        "median": 410.0,
+        "mean": 418.89,
+        "std": 106.07571776801701,
+        "min": 124,
+        "max": 1019,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "lettuce_under_water__s6": {
+        "median": 426.5,
+        "mean": 437.15,
+        "std": 104.09422414332123,
+        "min": 295,
+        "max": 1032,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "wash_t5__s5": {
+        "median": 430.5,
+        "mean": 441.15,
+        "std": 104.09422414332123,
+        "min": 299,
+        "max": 1036,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "wash_t10__s5": {
+        "median": 435.5,
+        "mean": 446.41,
+        "std": 104.25575235928231,
+        "min": 304,
+        "max": 1041,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "wash_t15__s5": {
+        "median": 440.5,
+        "mean": 451.54,
+        "std": 104.17969283886374,
+        "min": 309,
+        "max": 1046,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "wash_t20__s5": {
+        "median": 445.5,
+        "mean": 456.54,
+        "std": 104.17969283886374,
+        "min": 314,
+        "max": 1051,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "task_complete__s5": {
+        "median": 450.5,
+        "mean": 461.61,
+        "std": 104.17829860388392,
+        "min": 319,
+        "max": 1056,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 15.0,
+          "mean": 18.12,
+          "std": 20.739469617133413,
+          "min": 0,
+          "max": 102,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5",
+            "water_on__s6"
+          ]
+        },
+        "1": {
+          "median": 122.5,
+          "mean": 131.69,
+          "std": 43.98242717267887,
+          "min": 63,
+          "max": 322,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5",
+            "water_on__s6"
+          ]
+        },
+        "2": {
+          "median": 4.0,
+          "mean": 3.69,
+          "std": 3.722082750289144,
+          "min": 0,
+          "max": 23,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5",
+            "water_on__s6"
+          ]
+        },
+        "3": {
+          "median": 4.0,
+          "mean": 3.76,
+          "std": 3.552801711325866,
+          "min": 0,
+          "max": 15,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5",
+            "water_on__s6"
+          ]
+        },
+        "4": {
+          "median": 5.0,
+          "mean": 21.43,
+          "std": 22.914735433777103,
+          "min": 1,
+          "max": 76,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s1",
+            "water_on__s3",
+            "water_on__s4",
+            "water_on__s5",
+            "water_on__s6"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 199.5,
+          "mean": 214.23,
+          "std": 64.07633806640327,
+          "min": 0,
+          "max": 498,
+          "n": 100,
+          "subtasks_in_stage": [
+            "lettuce_under_water__s3",
+            "lettuce_under_water__s4",
+            "lettuce_under_water__s6"
+          ]
+        },
+        "1": {
+          "median": 25.0,
+          "mean": 28.737373737373737,
+          "std": 13.731616440624958,
+          "min": 12,
+          "max": 92,
+          "n": 99,
+          "subtasks_in_stage": [
+            "lettuce_under_water__s3",
+            "lettuce_under_water__s4",
+            "lettuce_under_water__s6"
+          ]
+        },
+        "2": {
+          "median": 12.0,
+          "mean": 15.93939393939394,
+          "std": 13.70454336063773,
+          "min": 3,
+          "max": 78,
+          "n": 99,
+          "subtasks_in_stage": [
+            "lettuce_under_water__s3",
+            "lettuce_under_water__s4",
+            "lettuce_under_water__s6"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 4.0,
+          "mean": 4.0,
+          "std": 0.0,
+          "min": 4,
+          "max": 4,
+          "n": 99,
+          "subtasks_in_stage": [
+            "wash_t5__s5",
+            "wash_t10__s5",
+            "wash_t15__s5",
+            "wash_t20__s5"
+          ]
+        },
+        "1": {
+          "median": 5.0,
+          "mean": 5.262626262626263,
+          "std": 2.599867357089932,
+          "min": 5,
+          "max": 31,
+          "n": 99,
+          "subtasks_in_stage": [
+            "wash_t5__s5",
+            "wash_t10__s5",
+            "wash_t15__s5",
+            "wash_t20__s5"
+          ]
+        },
+        "2": {
+          "median": 5.0,
+          "mean": 5.1313131313131315,
+          "std": 1.299933678544966,
+          "min": 5,
+          "max": 18,
+          "n": 99,
+          "subtasks_in_stage": [
+            "wash_t5__s5",
+            "wash_t10__s5",
+            "wash_t15__s5",
+            "wash_t20__s5"
+          ]
+        },
+        "3": {
+          "median": 5.0,
+          "mean": 5.0,
+          "std": 0.0,
+          "min": 5,
+          "max": 5,
+          "n": 99,
+          "subtasks_in_stage": [
+            "wash_t5__s5",
+            "wash_t10__s5",
+            "wash_t15__s5",
+            "wash_t20__s5"
+          ]
+        }
+      },
+      "3": {
+        "0": {
+          "median": 5.0,
+          "mean": 5.070707070707071,
+          "std": 0.6999642884472894,
+          "min": 5,
+          "max": 12,
+          "n": 99,
+          "subtasks_in_stage": [
+            "task_complete__s5"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 0.0,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0,
+      "max": 0,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-x10/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  }
+}

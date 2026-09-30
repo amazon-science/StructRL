@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# upstream checkouts and environments created by scripts/setup_upstream.sh
+/RLinf/
+/robocasa/
+/robosuite/
+/Isaac-GR00T/
+/openpi/
+/LIBERO/
+/libero_rl/
+/.venv*/
+
+# data, checkpoints and outputs
+/datasets/
+/ckpts/
+/eval_out/
+/density/overlays/
+**/logs/*
+!/logs/.gitkeep
+**/eval_out/
+*.mp4
+MUJOCO_LOG.TXT

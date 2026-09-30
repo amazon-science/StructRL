@@ -1,0 +1,1315 @@
+{
+  "DeliverStraw": {
+    "task": "DeliverStraw",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 846.5,
+      "mean": 867.81,
+      "min": 640,
+      "max": 1308
+    },
+    "success": {
+      "median": 830.5,
+      "mean": 851.13,
+      "std": 134.4753996089991,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "gripper_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "straw_in_glass_cup": {
+        "median": 743.5,
+        "mean": 763.88,
+        "std": 125.15264919289564,
+        "min": 573,
+        "max": 1236,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 743.5,
+          "mean": 763.88,
+          "std": 125.15264919289564,
+          "min": 573,
+          "max": 1236,
+          "n": 100,
+          "subtasks_in_stage": [
+            "straw_in_glass_cup"
+          ]
+        }
+      },
+      "1": {}
+    }
+  },
+  "GetToastedBread": {
+    "task": "GetToastedBread",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 1296.5,
+      "mean": 1315.14,
+      "min": 1122,
+      "max": 1951
+    },
+    "success": {
+      "median": 1274.5,
+      "mean": 1299.388888888889,
+      "std": 142.12900591008034,
+      "n_success": 72,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "gripper_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "toast_on_plate": {
+        "median": 1225.5,
+        "mean": 1244.57,
+        "std": 125.33038378621522,
+        "min": 1048,
+        "max": 1861,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "toaster_on": {
+        "median": 96.5,
+        "mean": 101.125,
+        "std": 24.33615137791695,
+        "min": 63,
+        "max": 187,
+        "coverage": 0.72,
+        "n": 72
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 96.5,
+          "mean": 101.125,
+          "std": 24.33615137791695,
+          "min": 63,
+          "max": 187,
+          "n": 72,
+          "subtasks_in_stage": [
+            "toaster_on"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 1117.5,
+          "mean": 1143.8472222222222,
+          "std": 128.10994190345326,
+          "min": 928,
+          "max": 1753,
+          "n": 72,
+          "subtasks_in_stage": [
+            "toast_on_plate"
+          ]
+        }
+      },
+      "2": {}
+    }
+  },
+  "KettleBoiling": {
+    "task": "KettleBoiling",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 443.5,
+      "mean": 449.47,
+      "min": 289,
+      "max": 825
+    },
+    "success": {
+      "median": 427.5,
+      "mean": 433.47,
+      "std": 103.10988846856542,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "gripper_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_active_burner": {
+        "median": 415.0,
+        "mean": 417.19,
+        "std": 106.32522701598148,
+        "min": 210,
+        "max": 809,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_stove": {
+        "median": 210.5,
+        "mean": 213.13,
+        "std": 51.94721455477666,
+        "min": 119,
+        "max": 355,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 210.5,
+          "mean": 213.13,
+          "std": 51.94721455477666,
+          "min": 119,
+          "max": 355,
+          "n": 100,
+          "subtasks_in_stage": [
+            "kettle_on_stove"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 192.5,
+          "mean": 204.06,
+          "std": 77.56375700028977,
+          "min": 90,
+          "max": 509,
+          "n": 100,
+          "subtasks_in_stage": [
+            "kettle_on_active_burner"
+          ]
+        }
+      },
+      "2": {}
+    }
+  },
+  "LoadDishwasher": {
+    "task": "LoadDishwasher",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 713.0,
+      "mean": 753.7,
+      "min": 480,
+      "max": 1326
+    },
+    "success": {
+      "median": 697.0,
+      "mean": 737.15,
+      "std": 167.55604286327605,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "dish0_on_rack": {
+        "median": 305.5,
+        "mean": 357.48,
+        "std": 151.82618219529857,
+        "min": 162,
+        "max": 921,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dish1_on_rack": {
+        "median": 412.5,
+        "mean": 414.26,
+        "std": 161.3332960055053,
+        "min": 162,
+        "max": 836,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dishwasher_closed": {
+        "median": 696.5,
+        "mean": 737.1,
+        "std": 167.56667329752656,
+        "min": 464,
+        "max": 1310,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 244.0,
+          "mean": 257.39,
+          "std": 65.91159154503856,
+          "min": 162,
+          "max": 499,
+          "n": 100,
+          "subtasks_in_stage": [
+            "dish0_on_rack",
+            "dish1_on_rack"
+          ]
+        },
+        "1": {
+          "median": 247.5,
+          "mean": 256.96,
+          "std": 69.54781376865847,
+          "min": 125,
+          "max": 451,
+          "n": 100,
+          "subtasks_in_stage": [
+            "dish0_on_rack",
+            "dish1_on_rack"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 196.0,
+          "mean": 222.75,
+          "std": 81.96723430737431,
+          "min": 101,
+          "max": 489,
+          "n": 100,
+          "subtasks_in_stage": [
+            "dishwasher_closed"
+          ]
+        }
+      }
+    }
+  },
+  "PackIdenticalLunches": {
+    "task": "PackIdenticalLunches",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 1427.0,
+      "mean": 1425.54,
+      "min": 838,
+      "max": 2286
+    },
+    "success": {
+      "median": 1411.0,
+      "mean": 1408.24,
+      "std": 276.77424446649655,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "gripper_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "tupper0_complete": {
+        "median": 1124.0,
+        "mean": 1065.12,
+        "std": 378.54849834598474,
+        "min": 368,
+        "max": 2070,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "tupper1_complete": {
+        "median": 863.5,
+        "mean": 1019.34,
+        "std": 444.81210010520175,
+        "min": 420,
+        "max": 2228,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 664.0,
+          "mean": 700.36,
+          "std": 181.97524666833124,
+          "min": 368,
+          "max": 1385,
+          "n": 100,
+          "subtasks_in_stage": [
+            "tupper0_complete",
+            "tupper1_complete"
+          ]
+        },
+        "1": {
+          "median": 743.5,
+          "mean": 683.74,
+          "std": 234.65496457565098,
+          "min": 222,
+          "max": 1156,
+          "n": 100,
+          "subtasks_in_stage": [
+            "tupper0_complete",
+            "tupper1_complete"
+          ]
+        }
+      },
+      "1": {}
+    }
+  },
+  "PreSoakPan": {
+    "task": "PreSoakPan",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 747.5,
+      "mean": 768.44,
+      "min": 479,
+      "max": 1442
+    },
+    "success": {
+      "median": 731.5,
+      "mean": 752.44,
+      "std": 147.05905752451972,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "gripper_far_pan": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "gripper_far_sponge": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_in_sink": {
+        "median": 185.0,
+        "mean": 228.19,
+        "std": 132.13528635455407,
+        "min": 113,
+        "max": 757,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "sponge_in_sink": {
+        "median": 412.0,
+        "mean": 388.11,
+        "std": 134.22562311272762,
+        "min": 0,
+        "max": 646,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on": {
+        "median": 731.5,
+        "mean": 752.44,
+        "std": 147.05905752451972,
+        "min": 463,
+        "max": 1426,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 178.0,
+          "mean": 180.03,
+          "std": 76.36994893280996,
+          "min": 0,
+          "max": 612,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on",
+            "pan_in_sink",
+            "sponge_in_sink"
+          ]
+        },
+        "1": {
+          "median": 239.5,
+          "mean": 256.24,
+          "std": 79.49177567522315,
+          "min": 26,
+          "max": 559,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on",
+            "pan_in_sink",
+            "sponge_in_sink"
+          ]
+        },
+        "2": {
+          "median": 295.5,
+          "mean": 316.17,
+          "std": 108.57302197139029,
+          "min": 142,
+          "max": 1000,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on",
+            "pan_in_sink",
+            "sponge_in_sink"
+          ]
+        }
+      },
+      "1": {}
+    }
+  },
+  "PrepareCoffee": {
+    "task": "PrepareCoffee",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 548.5,
+      "mean": 560.51,
+      "min": 316,
+      "max": 1092
+    },
+    "success": {
+      "median": 532.5,
+      "mean": 544.47,
+      "std": 143.12843567928772,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "gripper_button_far": {
+        "median": 0.0,
+        "mean": 0.17,
+        "std": 1.1920989891783313,
+        "min": 0,
+        "max": 9,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "gripper_obj_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "machine_turned_on": {
+        "median": 490.5,
+        "mean": 498.81,
+        "std": 128.60285338980623,
+        "min": 275,
+        "max": 993,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "mug_at_machine": {
+        "median": 300.0,
+        "mean": 310.69,
+        "std": 79.33431729081684,
+        "min": 147,
+        "max": 603,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 300.0,
+          "mean": 310.69,
+          "std": 79.33431729081684,
+          "min": 147,
+          "max": 603,
+          "n": 100,
+          "subtasks_in_stage": [
+            "mug_at_machine"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 177.5,
+          "mean": 188.12,
+          "std": 68.02033225440758,
+          "min": 60,
+          "max": 390,
+          "n": 100,
+          "subtasks_in_stage": [
+            "machine_turned_on"
+          ]
+        }
+      },
+      "2": {}
+    }
+  },
+  "RinseSinkBasin": {
+    "task": "RinseSinkBasin",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 402.0,
+      "mean": 402.83,
+      "min": 227,
+      "max": 661
+    },
+    "success": {
+      "median": 386.0,
+      "mean": 386.83,
+      "std": 80.66462111731512,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "washed_center": {
+        "median": 156.5,
+        "mean": 162.54,
+        "std": 38.395682048897115,
+        "min": 93,
+        "max": 283,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "washed_left": {
+        "median": 314.5,
+        "mean": 316.0,
+        "std": 72.30269704513104,
+        "min": 169,
+        "max": 475,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "washed_right": {
+        "median": 359.5,
+        "mean": 366.59,
+        "std": 88.44423045060655,
+        "min": 212,
+        "max": 646,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 156.5,
+          "mean": 162.54,
+          "std": 38.395682048897115,
+          "min": 93,
+          "max": 283,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left",
+            "washed_center",
+            "washed_right"
+          ]
+        },
+        "1": {
+          "median": 131.0,
+          "mean": 132.22,
+          "std": 31.830984904649114,
+          "min": 50,
+          "max": 239,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left",
+            "washed_center",
+            "washed_right"
+          ]
+        },
+        "2": {
+          "median": 80.5,
+          "mean": 93.07,
+          "std": 46.341397259901434,
+          "min": 40,
+          "max": 282,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left",
+            "washed_center",
+            "washed_right"
+          ]
+        }
+      }
+    }
+  },
+  "ScrubCuttingBoard": {
+    "task": "ScrubCuttingBoard",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 429.5,
+      "mean": 452.34,
+      "min": 263,
+      "max": 801
+    },
+    "success": {
+      "median": 414.5,
+      "mean": 439.01063829787233,
+      "std": 124.38183272632115,
+      "n_success": 94,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "contact_5steps": {
+        "median": 257.5,
+        "mean": 278.2340425531915,
+        "std": 88.6746894171738,
+        "min": 114,
+        "max": 644,
+        "coverage": 0.94,
+        "n": 94
+      },
+      "gripper_sponge_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "sweep_range_0p1m": {
+        "median": 215.0,
+        "mean": 232.76,
+        "std": 80.69301332829255,
+        "min": 98,
+        "max": 595,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 215.0,
+          "mean": 232.58,
+          "std": 80.43086223583583,
+          "min": 98,
+          "max": 595,
+          "n": 100,
+          "subtasks_in_stage": [
+            "contact_5steps",
+            "sweep_range_0p1m"
+          ]
+        },
+        "1": {
+          "median": 36.5,
+          "mean": 49.180851063829785,
+          "std": 50.12388116562281,
+          "min": 0,
+          "max": 250,
+          "n": 94,
+          "subtasks_in_stage": [
+            "contact_5steps",
+            "sweep_range_0p1m"
+          ]
+        }
+      },
+      "1": {}
+    }
+  },
+  "SearingMeat": {
+    "task": "SearingMeat",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 865.0,
+      "mean": 871.32,
+      "min": 507,
+      "max": 1305
+    },
+    "success": {
+      "median": 849.0,
+      "mean": 854.04,
+      "std": 182.8940086498188,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "gripper_meat_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat_in_pan": {
+        "median": 642.5,
+        "mean": 634.25,
+        "std": 123.65584296748779,
+        "min": 377,
+        "max": 897,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_on_active_knob": {
+        "median": 840.5,
+        "mean": 842.21,
+        "std": 184.74686979756925,
+        "min": 463,
+        "max": 1288,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 642.5,
+          "mean": 634.25,
+          "std": 123.65584296748779,
+          "min": 377,
+          "max": 897,
+          "n": 100,
+          "subtasks_in_stage": [
+            "meat_in_pan"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 194.5,
+          "mean": 207.96,
+          "std": 92.05269360534759,
+          "min": 83,
+          "max": 429,
+          "n": 100,
+          "subtasks_in_stage": [
+            "pan_on_active_knob"
+          ]
+        }
+      },
+      "2": {}
+    }
+  },
+  "SetUpCuttingStation": {
+    "task": "SetUpCuttingStation",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 630.5,
+      "mean": 659.24,
+      "min": 369,
+      "max": 1157
+    },
+    "success": {
+      "median": 612.0,
+      "mean": 641.55,
+      "std": 175.56960870264535,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "gripper_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "knife_on_board": {
+        "median": 385.5,
+        "mean": 394.68,
+        "std": 106.40384203589642,
+        "min": 200,
+        "max": 703,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat_on_board": {
+        "median": 592.0,
+        "mean": 618.62,
+        "std": 172.93876257218915,
+        "min": 331,
+        "max": 1117,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 385.5,
+          "mean": 394.68,
+          "std": 106.40384203589642,
+          "min": 200,
+          "max": 703,
+          "n": 100,
+          "subtasks_in_stage": [
+            "meat_on_board",
+            "knife_on_board"
+          ]
+        },
+        "1": {
+          "median": 182.0,
+          "mean": 223.94,
+          "std": 114.56847908565427,
+          "min": 102,
+          "max": 672,
+          "n": 100,
+          "subtasks_in_stage": [
+            "meat_on_board",
+            "knife_on_board"
+          ]
+        }
+      },
+      "1": {}
+    }
+  },
+  "StackBowlsCabinet": {
+    "task": "StackBowlsCabinet",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 323.5,
+      "mean": 340.27,
+      "min": 218,
+      "max": 698
+    },
+    "success": {
+      "median": 307.5,
+      "mean": 324.25,
+      "std": 86.92345770849201,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "any_bowl_in_cabinet": {
+        "median": 257.0,
+        "mean": 277.24,
+        "std": 69.50411786362014,
+        "min": 168,
+        "max": 501,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowls_stacked": {
+        "median": 140.5,
+        "mean": 154.55,
+        "std": 67.67663924870973,
+        "min": 88,
+        "max": 624,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "gripper_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 140.5,
+          "mean": 154.55,
+          "std": 67.67663924870973,
+          "min": 88,
+          "max": 624,
+          "n": 100,
+          "subtasks_in_stage": [
+            "bowls_stacked"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 121.5,
+          "mean": 131.74489795918367,
+          "std": 39.80111556853391,
+          "min": 74,
+          "max": 271,
+          "n": 98,
+          "subtasks_in_stage": [
+            "any_bowl_in_cabinet"
+          ]
+        }
+      },
+      "2": {}
+    }
+  },
+  "SteamInMicrowave": {
+    "task": "SteamInMicrowave",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 963.5,
+      "mean": 955.12,
+      "min": 578,
+      "max": 1388
+    },
+    "success": {
+      "median": 944.5,
+      "mean": 938.64,
+      "std": 177.3423536552958,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "bowl_in_micro": {
+        "median": 607.0,
+        "mean": 599.57,
+        "std": 102.25392461905803,
+        "min": 352,
+        "max": 821,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "door_closed": {
+        "median": 824.0,
+        "mean": 815.96,
+        "std": 135.15583006293144,
+        "min": 509,
+        "max": 1149,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "microwave_on": {
+        "median": 944.5,
+        "mean": 938.64,
+        "std": 177.3423536552958,
+        "min": 562,
+        "max": 1372,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg_in_bowl": {
+        "median": 233.5,
+        "mean": 238.73,
+        "std": 54.49547779403351,
+        "min": 137,
+        "max": 380,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 233.5,
+          "mean": 238.73,
+          "std": 54.49547779403351,
+          "min": 137,
+          "max": 380,
+          "n": 100,
+          "subtasks_in_stage": [
+            "veg_in_bowl"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 369.0,
+          "mean": 360.84,
+          "std": 64.86890164015419,
+          "min": 202,
+          "max": 490,
+          "n": 100,
+          "subtasks_in_stage": [
+            "bowl_in_micro"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 217.0,
+          "mean": 216.39,
+          "std": 44.56161913575403,
+          "min": 129,
+          "max": 345,
+          "n": 100,
+          "subtasks_in_stage": [
+            "door_closed"
+          ]
+        }
+      }
+    }
+  },
+  "StirVegetables": {
+    "task": "StirVegetables",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 788.0,
+      "mean": 818.52,
+      "min": 481,
+      "max": 1558
+    },
+    "success": {
+      "median": 757.0,
+      "mean": 788.7894736842105,
+      "std": 208.94032866306173,
+      "n_success": 95,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "spatula_grasped": {
+        "median": 526.5,
+        "mean": 550.01,
+        "std": 147.0601574186564,
+        "min": 237,
+        "max": 1112,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "task_complete": {
+        "median": 757.0,
+        "mean": 788.7894736842105,
+        "std": 208.94032866306173,
+        "min": 467,
+        "max": 1541,
+        "coverage": 0.95,
+        "n": 95
+      },
+      "veg1_in_pot": {
+        "median": 217.0,
+        "mean": 267.41,
+        "std": 114.72786017354285,
+        "min": 118,
+        "max": 562,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg2_in_pot": {
+        "median": 337.5,
+        "mean": 349.19,
+        "std": 141.34084300017457,
+        "min": 126,
+        "max": 744,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 193.0,
+          "mean": 200.02,
+          "std": 46.48117468395135,
+          "min": 118,
+          "max": 427,
+          "n": 100,
+          "subtasks_in_stage": [
+            "veg1_in_pot",
+            "veg2_in_pot"
+          ]
+        },
+        "1": {
+          "median": 207.5,
+          "mean": 216.56,
+          "std": 70.70195471130907,
+          "min": 109,
+          "max": 448,
+          "n": 100,
+          "subtasks_in_stage": [
+            "veg1_in_pot",
+            "veg2_in_pot"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 134.0,
+          "mean": 140.24742268041237,
+          "std": 53.19988197177727,
+          "min": 63,
+          "max": 368,
+          "n": 97,
+          "subtasks_in_stage": [
+            "spatula_grasped"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 212.0,
+          "mean": 232.84782608695653,
+          "std": 99.01854621874683,
+          "min": 83,
+          "max": 468,
+          "n": 92,
+          "subtasks_in_stage": [
+            "task_complete"
+          ]
+        }
+      }
+    }
+  },
+  "StoreLeftoversInBowl": {
+    "task": "StoreLeftoversInBowl",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 777.5,
+      "mean": 759.7,
+      "min": 434,
+      "max": 1007
+    },
+    "success": {
+      "median": 760.5,
+      "mean": 742.85,
+      "std": 107.20348641718702,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "bowl_in_fridge": {
+        "median": 718.0,
+        "mean": 703.58,
+        "std": 104.52322038666814,
+        "min": 390,
+        "max": 949,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "chicken_in_bowl": {
+        "median": 344.0,
+        "mean": 353.88,
+        "std": 83.14544846231811,
+        "min": 141,
+        "max": 548,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "gripper_far": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "vegetable_in_bowl": {
+        "median": 143.5,
+        "mean": 169.41,
+        "std": 89.51928228041153,
+        "min": 82,
+        "max": 477,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 142.0,
+          "mean": 150.65,
+          "std": 44.94671845641236,
+          "min": 82,
+          "max": 299,
+          "n": 100,
+          "subtasks_in_stage": [
+            "chicken_in_bowl",
+            "vegetable_in_bowl"
+          ]
+        },
+        "1": {
+          "median": 213.0,
+          "mean": 221.99,
+          "std": 58.65245007670183,
+          "min": 87,
+          "max": 384,
+          "n": 100,
+          "subtasks_in_stage": [
+            "chicken_in_bowl",
+            "vegetable_in_bowl"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 328.5,
+          "mean": 330.94,
+          "std": 68.64777053918066,
+          "min": 159,
+          "max": 489,
+          "n": 100,
+          "subtasks_in_stage": [
+            "bowl_in_fridge"
+          ]
+        }
+      },
+      "2": {}
+    }
+  },
+  "WashLettuce": {
+    "task": "WashLettuce",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 466.5,
+      "mean": 477.63,
+      "min": 335,
+      "max": 1072
+    },
+    "success": {
+      "median": 450.5,
+      "mean": 461.61,
+      "std": 104.17829860388392,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "task_complete": {
+        "median": 450.5,
+        "mean": 461.61,
+        "std": 104.17829860388392,
+        "min": 319,
+        "max": 1056,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on": {
+        "median": 166.0,
+        "mean": 178.69,
+        "std": 52.802593686295374,
+        "min": 101,
+        "max": 429,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 166.0,
+          "mean": 178.69,
+          "std": 52.802593686295374,
+          "min": 101,
+          "max": 429,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 280.5,
+          "mean": 282.92,
+          "std": 72.49823170257328,
+          "min": 24,
+          "max": 627,
+          "n": 100,
+          "subtasks_in_stage": [
+            "task_complete"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,521 @@
+{
+  "KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it": {
+    "task": "KITCHEN_SCENE3_turn_on_the_stove_and_put_the_moka_pot_on_it",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "turnon",
+        "flat_stove_1"
+      ],
+      [
+        "on",
+        "moka_pot_1",
+        "flat_stove_1_cook_region"
+      ]
+    ],
+    "horizon": {
+      "median": 262.5,
+      "min": 219,
+      "max": 340
+    },
+    "success": {
+      "n_success": 50,
+      "n_total": 50,
+      "median": 250.5
+    },
+    "subtask_timing": {
+      "on moka_pot_1 flat_stove_1_cook_region": {
+        "median": 250.5,
+        "mean": 253.02,
+        "std": 27.089843115086513,
+        "min": 208,
+        "max": 329,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "turnon flat_stove_1": {
+        "median": 85.0,
+        "mean": 87.88,
+        "std": 9.920967694736236,
+        "min": 73,
+        "max": 113,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        85.0,
+        165.5
+      ]
+    ]
+  },
+  "KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it": {
+    "task": "KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "close",
+        "white_cabinet_1_bottom_region"
+      ],
+      [
+        "in",
+        "akita_black_bowl_1",
+        "white_cabinet_1_bottom_region"
+      ]
+    ],
+    "horizon": {
+      "median": 245.5,
+      "min": 199,
+      "max": 317
+    },
+    "success": {
+      "n_success": 50,
+      "n_total": 50,
+      "median": 234.5
+    },
+    "subtask_timing": {
+      "close white_cabinet_1_bottom_region": {
+        "median": 234.5,
+        "mean": 237.68,
+        "std": 23.854089796091575,
+        "min": 188,
+        "max": 306,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "in akita_black_bowl_1 white_cabinet_1_bottom_region": {
+        "median": 143.0,
+        "mean": 144.94,
+        "std": 13.285194767108235,
+        "min": 119,
+        "max": 200,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        143.0
+      ],
+      [
+        87.5
+      ]
+    ]
+  },
+  "KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it": {
+    "task": "KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "in",
+        "white_yellow_mug_1",
+        "microwave_1_heating_region"
+      ],
+      [
+        "close",
+        "microwave_1"
+      ]
+    ],
+    "horizon": {
+      "median": 300.5,
+      "min": 224,
+      "max": 449
+    },
+    "success": {
+      "n_success": 50,
+      "n_total": 50,
+      "median": 289.5
+    },
+    "subtask_timing": {
+      "close microwave_1": {
+        "median": 289.5,
+        "mean": 293.64,
+        "std": 46.59989699559432,
+        "min": 213,
+        "max": 438,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "in white_yellow_mug_1 microwave_1_heating_region": {
+        "median": 154.0,
+        "mean": 164.6,
+        "std": 33.22167966855379,
+        "min": 116,
+        "max": 268,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        154.0
+      ],
+      [
+        122.0
+      ]
+    ]
+  },
+  "KITCHEN_SCENE8_put_both_moka_pots_on_the_stove": {
+    "task": "KITCHEN_SCENE8_put_both_moka_pots_on_the_stove",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "on",
+        "moka_pot_1",
+        "flat_stove_1_cook_region"
+      ],
+      [
+        "on",
+        "moka_pot_2",
+        "flat_stove_1_cook_region"
+      ],
+      [
+        "turnon",
+        "flat_stove_1"
+      ]
+    ],
+    "horizon": {
+      "median": 408.5,
+      "min": 341,
+      "max": 517
+    },
+    "success": {
+      "n_success": 44,
+      "n_total": 50,
+      "median": 396.5
+    },
+    "subtask_timing": {
+      "on moka_pot_1 flat_stove_1_cook_region": {
+        "median": 396.5,
+        "mean": 402.32,
+        "std": 40.90498258158778,
+        "min": 330,
+        "max": 495,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "on moka_pot_2 flat_stove_1_cook_region": {
+        "median": 181.0,
+        "mean": 185.1304347826087,
+        "std": 20.23837153576492,
+        "min": 150,
+        "max": 237,
+        "coverage": 0.92,
+        "n_pre_satisfied": 0
+      },
+      "turnon flat_stove_1": {
+        "median": 0.0,
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0,
+        "max": 0,
+        "coverage": 1.0,
+        "n_pre_satisfied": 50
+      }
+    },
+    "rank_budgets": [
+      [
+        182.5,
+        206.5
+      ]
+    ]
+  },
+  "LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket": {
+    "task": "LIVING_ROOM_SCENE1_put_both_the_alphabet_soup_and_the_cream_cheese_box_in_the_basket",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "in",
+        "alphabet_soup_1",
+        "basket_1_contain_region"
+      ],
+      [
+        "in",
+        "cream_cheese_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "horizon": {
+      "median": 268.0,
+      "min": 219,
+      "max": 334
+    },
+    "success": {
+      "n_success": 50,
+      "n_total": 50,
+      "median": 257.0
+    },
+    "subtask_timing": {
+      "in alphabet_soup_1 basket_1_contain_region": {
+        "median": 127.5,
+        "mean": 130.04,
+        "std": 16.664885238128704,
+        "min": 105,
+        "max": 188,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "in cream_cheese_1 basket_1_contain_region": {
+        "median": 257.0,
+        "mean": 258.48,
+        "std": 25.685980611999224,
+        "min": 208,
+        "max": 323,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        127.5,
+        129.0
+      ]
+    ]
+  },
+  "LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket": {
+    "task": "LIVING_ROOM_SCENE2_put_both_the_alphabet_soup_and_the_tomato_sauce_in_the_basket",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "in",
+        "alphabet_soup_1",
+        "basket_1_contain_region"
+      ],
+      [
+        "in",
+        "tomato_sauce_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "horizon": {
+      "median": 285.5,
+      "min": 230,
+      "max": 388
+    },
+    "success": {
+      "n_success": 50,
+      "n_total": 50,
+      "median": 273.5
+    },
+    "subtask_timing": {
+      "in alphabet_soup_1 basket_1_contain_region": {
+        "median": 144.0,
+        "mean": 148.7,
+        "std": 26.580632046661343,
+        "min": 112,
+        "max": 214,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "in tomato_sauce_1 basket_1_contain_region": {
+        "median": 273.5,
+        "mean": 281.72,
+        "std": 34.8815366633983,
+        "min": 219,
+        "max": 367,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        144.0,
+        132.5
+      ]
+    ]
+  },
+  "LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket": {
+    "task": "LIVING_ROOM_SCENE2_put_both_the_cream_cheese_box_and_the_butter_in_the_basket",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "in",
+        "cream_cheese_1",
+        "basket_1_contain_region"
+      ],
+      [
+        "in",
+        "butter_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "horizon": {
+      "median": 255.0,
+      "min": 234,
+      "max": 322
+    },
+    "success": {
+      "n_success": 50,
+      "n_total": 50,
+      "median": 243.5
+    },
+    "subtask_timing": {
+      "in butter_1 basket_1_contain_region": {
+        "median": 243.5,
+        "mean": 248.32,
+        "std": 20.262714526933454,
+        "min": 219,
+        "max": 311,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "in cream_cheese_1 basket_1_contain_region": {
+        "median": 136.0,
+        "mean": 135.0,
+        "std": 8.21462111116514,
+        "min": 120,
+        "max": 160,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        136.0,
+        108.5
+      ]
+    ]
+  },
+  "LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate": {
+    "task": "LIVING_ROOM_SCENE5_put_the_white_mug_on_the_left_plate_and_put_the_yellow_and_white_mug_on_the_right_plate",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "on",
+        "porcelain_mug_1",
+        "plate_1"
+      ],
+      [
+        "on",
+        "white_yellow_mug_1",
+        "plate_2"
+      ]
+    ],
+    "horizon": {
+      "median": 258.0,
+      "min": 216,
+      "max": 331
+    },
+    "success": {
+      "n_success": 50,
+      "n_total": 50,
+      "median": 236.5
+    },
+    "subtask_timing": {
+      "on porcelain_mug_1 plate_1": {
+        "median": 103.5,
+        "mean": 105.56,
+        "std": 15.379414813314582,
+        "min": 79,
+        "max": 147,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "on white_yellow_mug_1 plate_2": {
+        "median": 236.5,
+        "mean": 238.52,
+        "std": 20.5380037978378,
+        "min": 205,
+        "max": 309,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        103.5,
+        129.5
+      ]
+    ]
+  },
+  "LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate": {
+    "task": "LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "on",
+        "porcelain_mug_1",
+        "plate_1"
+      ],
+      [
+        "on",
+        "chocolate_pudding_1",
+        "living_room_table_plate_right_region"
+      ]
+    ],
+    "horizon": {
+      "median": 249.0,
+      "min": 203,
+      "max": 342
+    },
+    "success": {
+      "n_success": 50,
+      "n_total": 50,
+      "median": 235.5
+    },
+    "subtask_timing": {
+      "on chocolate_pudding_1 living_room_table_plate_right_region": {
+        "median": 235.0,
+        "mean": 240.76,
+        "std": 31.246478201550968,
+        "min": 192,
+        "max": 331,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      },
+      "on porcelain_mug_1 plate_1": {
+        "median": 120.0,
+        "mean": 124.46,
+        "std": 25.86365016775475,
+        "min": 98,
+        "max": 275,
+        "coverage": 1.0,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        120.0,
+        109.0
+      ]
+    ]
+  },
+  "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy": {
+    "task": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy",
+    "n_episodes": 50,
+    "goal_state": [
+      [
+        "in",
+        "black_book_1",
+        "desk_caddy_1_back_contain_region"
+      ]
+    ],
+    "horizon": {
+      "median": 186.5,
+      "min": 150,
+      "max": 259
+    },
+    "success": {
+      "n_success": 49,
+      "n_total": 50,
+      "median": 174.0
+    },
+    "subtask_timing": {
+      "in black_book_1 desk_caddy_1_back_contain_region": {
+        "median": 174.0,
+        "mean": 177.0204081632653,
+        "std": 20.22373811902419,
+        "min": 139,
+        "max": 248,
+        "coverage": 0.98,
+        "n_pre_satisfied": 0
+      }
+    },
+    "rank_budgets": [
+      [
+        174.0
+      ]
+    ]
+  }
+}

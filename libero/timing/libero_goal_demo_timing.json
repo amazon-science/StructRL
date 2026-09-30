@@ -1,0 +1,248 @@
+{
+  "open_the_middle_drawer_of_the_cabinet": {
+    "goal_state": [
+      [
+        "open",
+        "wooden_cabinet_1_middle_region"
+      ]
+    ],
+    "stages": [
+      [
+        "open wooden_cabinet_1_middle_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        125.5
+      ]
+    ]
+  },
+  "open_the_top_drawer_and_put_the_bowl_inside": {
+    "goal_state": [
+      [
+        "in",
+        "akita_black_bowl_1",
+        "wooden_cabinet_1_top_region"
+      ]
+    ],
+    "stages": [
+      [
+        "open wooden_cabinet_1_top_region"
+      ],
+      [
+        "grasp akita_black_bowl_1"
+      ],
+      [
+        "in akita_black_bowl_1 wooden_cabinet_1_top_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        57.5
+      ],
+      [
+        74.0
+      ],
+      [
+        50.0
+      ]
+    ]
+  },
+  "push_the_plate_to_the_front_of_the_stove": {
+    "goal_state": [
+      [
+        "on",
+        "plate_1",
+        "main_table_stove_front_region"
+      ]
+    ],
+    "stages": [
+      [
+        "on plate_1 main_table_stove_front_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        134.5
+      ]
+    ]
+  },
+  "put_the_bowl_on_the_plate": {
+    "goal_state": [
+      [
+        "on",
+        "akita_black_bowl_1",
+        "plate_1"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp akita_black_bowl_1"
+      ],
+      [
+        "on akita_black_bowl_1 plate_1"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        50.0
+      ],
+      [
+        27.0
+      ]
+    ]
+  },
+  "put_the_bowl_on_the_stove": {
+    "goal_state": [
+      [
+        "on",
+        "akita_black_bowl_1",
+        "flat_stove_1_cook_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp akita_black_bowl_1"
+      ],
+      [
+        "on akita_black_bowl_1 flat_stove_1_cook_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        53.5
+      ],
+      [
+        34.0
+      ]
+    ]
+  },
+  "put_the_bowl_on_top_of_the_cabinet": {
+    "goal_state": [
+      [
+        "on",
+        "akita_black_bowl_1",
+        "wooden_cabinet_1_top_side"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp akita_black_bowl_1"
+      ],
+      [
+        "on akita_black_bowl_1 wooden_cabinet_1_top_side"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        45.0
+      ],
+      [
+        39.0
+      ]
+    ]
+  },
+  "put_the_cream_cheese_in_the_bowl": {
+    "goal_state": [
+      [
+        "on",
+        "cream_cheese_1",
+        "akita_black_bowl_1"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp cream_cheese_1"
+      ],
+      [
+        "on cream_cheese_1 akita_black_bowl_1"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        50.0
+      ],
+      [
+        40.5
+      ]
+    ]
+  },
+  "put_the_wine_bottle_on_the_rack": {
+    "goal_state": [
+      [
+        "on",
+        "wine_bottle_1",
+        "wine_rack_1_top_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp wine_bottle_1"
+      ],
+      [
+        "on wine_bottle_1 wine_rack_1_top_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        85.0
+      ],
+      [
+        60.5
+      ]
+    ]
+  },
+  "put_the_wine_bottle_on_top_of_the_cabinet": {
+    "goal_state": [
+      [
+        "on",
+        "wine_bottle_1",
+        "wooden_cabinet_1_top_side"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp wine_bottle_1"
+      ],
+      [
+        "on wine_bottle_1 wooden_cabinet_1_top_side"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        43.0
+      ],
+      [
+        48.0
+      ]
+    ]
+  },
+  "turn_on_the_stove": {
+    "goal_state": [
+      [
+        "turnon",
+        "flat_stove_1"
+      ]
+    ],
+    "stages": [
+      [
+        "turnon flat_stove_1"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        78.5
+      ]
+    ]
+  }
+}

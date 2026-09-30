@@ -1,0 +1,817 @@
+diff --git a/rlinf/algorithms/losses.py b/rlinf/algorithms/losses.py
+index d1fcdda8..351b4df4 100644
+--- a/rlinf/algorithms/losses.py
++++ b/rlinf/algorithms/losses.py
+@@ -370,11 +370,11 @@ def compute_ppo_critic_loss(
+ 
+     var_returns = torch.var(masked_returns)
+     if torch.isnan(var_returns) or var_returns == 0:
+-        explained_variance = torch.tensor(float("nan"), device=returns.device)
++        explained_variance = torch.tensor(0.0, device=returns.device)
+     else:
+         var_diff = torch.var(masked_returns - masked_values)
+         if torch.isnan(var_diff):
+-            explained_variance = torch.tensor(float("nan"), device=returns.device)
++            explained_variance = torch.tensor(0.0, device=returns.device)
+         else:
+             explained_variance = 1 - var_diff / var_returns
+ 
+diff --git a/rlinf/envs/libero/dense_reward.py b/rlinf/envs/libero/dense_reward.py
+new file mode 100644
+index 00000000..227cd042
+--- /dev/null
++++ b/rlinf/envs/libero/dense_reward.py
+@@ -0,0 +1,486 @@
++"""LIBERO-Long dense BDDL-milestone reward (Phase 2).
++
++Used only in the LIBERO RLinf checkout. Touches nothing in the RoboCasa365
++code and nothing in the sparse pipeline (it is only imported/used when
++env.train.dense_reward.enabled=True, which the sparse config never sets).
++
++Design mirrors RC365 `structrl/timing_reward.py` + `flat_reward.py`, but the
++"flat" variant only (no demo timing budgets, no ratio-band, no persistent
++stuck penalty), because LIBERO has no per-subtask demo timing data and the
++BDDL predicate set has no grasp/contact milestones to time.
++
++Per chunk:  r = 0.3 * (#conjuncts first-latched this step) + 1.0 * 1[success]
++
++Stage semantics (same as RC365):
++  * A task is split into ordered STAGES. Stages execute in strict order.
++  * Subtasks (BDDL goal conjuncts) WITHIN a stage are parallel (any order).
++  * A conjunct only latches (and only earns its 0.3) while it belongs to the
++    CURRENT stage — defends against silent-skip of a later stage's conjunct.
++  * A stage completes when ALL its conjuncts have latched; the next opens.
++  * success (env._check_success()) fires the 1.0 outcome once.
++
++Subtask completion is read directly from the LIBERO simulator via
++inner._eval_predicate(conjunct) (see subtask_checker semantics in
++notes/dense_reward.md) — never imagined.
++
++Conjunct representation: a tuple of lowercase strings, exactly as it appears
++in inner.parsed_problem["goal_state"], e.g.
++  ("turnon", "flat_stove_1")
++  ("on", "moka_pot_1", "flat_stove_1_cook_region")
++"""
++from __future__ import annotations
++
++import json
++import os
++from typing import Iterable, Optional
++
++
++# Demo-timing budget table (produced by extract_libero_demo_timing.py). Path
++# overridable via LIBERO_TIMING_JSON; defaults to the repo-root artifact.
++_DEFAULT_TIMING_JSON = os.environ.get(
++    "LIBERO_TIMING_JSON", "libero_long_demo_timing.json"
++)
++_TIMING_CACHE: Optional[dict] = None
++
++
++def load_timing_data(path: Optional[str] = None) -> dict:
++    """Load (and cache) the demo-timing JSON, returning a dict keyed by
++    goal_signature(frozenset) -> rank_budgets (list[list[float]]).
++
++    Falls back to the default path if the env-var path is missing/empty so
++    spawned env workers that didn't inherit LIBERO_TIMING_JSON still resolve
++    the budgets (mirrors robocasa365 timing_reward_builder.load_timing_data).
++    """
++    global _TIMING_CACHE
++    if _TIMING_CACHE is not None:
++        return _TIMING_CACHE
++    p = path or os.environ.get("LIBERO_TIMING_JSON", "") or _DEFAULT_TIMING_JSON
++    if not os.path.isfile(p):
++        p = _DEFAULT_TIMING_JSON
++    by_sig: dict = {}
++    try:
++        with open(p) as f:
++            raw = json.load(f)
++        for _task, v in raw.items():
++            sig = goal_signature(v["goal_state"])
++            by_sig[sig] = [[float(x) for x in row] for row in v["rank_budgets"]]
++    except Exception:
++        by_sig = {}
++    _TIMING_CACHE = by_sig
++    return by_sig
++
++
++def get_rank_budgets(goal_state: Iterable) -> Optional[list[list[float]]]:
++    """Return the demo-timing rank_budgets for this task's goal, or None if
++    the task is not in the timing JSON (caller then falls back to defaults)."""
++    return load_timing_data().get(goal_signature(goal_state))
++
++
++def unwrap_inner(env):
++    """Walk wrapper chain (OffScreenRenderEnv -> .env -> ... ) down to the
++    leaf task env that exposes _eval_predicate / _check_success /
++    parsed_problem. Returns None if not found within a bounded depth."""
++    inner = env
++    for _ in range(6):  # OffScreenRenderEnv.env is the task env (1 hop typ.)
++        if hasattr(inner, "_eval_predicate") and hasattr(inner, "parsed_problem"):
++            return inner
++        if not hasattr(inner, "env"):
++            return None
++        inner = inner.env
++    return inner if hasattr(inner, "_eval_predicate") else None
++
++
++def eval_conjuncts_true(inner, conjuncts: Iterable[tuple]) -> set:
++    """Return the subset of conjuncts whose predicate currently holds.
++
++    Each conjunct is a tuple like ("turnon","flat_stove_1") and is evaluated
++    via the env's own _eval_predicate — the exact same code path as
++    _check_success, so it is sim-grounded and consistent with the success
++    signal. A conjunct that raises is treated as False (logged once upstream).
++    """
++    out = set()
++    for c in conjuncts:
++        try:
++            if bool(inner._eval_predicate(list(c))):
++                out.add(c)
++        except Exception:
++            pass
++    return out
++
++
++FIXED_SUBTASK_REWARD = 0.3   # per-conjunct, on first latch (RC365 parity)
++OUTCOME_REWARD = 2.0         # one-shot on first success; DENSE emphasises final (sparse uses 1.0)
++
++
++# ---------------------------------------------------------------------------
++# Per-task stage split (the table approved in notes/dense_reward.md).
++#
++# Keyed by the frozenset of goal conjuncts so we never depend on bddl
++# filenames. Value = ordered list of stages; each stage = list of conjuncts
++# (parallel within the stage). Only KITCHEN4 / KITCHEN6 are multi-stage (real
++# physical "put-in then close-door" precedent, mirroring RC365
++# SteamInMicrowave bowl_in_micro -> door_closed). Everything else is a single
++# parallel stage (the goal conjuncts are physically independent).
++#
++# Conjuncts already TRUE at episode reset (e.g. KITCHEN8 stove starts on) are
++# detected and dropped dynamically in LiberoDenseReward.reset(), so they earn
++# no reward and don't block stage completion — no need to special-case here.
++# ---------------------------------------------------------------------------
++def _c(*parts: str) -> tuple:
++    return tuple(parts)
++
++
++TASK_STAGES: dict[frozenset, list[list[tuple]]] = {
++    # KITCHEN3: turn on stove + put moka pot on it. Physically independent
++    # (can place then turn on, or turn on then place) -> 1 parallel stage.
++    frozenset({_c("turnon", "flat_stove_1"),
++               _c("on", "moka_pot_1", "flat_stove_1_cook_region")}): [
++        [_c("turnon", "flat_stove_1"),
++         _c("on", "moka_pot_1", "flat_stove_1_cook_region")],
++    ],
++    # KITCHEN4: put bowl in bottom drawer, THEN close it. Hard physical
++    # precedent (can't place after closing) -> 2 sequential stages.
++    frozenset({_c("close", "white_cabinet_1_bottom_region"),
++               _c("in", "akita_black_bowl_1", "white_cabinet_1_bottom_region")}): [
++        [_c("in", "akita_black_bowl_1", "white_cabinet_1_bottom_region")],
++        [_c("close", "white_cabinet_1_bottom_region")],
++    ],
++    # KITCHEN6: put mug in microwave, THEN close it -> 2 sequential stages.
++    frozenset({_c("in", "white_yellow_mug_1", "microwave_1_heating_region"),
++               _c("close", "microwave_1")}): [
++        [_c("in", "white_yellow_mug_1", "microwave_1_heating_region")],
++        [_c("close", "microwave_1")],
++    ],
++    # KITCHEN8: both moka pots on stove (+ stove already on at reset, dropped
++    # dynamically). 2 placements, physically independent -> 1 parallel stage.
++    frozenset({_c("on", "moka_pot_1", "flat_stove_1_cook_region"),
++               _c("on", "moka_pot_2", "flat_stove_1_cook_region"),
++               _c("turnon", "flat_stove_1")}): [
++        [_c("on", "moka_pot_1", "flat_stove_1_cook_region"),
++         _c("on", "moka_pot_2", "flat_stove_1_cook_region"),
++         _c("turnon", "flat_stove_1")],
++    ],
++    # LIVING1: soup + cream cheese in basket -> 1 parallel stage.
++    frozenset({_c("in", "alphabet_soup_1", "basket_1_contain_region"),
++               _c("in", "cream_cheese_1", "basket_1_contain_region")}): [
++        [_c("in", "alphabet_soup_1", "basket_1_contain_region"),
++         _c("in", "cream_cheese_1", "basket_1_contain_region")],
++    ],
++    # LIVING2a: soup + tomato sauce in basket -> 1 parallel stage.
++    frozenset({_c("in", "alphabet_soup_1", "basket_1_contain_region"),
++               _c("in", "tomato_sauce_1", "basket_1_contain_region")}): [
++        [_c("in", "alphabet_soup_1", "basket_1_contain_region"),
++         _c("in", "tomato_sauce_1", "basket_1_contain_region")],
++    ],
++    # LIVING2b: cream cheese + butter in basket -> 1 parallel stage.
++    frozenset({_c("in", "cream_cheese_1", "basket_1_contain_region"),
++               _c("in", "butter_1", "basket_1_contain_region")}): [
++        [_c("in", "cream_cheese_1", "basket_1_contain_region"),
++         _c("in", "butter_1", "basket_1_contain_region")],
++    ],
++    # LIVING5: white mug on left plate + yellow/white mug on right plate.
++    frozenset({_c("on", "porcelain_mug_1", "plate_1"),
++               _c("on", "white_yellow_mug_1", "plate_2")}): [
++        [_c("on", "porcelain_mug_1", "plate_1"),
++         _c("on", "white_yellow_mug_1", "plate_2")],
++    ],
++    # LIVING6: white mug on plate + pudding to right of plate.
++    frozenset({_c("on", "porcelain_mug_1", "plate_1"),
++               _c("on", "chocolate_pudding_1", "living_room_table_plate_right_region")}): [
++        [_c("on", "porcelain_mug_1", "plate_1"),
++         _c("on", "chocolate_pudding_1", "living_room_table_plate_right_region")],
++    ],
++    # STUDY1: book in back compartment of caddy -> single conjunct.
++    frozenset({_c("in", "black_book_1", "desk_caddy_1_back_contain_region")}): [
++        [_c("in", "black_book_1", "desk_caddy_1_back_contain_region")],
++    ],
++}
++
++
++def goal_signature(goal_state: Iterable) -> frozenset:
++    """Normalize parsed_problem['goal_state'] to a frozenset of conjunct
++    tuples, so we can look up TASK_STAGES regardless of conjunct ordering."""
++    sig = set()
++    for conj in goal_state:
++        sig.add(tuple(str(x) for x in conj))
++    return frozenset(sig)
++
++
++def get_stage_def(goal_state: Iterable) -> Optional[list[list[tuple]]]:
++    """Return the ordered stage split for this task, or None if the task is
++    not one of the 10 libero_10 tasks (caller then skips dense reward)."""
++    return TASK_STAGES.get(goal_signature(goal_state))
++
++
++class LiberoDenseReward:
++    """Per-env stateful flat dense reward.
++
++    Construct once per env (lazily, when its task/goal is known). Call
++    reset(already_true) at each episode start and step(true_now, success)
++    once per sim step.
++    """
++
++    def __init__(self, stages: list[list[tuple]]):
++        # Defensive copy; stages is list[list[conjunct-tuple]].
++        self.stages_template = [list(s) for s in stages]
++        self.stages = [list(s) for s in stages]
++        self.all_subtasks: set[tuple] = set()
++        for s in self.stages_template:
++            self.all_subtasks.update(s)
++        self.reset(already_true=set())
++
++    @property
++    def K(self) -> int:
++        return len(self.stages)
++
++    def reset(self, already_true: Optional[set] = None) -> None:
++        """Start a fresh episode.
++
++        already_true: conjuncts that are TRUE at reset (e.g. KITCHEN8 stove on)
++        — removed from their stage so they earn no reward and don't block
++        stage completion. Empty stages are dropped (preserving order).
++        """
++        already_true = already_true or set()
++        self.stages = []
++        for s in self.stages_template:
++            kept = [c for c in s if c not in already_true]
++            if kept:
++                self.stages.append(kept)
++        self.stage_idx = 0
++        self.latched: dict[tuple, bool] = {c: False for c in self.all_subtasks}
++        # Pre-satisfied conjuncts count as already latched (so success/logging
++        # is consistent), but they never fired an event reward.
++        for c in already_true:
++            if c in self.latched:
++                self.latched[c] = True
++        self.outcome_fired = False
++        self.cumulative = 0.0
++        self.cumulative_progress = 0.0
++        self.cumulative_outcome = 0.0
++
++    def step(self, true_now: set, success: bool) -> dict:
++        """Advance one sim step.
++
++        Args:
++          true_now: set of conjuncts currently TRUE (from inner._eval_predicate).
++          success:  env._check_success() this step.
++
++        Returns dict with this step's reward + diagnostics.
++        """
++        n_newly_latched = 0
++
++        # Cascade through stages within this step: latch conjuncts in the
++        # current stage only (silent-skip defense — a later stage's conjunct
++        # earns nothing until its stage opens); if that completes the stage,
++        # the next stage opens and is processed in the SAME step (so a conjunct
++        # already true when its stage opens latches immediately, not next step).
++        while self.stage_idx < self.K:
++            current_stage = self.stages[self.stage_idx]
++            for c in current_stage:
++                if (c in true_now) and not self.latched.get(c, False):
++                    self.latched[c] = True
++                    n_newly_latched += 1
++            if all(self.latched.get(c, False) for c in current_stage):
++                self.stage_idx += 1   # stage complete → open next, re-loop
++            else:
++                break                 # current stage still pending
++
++        r_event = FIXED_SUBTASK_REWARD * n_newly_latched
++
++        r_outcome = 0.0
++        if success and not self.outcome_fired:
++            r_outcome = OUTCOME_REWARD
++            self.outcome_fired = True
++
++        r_total = r_event + r_outcome
++        self.cumulative += r_total
++        self.cumulative_progress += r_event
++        self.cumulative_outcome += r_outcome
++
++        n_latched_total = sum(1 for v in self.latched.values() if v)
++        return dict(
++            r_total=r_total,
++            r_event=r_event,
++            r_outcome=r_outcome,
++            n_newly_latched=n_newly_latched,
++            stage_idx_after=self.stage_idx,
++            n_total=len(self.all_subtasks),
++            n_latched=n_latched_total,
++            cumulative=self.cumulative,
++            cumulative_progress=self.cumulative_progress,
++            cumulative_outcome=self.cumulative_outcome,
++        )
++
++
++# ===========================================================================
++# StructRL (smooth_band) paced reward, ported from the RoboCasa365 implementation
++# ===========================================================================
++# Port of robocasa365 structrl smooth_band: the per-subtask event reward is
++# no longer a flat 0.3 — it is shaped by how fast the policy completes each
++# subtask RELATIVE to the human-demo budget. Faster than the human → bigger
++# reward (capped), slower → smoothly decays toward 0.
++#
++# Chain mirrored (robocasa365):
++#   TimingReward (stage/latch/silent-skip + D3 timer + piecewise band + #3
++#                 persistent penalty + outcome 2.0)
++#     -> SmoothTimingReward  (band -> continuous CAP_MULT*sub_base/(1+ratio))
++#       -> SmoothBandReward  (back out the #3 persistent penalty)
++#
++# Here we collapse the chain into ONE class (LiberoSmoothBandReward) that is
++# the smooth_band variant directly: continuous band, NO persistent penalty.
++# Budgets are RAW human-demo median sim-frame gaps (D3) — NO scaling to the
++# robot horizon (verified against robocasa365: Sum(budget) ~= human horizon,
++# not robot max_episode_steps; the robot's slowness is absorbed by a generous
++# max_episode_steps + the smooth decay curve, not by scaling budgets).
++#
++# Subtask = BDDL goal conjunct tuple (NOT a named flag like robocasa365), so
++# rank_budgets are indexed by the same post-drop stage structure produced by
++# reset(already_true=...). The stage def is the SAME TASK_STAGES table above,
++# so smooth_band and the flat LiberoDenseReward share one source of truth.
++
++CAP_MULT = 2.0   # ratio->0 event reward = CAP_MULT*sub_base (=0.60); anchor 0.30 at ratio=1
++
++
++class LiberoSmoothBandReward:
++    """Per-env stateful smooth_band timing dense reward.
++
++    Event reward for completing the r-th subtask in the current stage:
++        gap_elapsed = t - subtask_start_step              (D3: gap since last latch)
++        budget      = rank_budgets[stage_idx][rank]        (human-demo median, sim-frames)
++        ratio       = gap_elapsed / max(budget, 1.0)
++        r_event     = CAP_MULT * FIXED_SUBTASK_REWARD / (1 + ratio)
++    Outcome: OUTCOME_REWARD (2.0) one-shot on first success. NO persistent penalty.
++
++    Construct once per env (lazily, when task/goal known). reset(already_true,
++    rank_budgets) at each episode start, step(true_now, success, sim_t) per
++    sim step. rank_budgets is re-supplied at reset because the post-drop stage
++    structure (which pre-satisfied conjuncts were dropped) is only known then.
++    """
++
++    def __init__(self, stages: list[list[tuple]]):
++        self.stages_template = [list(s) for s in stages]
++        self.all_subtasks: set[tuple] = set()
++        for s in self.stages_template:
++            self.all_subtasks.update(s)
++        # Effective (post-drop) state, filled in reset().
++        self.stages: list[list[tuple]] = [list(s) for s in stages]
++        self.rank_budgets: list[list[float]] = []
++        self.reset(already_true=set(), rank_budgets=None)
++
++    @property
++    def K(self) -> int:
++        return len(self.stages)
++
++    def reset(self, already_true: Optional[set] = None,
++              rank_budgets: Optional[list[list[float]]] = None) -> None:
++        """Start a fresh episode.
++
++        already_true: conjuncts TRUE at reset — dropped from their stage (no
++          reward, don't block stage completion), empty stages removed.
++        rank_budgets: per-stage list of median sim-frame budgets for the
++          POST-DROP stage structure (same indexing as self.stages). If None or
++          too short, missing budgets fall back to a safe default so a latch
++          never crashes (ratio just degrades gracefully).
++        """
++        already_true = already_true or set()
++        self.stages = []
++        for s in self.stages_template:
++            kept = [c for c in s if c not in already_true]
++            if kept:
++                self.stages.append(kept)
++        self.rank_budgets = [list(r) for r in (rank_budgets or [])]
++        self.stage_idx = 0
++        # D3 timer: resets at every subtask completion. First subtask from t=0.
++        self.subtask_start_step = 0
++        self.t = -1
++        self.latched: dict[tuple, bool] = {c: False for c in self.all_subtasks}
++        for c in already_true:
++            if c in self.latched:
++                self.latched[c] = True
++        self.outcome_fired = False
++        self.cumulative = 0.0
++        self.cumulative_progress = 0.0
++        self.cumulative_outcome = 0.0
++
++    def _budget(self, stage_idx: int, rank: int) -> float:
++        """Human-demo median gap budget for (stage, rank), with safe fallback.
++
++        Fallback (missing budget): use the last known budget in the stage, or
++        a neutral 50 frames, so a latch with no extracted budget still scores
++        (ratio ~ moderate) instead of raising.
++        """
++        if stage_idx < len(self.rank_budgets):
++            row = self.rank_budgets[stage_idx]
++            if rank < len(row):
++                return max(float(row[rank]), 1.0)
++            if row:
++                return max(float(row[-1]), 1.0)
++        return 50.0
++
++    def _ratio_band_reward(self, ratio: float) -> float:
++        # Continuous, knob-free curve (robocasa365 SmoothTimingReward):
++        #   ratio->0 -> CAP_MULT*sub_base (cap 0.60); ratio=1 -> sub_base (0.30);
++        #   ratio->inf -> 0 (never negative). sub_base = FIXED_SUBTASK_REWARD.
++        return CAP_MULT * FIXED_SUBTASK_REWARD / (1.0 + max(ratio, 0.0))
++
++    def step(self, true_now: set, success: bool,
++             sim_t: Optional[int] = None) -> dict:
++        if sim_t is None:
++            self.t += 1
++        else:
++            self.t = int(sim_t)
++
++        r_event = 0.0
++        events: list[dict] = []
++
++        # Cascade through stages within this step (silent-skip defense + same-
++        # step stage open). Latch conjuncts in the CURRENT stage only; on each
++        # latch, score via D3 ratio band and reset subtask_start_step to t.
++        while self.stage_idx < self.K:
++            current_stage = self.stages[self.stage_idx]
++            n_latched_current = sum(
++                1 for c in current_stage if self.latched.get(c, False)
++            )
++            for c in current_stage:
++                if (c in true_now) and not self.latched.get(c, False):
++                    self.latched[c] = True
++                    rank = n_latched_current
++                    budget = self._budget(self.stage_idx, rank)
++                    gap_elapsed = self.t - self.subtask_start_step
++                    ratio = gap_elapsed / budget
++                    r = self._ratio_band_reward(ratio)
++                    r_event += r
++                    events.append(dict(subtask=c, stage=self.stage_idx, rank=rank,
++                                       elapsed=gap_elapsed, budget=budget,
++                                       ratio=ratio, r=r))
++                    n_latched_current += 1
++                    self.subtask_start_step = self.t  # D3 reset
++            if all(self.latched.get(c, False) for c in current_stage):
++                self.stage_idx += 1   # stage complete → open next, re-loop
++            else:
++                break                 # current stage still pending
++
++        r_outcome = 0.0
++        if success and not self.outcome_fired:
++            r_outcome = OUTCOME_REWARD
++            self.outcome_fired = True
++
++        r_total = r_event + r_outcome
++        self.cumulative += r_total
++        self.cumulative_progress += r_event
++        self.cumulative_outcome += r_outcome
++
++        n_latched_total = sum(1 for v in self.latched.values() if v)
++        return dict(
++            r_total=r_total,
++            r_event=r_event,
++            r_outcome=r_outcome,
++            n_newly_latched=len(events),
++            stage_idx_after=self.stage_idx,
++            n_total=len(self.all_subtasks),
++            n_latched=n_latched_total,
++            cumulative=self.cumulative,
++            cumulative_progress=self.cumulative_progress,
++            cumulative_outcome=self.cumulative_outcome,
++            events=events,
++        )
+diff --git a/rlinf/envs/libero/venv.py b/rlinf/envs/libero/venv.py
+index acf4862d..9450a019 100644
+--- a/rlinf/envs/libero/venv.py
++++ b/rlinf/envs/libero/venv.py
+@@ -97,6 +97,143 @@ def _worker(
+ 
+     parent.close()
+     env = env_fn_wrapper.data()
++    # ---- Dense BDDL-milestone reward (Phase 2), fully gated --------------
++    # Computed here in the env subprocess (the inner sim / _eval_predicate
++    # live in THIS process). Injected as info["dense_reward"]; env_worker
++    # swaps it into chunk_rewards only when env.train.dense_reward.enabled.
++    # Gated by LIBERO_DENSE_REWARD=1 so the sparse job (which never sets it)
++    # pays zero overhead and sees identical behavior.
++    import os as _os
++    _dense_on = _os.environ.get("LIBERO_DENSE_REWARD", "0").strip() == "1"
++    # Reward variant (LIBERO_REWARD_VARIANT): "fixed" (= "flat", default) pays
++    # 0.3 per completed subtask; "structrl" (= "smooth_band") is the paper's
++    # reward, paced by beta / (1 + T / T_d) with the demonstration durations.
++    _reward_variant = _os.environ.get(
++        "LIBERO_REWARD_VARIANT", "flat"
++    ).strip().lower()
++    _reward_variant = {"structrl": "smooth_band", "fixed": "flat"}.get(
++        _reward_variant, _reward_variant)
++    _dense = {"reward": None, "sig": None, "inner": None, "err": False,
++              "is_timed": False}
++
++    def _dense_setup():
++        """(Re)build + reset the dense reward for the current episode/task.
++        Call after the sim is in its init state (set_init_state)."""
++        if not _dense_on:
++            return
++        try:
++            from rlinf.envs.libero.dense_reward import (
++                LiberoDenseReward,
++                LiberoSmoothBandReward,
++                eval_conjuncts_true,
++                get_rank_budgets,
++                get_stage_def,
++                goal_signature,
++                unwrap_inner,
++            )
++            inner = unwrap_inner(env)
++            if inner is None:
++                return
++            goal_state = inner.parsed_problem["goal_state"]
++            sig = goal_signature(goal_state)
++            is_timed = _reward_variant == "smooth_band"
++            if _dense["reward"] is None or _dense["sig"] != sig:
++                stage_def = get_stage_def(goal_state)
++                if stage_def is None:
++                    _dense["reward"] = None
++                    _dense["sig"] = sig
++                    _dense["inner"] = inner
++                    return
++                if is_timed:
++                    _dense["reward"] = LiberoSmoothBandReward(stage_def)
++                else:
++                    _dense["reward"] = LiberoDenseReward(stage_def)
++                _dense["sig"] = sig
++                _dense["is_timed"] = is_timed
++            _dense["inner"] = inner
++            # Conjuncts already true at reset → dropped (criterion ③).
++            all_conj = set()
++            for s in _dense["reward"].stages_template:
++                all_conj.update(s)
++            already = eval_conjuncts_true(inner, all_conj)
++            if is_timed:
++                # Post-drop rank budgets for this task (from demo-timing JSON);
++                # None falls back to per-class neutral default inside reset.
++                budgets = get_rank_budgets(goal_state)
++                _dense["reward"].reset(already_true=already, rank_budgets=budgets)
++            else:
++                _dense["reward"].reset(already_true=already)
++        except Exception as _e:
++            if not _dense["err"]:
++                import sys as _sys
++                import traceback as _tb
++                print(f"[libero dense_reward] setup error: {type(_e).__name__}: {_e}",
++                      file=_sys.stderr, flush=True)
++                _tb.print_exc()
++                _dense["err"] = True
++
++    def _dense_step_inject(info):
++        # When dense is on, ALWAYS write the full key set (0.0 fallback on any
++        # failure / unknown task), so list_of_dict_to_dict_of_list in the main
++        # process sees a consistent key set across all envs and env_worker can
++        # index info["dense_reward"][env_idx] for every env (RC365 invariant).
++        if not _dense_on:
++            return info
++        if not isinstance(info, dict):
++            info = dict(info) if info else {}
++        r_total = r_event = r_outcome = 0.0
++        n_done = n_total = n_latched = 0
++        cum = 0.0
++        latched_outcome = 0
++        try:
++            rw = _dense["reward"]
++            inner = _dense["inner"]
++            if rw is not None and inner is not None:
++                from rlinf.envs.libero.dense_reward import eval_conjuncts_true
++                all_conj = set()
++                for s in rw.stages_template:
++                    all_conj.update(s)
++                true_now = eval_conjuncts_true(inner, all_conj)
++                success = bool(inner._check_success())
++                if _dense["is_timed"]:
++                    # smooth_band needs the REAL sim-step counter (budgets are
++                    # in demo sim-frame units). inner.timestep advances once per
++                    # env.step = once per worker "step" cmd, same unit as the
++                    # demo replay used by extract_libero_demo_timing.py.
++                    sim_t = None
++                    try:
++                        sim_t = int(getattr(inner, "timestep"))
++                    except Exception:
++                        sim_t = None
++                    tinfo = rw.step(true_now, success, sim_t=sim_t)
++                else:
++                    tinfo = rw.step(true_now, success)
++                r_total = float(tinfo["r_total"])
++                r_event = float(tinfo["r_event"])
++                r_outcome = float(tinfo["r_outcome"])
++                n_done = int(tinfo["stage_idx_after"])
++                n_total = int(tinfo["n_total"])
++                n_latched = int(tinfo["n_latched"])
++                cum = float(tinfo["cumulative"])
++                latched_outcome = 1 if (tinfo["r_outcome"] > 0 or rw.outcome_fired) else 0
++        except Exception as _e:
++            if not _dense["err"]:
++                import sys as _sys
++                import traceback as _tb
++                print(f"[libero dense_reward] step error: {type(_e).__name__}: {_e}",
++                      file=_sys.stderr, flush=True)
++                _tb.print_exc()
++                _dense["err"] = True
++        info["dense_reward"] = r_total
++        info["dense_reward_progress"] = r_event
++        info["dense_reward_outcome"] = r_outcome
++        info["dense_reward_n_done"] = n_done
++        info["dense_reward_n_total"] = n_total
++        info["dense_reward_inst"] = cum
++        info["dense_reward_latched_n_done"] = n_latched
++        info["dense_reward_latched_outcome"] = latched_outcome
++        return info
++
+     try:
+         while True:
+             try:
+@@ -106,6 +243,12 @@ def _worker(
+                 break
+             if cmd == "step":
+                 env_return = env.step(data)
++                if _dense_on:
++                    # env.step -> (obs, reward, done, info). Inject dense reward
++                    # into info before obs is stripped for shared-mem encode.
++                    _er = list(env_return)
++                    _er[-1] = _dense_step_inject(_er[-1])
++                    env_return = tuple(_er)
+                 if obs_bufs is not None:
+                     _encode_obs(env_return[0], obs_bufs)
+                     env_return = (None, *env_return[1:])
+@@ -152,12 +295,19 @@ def _worker(
+                 p.send(env.get_sim_state())
+             elif cmd == "set_init_state":
+                 obs = env.set_init_state(data)
++                # Episode start: sim is now in its init state, so (re)build and
++                # reset the dense reward here (drops conjuncts already true).
++                _dense_setup()
+                 p.send(obs)
+             elif cmd == "reconfigure":
+                 env.close()
+                 seed = data.pop("seed")
+                 env = OffScreenRenderEnv(**data)
+                 env.seed(seed)
++                # Task may have changed → force a rebuild on next set_init_state.
++                _dense["reward"] = None
++                _dense["sig"] = None
++                _dense["inner"] = None
+                 p.send(None)
+             else:
+                 p.close()
+diff --git a/rlinf/hybrid_engines/fsdp/strategy/checkpoint.py b/rlinf/hybrid_engines/fsdp/strategy/checkpoint.py
+index 7f198b9f..1099e76e 100644
+--- a/rlinf/hybrid_engines/fsdp/strategy/checkpoint.py
++++ b/rlinf/hybrid_engines/fsdp/strategy/checkpoint.py
+@@ -12,6 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
++import os
+ from collections.abc import Iterable
+ from typing import Union
+ 
+@@ -19,6 +20,7 @@ import torch
+ from torch.distributed.checkpoint.state_dict import (
+     StateDictOptions,
+     get_state_dict,
++    set_model_state_dict,
+     set_state_dict,
+ )
+ from torch.distributed.checkpoint.stateful import Stateful
+@@ -39,6 +41,7 @@ class Checkpoint(Stateful):
+         opts: StateDictOptions,
+         fsdp_version: FSDPVersion,
+         checkpoint_format: str = "dcp",
++        is_load: bool = False,
+     ):
+         self.model = model
+         self.optimizers = optimizers
+@@ -50,6 +53,10 @@ class Checkpoint(Stateful):
+         self.opts = opts
+         self.fsdp_version = fsdp_version
+         self.checkpoint_format = checkpoint_format
++        # is_load is True only when this object is the LOAD template (see
++        # base.load_checkpoint). It gates the RLINF_RESUME_FIX_INITIAL_LR
++        # workaround so it never touches the SAVE path.
++        self.is_load = is_load
+ 
+     def _get_local_optim_state_dicts(self):
+         if isinstance(self.optimizers, Optimizer):
+@@ -63,6 +70,38 @@ class Checkpoint(Stateful):
+             for opt, opt_sd in zip(self.optimizers, optim_state_dicts):
+                 opt.load_state_dict(opt_sd)
+ 
++    def _maybe_strip_initial_lr(self, optim_sd):
++        """RLINF_RESUME_FIX_INITIAL_LR=1 + load template only: return a COPY of
++        the optimizer state_dict whose param_groups have no 'initial_lr' key, so
++        DCP's load planner does not demand a key absent from the on-disk
++        checkpoint (WILD ckpts saved after a critic_warmup optimizer rebuild lack
++        it). Adam moments still load normally; initial_lr is reinjected onto the
++        live optimizer in load_state_dict. Never mutates in place, never runs on
++        save (is_load gate), and is a no-op without the env var -> from-scratch
++        save/load and normal resume are byte-identical to upstream.
++        """
++        if not (
++            self.is_load
++            and os.environ.get("RLINF_RESUME_FIX_INITIAL_LR", "0") == "1"
++        ):
++            return optim_sd
++
++        def strip_one(sd):
++            pgs = sd.get("param_groups")
++            if not isinstance(pgs, list):
++                return sd
++            new_pgs = [
++                {k: v for k, v in pg.items() if k != "initial_lr"}
++                if isinstance(pg, dict)
++                else pg
++                for pg in pgs
++            ]
++            return {**sd, "param_groups": new_pgs}
++
++        if isinstance(optim_sd, list):
++            return [strip_one(sd) for sd in optim_sd]
++        return strip_one(optim_sd)
++
+     def state_dict(self):
+         if self.checkpoint_format == "local_shard":
+             model_sd = self.model.state_dict()
+@@ -109,11 +148,26 @@ class Checkpoint(Stateful):
+                 f"FSDP version mismatch: {ckpt_fsdp_version} != {self.fsdp_version}"
+             )
+ 
++        # RLINF_RESUME_SKIP_OPTIM=1: restore only model weights (+ lr_schedulers
++        # and rng below), leaving the live optimizer at its freshly-constructed
++        # state. Needed to resume from checkpoints whose saved optimizer
++        # param_groups omit keys the loader requires (e.g. 'initial_lr'), which
++        # otherwise raise "Missing key in checkpoint state_dict". Adam moments
++        # restart from zero; lr_schedulers fully restore the LR schedule.
++        skip_optim = os.environ.get("RLINF_RESUME_SKIP_OPTIM", "0") == "1"
++
+         if self.checkpoint_format == "local_shard":
+             self.model.load_state_dict(state["model"])
+ 
+-            self._load_local_optim_state_dicts(state["optimizers"])
++            if not skip_optim:
++                self._load_local_optim_state_dicts(state["optimizers"])
+ 
++        elif skip_optim:
++            set_model_state_dict(
++                model=self.model,
++                model_state_dict=state["model"],
++                options=self.opts,
++            )
+         else:
+             set_state_dict(
+                 model=self.model,
+diff --git a/rlinf/workers/actor/fsdp_actor_worker.py b/rlinf/workers/actor/fsdp_actor_worker.py
+index 3f0af75f..4879e33c 100644
+--- a/rlinf/workers/actor/fsdp_actor_worker.py
++++ b/rlinf/workers/actor/fsdp_actor_worker.py
+@@ -1873,7 +1873,14 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+         self.lr_scheduler.step()
+         self.optimizer.zero_grad()
+         clear_memory()
+-        mean_metric_dict = {key: np.mean(value) for key, value in metrics.items()}
++        # explained_variance is nan on micro-batches with zero return variance
++        # (common near a saturated SFT prior); average only the valid ones so the
++        # metric isn't blanked to nan by a single degenerate micro-batch. Other
++        # metrics keep plain mean so a real nan stays visible.
++        mean_metric_dict = {
++            key: (np.nanmean(value) if "explained_variance" in key else np.mean(value))
++            for key, value in metrics.items()
++        }
+         mean_metric_dict = all_reduce_dict(
+             mean_metric_dict, op=torch.distributed.ReduceOp.AVG
+         )

@@ -1,0 +1,262 @@
+{
+  "pick_up_the_alphabet_soup_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "alphabet_soup_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp alphabet_soup_1"
+      ],
+      [
+        "in alphabet_soup_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        56.0
+      ],
+      [
+        84.0
+      ]
+    ]
+  },
+  "pick_up_the_bbq_sauce_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "bbq_sauce_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp bbq_sauce_1"
+      ],
+      [
+        "in bbq_sauce_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        62.0
+      ],
+      [
+        65.0
+      ]
+    ]
+  },
+  "pick_up_the_butter_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "butter_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp butter_1"
+      ],
+      [
+        "in butter_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        56.5
+      ],
+      [
+        85.5
+      ]
+    ]
+  },
+  "pick_up_the_chocolate_pudding_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "chocolate_pudding_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp chocolate_pudding_1"
+      ],
+      [
+        "in chocolate_pudding_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        59.0
+      ],
+      [
+        87.0
+      ]
+    ]
+  },
+  "pick_up_the_cream_cheese_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "cream_cheese_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp cream_cheese_1"
+      ],
+      [
+        "in cream_cheese_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        59.0
+      ],
+      [
+        66.0
+      ]
+    ]
+  },
+  "pick_up_the_ketchup_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "ketchup_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp ketchup_1"
+      ],
+      [
+        "in ketchup_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        75.0
+      ],
+      [
+        72.0
+      ]
+    ]
+  },
+  "pick_up_the_milk_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "milk_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp milk_1"
+      ],
+      [
+        "in milk_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        52.5
+      ],
+      [
+        76.0
+      ]
+    ]
+  },
+  "pick_up_the_orange_juice_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "orange_juice_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp orange_juice_1"
+      ],
+      [
+        "in orange_juice_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        54.0
+      ],
+      [
+        66.5
+      ]
+    ]
+  },
+  "pick_up_the_salad_dressing_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "salad_dressing_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp salad_dressing_1"
+      ],
+      [
+        "in salad_dressing_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        53.0
+      ],
+      [
+        63.0
+      ]
+    ]
+  },
+  "pick_up_the_tomato_sauce_and_place_it_in_the_basket": {
+    "goal_state": [
+      [
+        "in",
+        "tomato_sauce_1",
+        "basket_1_contain_region"
+      ]
+    ],
+    "stages": [
+      [
+        "grasp tomato_sauce_1"
+      ],
+      [
+        "in tomato_sauce_1 basket_1_contain_region"
+      ]
+    ],
+    "n_demos_pooled": 50,
+    "rank_budgets": [
+      [
+        63.0
+      ],
+      [
+        65.5
+      ]
+    ]
+  }
+}

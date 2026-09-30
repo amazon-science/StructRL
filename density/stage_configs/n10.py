@@ -1,0 +1,144 @@
+"""Density N̄ = 10 (Sec. 4.5): 160 signals, 8 to 15 per task.
+
+Deterministic subset of the N̄ = 29 signals that keeps every N̄ = 5 milestone and the N̄ = 5
+stage order; signals that never fire in the demonstrations are only kept when they are N̄ = 5
+milestones. Uses density/checkers/subtask_checker_n29.py.
+"""
+from collections import OrderedDict
+
+
+TASK_STAGES = OrderedDict([
+    ("DeliverStraw", {
+        "progress_stages": [
+            ['grasp_straw__s2', 'grasp_straw__s3', 'grasp_straw__s5', 'grasp_straw__s6'],
+            ['straw_in_glass_cup__s1', 'straw_in_glass_cup__s3', 'straw_in_glass_cup__s4', 'straw_in_glass_cup__s6'],
+        ],
+        "retreat_stage": ['gripper_far'],
+    }),
+    ("GetToastedBread", {
+        "progress_stages": [
+            ['toaster_on__s1', 'toaster_on__s2', 'toaster_on__s7'],
+            ['grasp_toast__s1', 'grasp_toast__s3'],
+            ['toast_on_plate__s1', 'toast_on_plate__s3', 'toast_on_plate__s6'],
+        ],
+        "retreat_stage": ['gripper_far'],
+    }),
+    ("KettleBoiling", {
+        "progress_stages": [
+            ['grasp_kettle__s1', 'grasp_kettle__s3', 'grasp_kettle__s4'],
+            ['kettle_on_stove__s2', 'kettle_on_stove__s6'],
+            ['kettle_on_active_burner__s1', 'kettle_on_active_burner__s4', 'kettle_on_active_burner__s6'],
+        ],
+        "retreat_stage": ['gripper_far'],
+    }),
+    ("LoadDishwasher", {
+        "progress_stages": [
+            ['grasp_dish0__s2', 'grasp_dish0__s4', 'dish0_on_rack__s2', 'dish0_on_rack__s6', 'grasp_dish1__s1', 'grasp_dish1__s4', 'dish1_on_rack__s6'],
+            ['door_half_closed__s6'],
+            ['dishwasher_closed__s5'],
+        ],
+        "retreat_stage": [],
+    }),
+    ("PackIdenticalLunches", {
+        "progress_stages": [
+            ['grasp_vegetable0__s2', 'grasp_vegetable0__s3', 'grasp_vegetable0__s6', 'vegetable0_packed__s6', 'grasp_vegetable1__s2', 'grasp_vegetable1__s6', 'vegetable1_packed__s6', 'grasp_meat0__s2', 'grasp_meat0__s3', 'grasp_meat0__s6', 'meat0_packed__s6', 'grasp_meat1__s1', 'grasp_meat1__s2', 'grasp_meat1__s6', 'meat1_packed__s6'],
+        ],
+        "retreat_stage": ['gripper_far'],
+    }),
+    ("PreSoakPan", {
+        "progress_stages": [
+            ['grasp_pan__s6', 'pan_in_sink__s6', 'grasp_sponge__s2', 'grasp_sponge__s6', 'sponge_in_sink__s6', 'water_on__s1', 'water_on__s2', 'water_on__s5'],
+        ],
+        "retreat_stage": ['gripper_far_pan', 'gripper_far_sponge'],
+    }),
+    ("PrepareCoffee", {
+        "progress_stages": [
+            ['grasp_mug__s1', 'grasp_mug__s3', 'grasp_mug__s6'],
+            ['mug_at_machine__s3', 'mug_at_machine__s6'],
+            ['machine_turned_on__s3', 'machine_turned_on__s4', 'machine_turned_on__s6'],
+        ],
+        "retreat_stage": ['gripper_obj_far', 'gripper_button_far'],
+    }),
+    ("RinseSinkBasin", {
+        "progress_stages": [
+            ['water_on__s1', 'water_on__s2', 'water_on__s3', 'water_on__s4', 'water_on__s5'],
+            ['washed_left__s6', 'washed_center__s6', 'washed_right__s6'],
+        ],
+        "retreat_stage": [],
+    }),
+    ("ScrubCuttingBoard", {
+        "progress_stages": [
+            ['grasp_sponge__s1', 'grasp_sponge__s2', 'grasp_sponge__s3', 'grasp_sponge__s6'],
+            ['contact_1step__s3', 'contact_1step__s4', 'contact_1step__s6'],
+            ['contact_3steps__s5', 'sweep_range_0p05m__s5'],
+            ['contact_5steps__s5', 'sweep_range_0p1m__s5'],
+        ],
+        "retreat_stage": ['gripper_sponge_far'],
+    }),
+    ("SearingMeat", {
+        "progress_stages": [
+            ['grasp_pan__s1', 'grasp_pan__s6', 'pan_on_stove__s2', 'pan_on_stove__s4', 'pan_on_stove__s6', 'pan_on_active_knob__s6'],
+            ['grasp_meat__s1', 'grasp_meat__s2', 'grasp_meat__s6', 'meat_in_pan__s6'],
+        ],
+        "retreat_stage": ['gripper_meat_far'],
+    }),
+    ("SetUpCuttingStation", {
+        "progress_stages": [
+            ['grasp_meat__s2', 'grasp_meat__s6', 'meat_on_board__s6', 'grasp_knife__s1', 'grasp_knife__s6', 'knife_on_board__s2', 'knife_on_board__s3', 'knife_on_board__s6'],
+        ],
+        "retreat_stage": ['gripper_far'],
+    }),
+    ("StackBowlsCabinet", {
+        "progress_stages": [
+            ['grasp_any_bowl__s1', 'grasp_any_bowl__s2', 'grasp_any_bowl__s3', 'grasp_any_bowl__s6'],
+            ['bowls_stacked__s3', 'bowls_stacked__s6'],
+            ['any_bowl_in_cabinet__s6', 'both_bowls_in_cabinet__s5'],
+        ],
+        "retreat_stage": ['gripper_far'],
+    }),
+    ("SteamInMicrowave", {
+        "progress_stages": [
+            ['grasp_vegetable__s1', 'grasp_vegetable__s3', 'grasp_vegetable__s6', 'veg_in_bowl__s5'],
+            ['grasp_bowl__s1', 'grasp_bowl__s6', 'bowl_in_micro__s1', 'bowl_in_micro__s2', 'bowl_in_micro__s3', 'bowl_in_micro__s5'],
+            ['door_half_closed__s1', 'door_half_closed__s6', 'door_closed__s6'],
+        ],
+        "retreat_stage": [],
+    }),
+    ("StirVegetables", {
+        "progress_stages": [
+            ['grasp_veg1__s1', 'grasp_veg1__s6', 'veg1_in_pot__s3', 'veg1_in_pot__s5', 'grasp_veg2__s6', 'veg2_in_pot__s5'],
+            ['spatula_grasped__s6'],
+            ['stir_t1__s1', 'stir_t1__s3', 'stir_t1__s5', 'stir_t1__s6', 'stir_t3__s6'],
+            ['task_complete__s5'],
+        ],
+        "retreat_stage": [],
+    }),
+    ("StoreLeftoversInBowl", {
+        "progress_stages": [
+            ['grasp_chicken__s1', 'grasp_chicken__s2', 'grasp_chicken__s6', 'chicken_in_bowl__s5', 'grasp_vegetable__s1', 'grasp_vegetable__s6', 'vegetable_in_bowl__s5'],
+            ['grasp_bowl__s6', 'bowl_in_fridge__s1', 'bowl_in_fridge__s2', 'bowl_in_fridge__s4', 'bowl_in_fridge__s6'],
+        ],
+        "retreat_stage": ['gripper_far'],
+    }),
+    ("WashLettuce", {
+        "progress_stages": [
+            ['water_on__s1', 'water_on__s3', 'water_on__s4', 'water_on__s5', 'water_on__s6'],
+            ['lettuce_under_water__s3', 'lettuce_under_water__s4', 'lettuce_under_water__s6'],
+            ['wash_t5__s5', 'wash_t10__s5', 'wash_t15__s5', 'wash_t20__s5'],
+            ['task_complete__s5'],
+        ],
+        "retreat_stage": [],
+    }),
+])
+
+
+def get_stage_def(task_name: str):
+    """Progress stages only. The retreat stage is deliberately excluded."""
+    cfg = TASK_STAGES.get(task_name)
+    if cfg is None:
+        raise KeyError(f"No stage def for task: {task_name}")
+    return list(cfg["progress_stages"])
+
+
+def get_n_stages(task_name: str) -> int:
+    return len(get_stage_def(task_name))

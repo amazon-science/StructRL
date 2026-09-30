@@ -1,0 +1,3881 @@
+diff --git a/examples/embodiment/eval_embodiment.sh b/examples/embodiment/eval_embodiment.sh
+index 01cc4039..7a52f9e0 100644
+--- a/examples/embodiment/eval_embodiment.sh
++++ b/examples/embodiment/eval_embodiment.sh
+@@ -4,8 +4,8 @@ export EMBODIED_PATH="$( cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ export REPO_PATH=$(dirname $(dirname "$EMBODIED_PATH"))
+ export SRC_FILE="${EMBODIED_PATH}/eval_embodied_agent.py"
+ 
+-export MUJOCO_GL="osmesa"
+-export PYOPENGL_PLATFORM="osmesa"
++export MUJOCO_GL="${MUJOCO_GL:-osmesa}"
++export PYOPENGL_PLATFORM="${PYOPENGL_PLATFORM:-osmesa}"
+ export PYTHONPATH=${REPO_PATH}:$PYTHONPATH
+ 
+ # Base path to the BEHAVIOR dataset, which is the BEHAVIOR-1k repo's dataset folder
+diff --git a/rlinf/config.py b/rlinf/config.py
+index 428ed853..9b9765ed 100644
+--- a/rlinf/config.py
++++ b/rlinf/config.py
+@@ -89,6 +89,7 @@ SupportedModel.OPENPI = SupportedModel.register("openpi", force=True)
+ SupportedModel.STARVLA = SupportedModel.register("starvla", force=True)
+ SupportedModel.MLP_POLICY = SupportedModel.register("mlp_policy", force=True)
+ SupportedModel.GR00T = SupportedModel.register("gr00t", force=True)
++SupportedModel.RLDX1 = SupportedModel.register("rldx1", force=True)
+ SupportedModel.DEXBOTIC_PI = SupportedModel.register("dexbotic_pi", force=True)
+ SupportedModel.DEXBOTIC_DM0 = SupportedModel.register("dexbotic_dm0", force=True)
+ SupportedModel.DREAMZERO = SupportedModel.register("dreamzero", force=True)
+@@ -112,6 +113,7 @@ EMBODIED_MODEL = set(
+         SupportedModel.STARVLA,
+         SupportedModel.MLP_POLICY,
+         SupportedModel.GR00T,
++        SupportedModel.RLDX1,
+         SupportedModel.DEXBOTIC_PI,
+         SupportedModel.DEXBOTIC_DM0,
+         SupportedModel.DREAMZERO,
+diff --git a/rlinf/data/embodied_io_struct.py b/rlinf/data/embodied_io_struct.py
+index 74c2b4ae..7080b0ac 100644
+--- a/rlinf/data/embodied_io_struct.py
++++ b/rlinf/data/embodied_io_struct.py
+@@ -109,13 +109,27 @@ class EnvOutput:
+             else None
+         )
+ 
+-        return {
++        prepared = {
+             "main_images": image_tensor,  # [N_ENV, H, W, C]
+             "wrist_images": wrist_image_tensor,  # [N_ENV, H, W, C] or [N_ENV, N_IMG, H, W, C]
+             "extra_view_images": extra_view_image_tensor,  # [N_ENV, N_IMG, H, W, C]
+             "states": states,
+             "task_descriptions": task_descriptions,
+         }
++        # RLDX-ONLY additive passthrough: the RoboCasa365Env chunk_step override
++        # (gated on env cfg `rldx_frame_stack`) injects pre-built 4-frame temporal
++        # stacks under `stacked_*` keys ([N_ENV, T, H, W, C]). This fixed schema
++        # would otherwise DROP them, so the model never sees the stack. Forward
++        # them ONLY when present. GR00T never produces these keys, so its obs dict
++        # is byte-identical (no new keys added) -> strict isolation preserved.
++        for _stacked_key in (
++            "stacked_main_images",
++            "stacked_extra_view_images",
++            "stacked_wrist_images",
++        ):
++            if _stacked_key in obs and obs[_stacked_key] is not None:
++                prepared[_stacked_key] = obs[_stacked_key]
++        return prepared
+ 
+     @staticmethod
+     def merge_env_outputs(env_outputs: list[dict]) -> dict[str, Any]:
+@@ -348,6 +362,7 @@ class ChunkStepResult:
+     rewards: torch.Tensor = None  # [B, 1]
+     forward_inputs: dict[str, torch.Tensor] = field(default_factory=dict)
+     versions: torch.Tensor = None  # [B, 1]
++    task_ids: torch.Tensor = None  # [B] static per-env task index
+ 
+     def __post_init__(self):
+         if self.actions is not None:
+@@ -368,6 +383,8 @@ class ChunkStepResult:
+             self.forward_inputs = put_tensor_device(self.forward_inputs, "cpu")
+         if self.versions is not None:
+             self.versions = self.versions.cpu().contiguous()
++        if self.task_ids is not None:
++            self.task_ids = self.task_ids.cpu().contiguous()
+ 
+ 
+ @dataclass
+@@ -392,6 +409,10 @@ class Trajectory:
+     curr_obs: dict[str, Any] = field(default_factory=dict)
+     next_obs: dict[str, Any] = field(default_factory=dict)
+ 
++    # Per-step per-env task identifier, shape [T, B]. Used by per-task IBRL
++    # dynamic lambda to weight BC vs PPO loss differently for each task.
++    task_ids: torch.Tensor = None
++
+     @staticmethod
+     def _generate_field_mask(
+         ref_tensor: torch.Tensor, mask: torch.Tensor, traj_len: int
+@@ -539,6 +560,10 @@ class EmbodiedRolloutResult:
+     curr_obs: list[dict[str, Any]] = field(default_factory=list)  # trajectory_length
+     next_obs: list[dict[str, Any]] = field(default_factory=list)  # trajectory_length
+ 
++    # Per-step per-env task identifier; appended once per chunk step from the
++    # env's static self.task_ids vector (shape [B] -> stacked to [T, B]).
++    task_ids: list[torch.Tensor] = field(default_factory=list)
++
+     def append_step_result(self, result: ChunkStepResult):
+         if result.actions is not None:
+             self.actions.append(result.actions)
+@@ -561,6 +586,8 @@ class EmbodiedRolloutResult:
+             self.versions.append(result.versions)
+         if result.forward_inputs:
+             self.forward_inputs.append(result.forward_inputs)
++        if result.task_ids is not None:
++            self.task_ids.append(result.task_ids)
+ 
+     def mark_last_step_with_flags(self, save_flags: torch.Tensor):
+         if not self.intervene_flags:
+@@ -676,6 +703,8 @@ class EmbodiedRolloutResult:
+             )
+         if len(self.versions) > 0:
+             trajectory.versions = torch.stack(self.versions, dim=0).cpu().contiguous()
++        if len(self.task_ids) > 0:
++            trajectory.task_ids = torch.stack(self.task_ids, dim=0).cpu().contiguous()
+         if len(self.forward_inputs) > 0:
+             trajectory.forward_inputs = stack_list_of_dict_tensor(self.forward_inputs)
+             for key in trajectory.forward_inputs.keys():
+diff --git a/rlinf/envs/__init__.py b/rlinf/envs/__init__.py
+index bfb5ea1c..cfe35c40 100644
+--- a/rlinf/envs/__init__.py
++++ b/rlinf/envs/__init__.py
+@@ -24,6 +24,7 @@ class SupportedEnvType(Enum):
+     BEHAVIOR = "behavior"
+     CALVIN = "calvin"
+     ROBOCASA = "robocasa"
++    ROBOCASA365 = "robocasa365"
+     REALWORLD = "realworld"
+     FRANKASIM = "frankasim"
+     HABITAT = "habitat"
+@@ -96,6 +97,10 @@ def get_env_cls(env_type: str, env_cfg=None):
+         from rlinf.envs.robocasa.robocasa_env import RobocasaEnv
+ 
+         return RobocasaEnv
++    elif env_type == SupportedEnvType.ROBOCASA365:
++        from rlinf.envs.robocasa365.robocasa365_env import RoboCasa365Env
++
++        return RoboCasa365Env
+     elif env_type == SupportedEnvType.REALWORLD:
+         from rlinf.envs.realworld import RealWorldEnv
+ 
+diff --git a/rlinf/envs/action_utils.py b/rlinf/envs/action_utils.py
+index 87ce3372..73d731a0 100644
+--- a/rlinf/envs/action_utils.py
++++ b/rlinf/envs/action_utils.py
+@@ -273,6 +273,10 @@ def prepare_actions(
+             action_dim=action_dim,
+             action_space=policy,
+         )
++    elif env_type == SupportedEnvType.ROBOCASA365:
++        # Model already emits the aligned 12-D action; RoboCasa365Env.step
++        # splits it back into the dict GrootRoboCasaEnv expects. Passthrough.
++        chunk_actions = raw_chunk_actions
+     elif env_type == SupportedEnvType.REALWORLD:
+         chunk_actions = raw_chunk_actions
+     elif env_type == SupportedEnvType.FRANKASIM:
+diff --git a/rlinf/envs/robocasa/robocasa_env.py b/rlinf/envs/robocasa/robocasa_env.py
+index d0038518..36141866 100644
+--- a/rlinf/envs/robocasa/robocasa_env.py
++++ b/rlinf/envs/robocasa/robocasa_env.py
+@@ -93,11 +93,19 @@ class RobocasaEnv(gym.Env):
+         1. Robocasa doesn't support changing scenes via reset options
+         2. Each environment is created with a fixed seed
+ 
+-        We simply assign each parallel environment a unique, fixed seed.
++        Group-aware seeding (for GRPO): the `group_size` consecutive envs in a
++        group share ONE seed (and therefore one task+init scene), so a GRPO
++        group is `group_size` rollouts from the SAME initial state. The seed is
++        keyed by the global GROUP id, not the global env id.
++
++        Identity at group_size=1: num_group == num_envs, so global_group_id
++        reduces to seed_offset*num_envs + local_env_id == the legacy global env
++        id, and env_seeds are byte-identical to the pre-grouping behavior.
+         """
+         local_env_ids = np.arange(self.num_envs, dtype=np.int64)
+-        global_env_ids = self.seed_offset * self.num_envs + local_env_ids
+-        self.env_seeds = (self.cfg.seed + global_env_ids).astype(np.int64)
++        local_group_ids = local_env_ids // self.group_size
++        global_group_ids = self.seed_offset * self.num_group + local_group_ids
++        self.env_seeds = (self.cfg.seed + global_group_ids).astype(np.int64)
+ 
+     def update_reset_state_ids(self):
+         """Update reset state IDs for the next rollout.
+@@ -112,9 +120,19 @@ class RobocasaEnv(gym.Env):
+ 
+         self.task_ids = []
+ 
+-        # Determine task IDs for each environment
++        # Determine task IDs for each environment. Use the GLOBAL env id
++        # (seed_offset * num_envs + local id) so that round-robin task
++        # assignment spans all tasks across every env worker. Using the local
++        # env id would make every worker run only tasks 0..(num_envs-1).
++        # Group-aware task assignment (for GRPO): all `group_size` envs in a
++        # group must run the SAME task so the group is a valid same-init-state
++        # baseline. Key the round-robin by the global GROUP id. Identity at
++        # group_size=1: global_group_id == legacy global env id, so task_ids
++        # are byte-identical to the pre-grouping behavior.
+         for env_id in range(self.num_envs):
+-            task_idx = env_id % self.num_tasks
++            local_group_id = env_id // self.group_size
++            global_group_id = self.seed_offset * self.num_group + local_group_id
++            task_idx = global_group_id % self.num_tasks
+             self.task_ids.append(task_idx)
+         self.task_ids = np.array(self.task_ids)
+ 
+diff --git a/rlinf/envs/robocasa365/__init__.py b/rlinf/envs/robocasa365/__init__.py
+new file mode 100644
+index 00000000..5b365ea1
+--- /dev/null
++++ b/rlinf/envs/robocasa365/__init__.py
+@@ -0,0 +1,13 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
+diff --git a/rlinf/envs/robocasa365/robocasa365_env.py b/rlinf/envs/robocasa365/robocasa365_env.py
+new file mode 100644
+index 00000000..18505cfe
+--- /dev/null
++++ b/rlinf/envs/robocasa365/robocasa365_env.py
+@@ -0,0 +1,318 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""RoboCasa365 environment for RLinf, wrapping the user's GrootRoboCasaEnv.
++
++This is the REAL RoboCasa365 (v1.0.0) gym env that the user's GR00T checkpoint
++was SFT'd against, so observations/actions are byte-for-byte aligned with the
++ckpt's training spec. We reuse the generic rollout machinery (metrics,
++chunk_step, auto-reset, reward) from RobocasaEnv and only override the
++env-construction and obs/action plumbing.
++
++Data contract bridged here:
++  - GrootRoboCasaEnv emits GR00T-format dict obs (state.*, video.res256_*,
++    annotation...). We re-flatten it into the RLinf contract
++    (main_images / wrist_images / extra_view_images / states[B,16] /
++    task_descriptions) in _wrap_obs.
++  - The model emits a flat 12-D action; an in-subprocess adapter
++    (_ActionDictAdapter) converts it back into the action dict GrootRoboCasaEnv
++    expects, so the [num_envs, 12] numpy contract stays intact through the base
++    venv/step/chunk_step.
++"""
++
++import gymnasium as gym
++import numpy as np
++import torch
++
++from rlinf.envs.robocasa.robocasa_env import RobocasaEnv
++from rlinf.envs.robocasa365.venv import RoboCasa365SubprocEnv
++from rlinf.envs.utils import list_of_dict_to_dict_of_list, to_tensor
++
++# GrootRoboCasaEnv obs keys (PandaOmronKeyConverter) -> RLinf flat image keys.
++# side_0=agentview_left (main), side_1=agentview_right (extra), wrist_0=eye_in_hand.
++GROOT_IMAGE_KEY_MAPPING = {
++    "main_images": "video.res256_image_side_0",
++    "extra_view_images": "video.res256_image_side_1",
++    "wrist_images": "video.res256_image_wrist_0",
++}
++
++# Raw 16-D state assembled in SFT state_keys order.
++GROOT_STATE_KEYS = [
++    ("state.end_effector_position_relative", 3),
++    ("state.end_effector_rotation_relative", 4),
++    ("state.gripper_qpos", 2),
++    ("state.base_position", 3),
++    ("state.base_rotation", 4),
++]
++
++
++class _ActionDictAdapter(gym.Wrapper):
++    """Converts a flat 12-D action vector into the dict GrootRoboCasaEnv wants.
++
++    Layout (SFT action_keys order):
++        [0:3] eef_position, [3:6] eef_rotation, [6] gripper_close,
++        [7:11] base_motion, [11] control_mode.
++    """
++
++    def step(self, action):
++        a = np.asarray(action, dtype=np.float32).reshape(-1)
++        assert a.shape[0] == 12, f"Expected 12-D action, got {a.shape[0]}"
++        action_dict = {
++            "action.end_effector_position": a[0:3],
++            "action.end_effector_rotation": a[3:6],
++            "action.gripper_close": float(a[6]),
++            "action.base_motion": a[7:11],
++            "action.control_mode": float(a[11]),
++        }
++        return self.env.step(action_dict)
++
++
++class RoboCasa365Env(RobocasaEnv):
++    def _init_env(self):
++        """Build GrootRoboCasaEnv instances under subprocess isolation."""
++        import robocasa  # noqa: F401  register envs
++        import robocasa.utils.gym_utils.gymnasium_groot  # noqa: F401  register groot env ids
++
++        # Two task-assignment strategies, controlled by env cfg flag
++        # `per_rank_single_task` (default False = legacy global round-robin):
++        #
++        # (a) GLOBAL round-robin (default, matches parent RobocasaEnv):
++        #     Every per-rank env_id maps to a different task via the global
++        #     env id. With num_envs=8 and num_tasks=16:
++        #       rank 0  -> tasks [0, 1, 2, 3, 4, 5, 6, 7]
++        #       rank 1  -> tasks [8, 9, 10, 11, 12, 13, 14, 15]
++        #       rank 2  -> tasks [0..7] (wraps), etc.
++        #     Each rank's PPO advantage normalization sees a healthy mix of
++        #     tasks => non-degenerate (mean, std). Use this for fix-lambda
++        #     IBRL, pure RL, and global dynamic-lambda IBRL.
++        #
++        # (b) PER-RANK single-task (opt-in via env.train.per_rank_single_task=True):
++        #     Every env on a given rank runs the SAME task, consecutive ranks
++        #     run consecutive tasks. Required by ibrl_mode=dynamic_per_task,
++        #     so each rank can apply its task's own lambda cleanly. Note: a
++        #     rank's advantage normalization may degenerate when its task is
++        #     all-fail or all-succeed (PPO loss -> 0 for that rank).
++        per_rank_single_task = bool(self.cfg.get("per_rank_single_task", False))
++        self.task_ids = []
++        if per_rank_single_task:
++            task_idx = self.seed_offset % self.num_tasks
++            self.task_ids = np.full(self.num_envs, task_idx, dtype=np.int64)
++        else:
++            # Group-aware (GRPO): all `group_size` envs in a group share one
++            # task, keyed by the global GROUP id. Identity at group_size=1
++            # (global_group_id == legacy global env id). Matches env_seeds set
++            # by the parent RobocasaEnv._init_reset_state_ids so a group's task
++            # and init scene coincide.
++            for env_id in range(self.num_envs):
++                local_group_id = env_id // self.group_size
++                global_group_id = self.seed_offset * self.num_group + local_group_id
++                task_idx = global_group_id % self.num_tasks
++                self.task_ids.append(task_idx)
++            self.task_ids = np.array(self.task_ids)
++
++        env_fns = self.get_env_fns()
++        self.env = RoboCasa365SubprocEnv(env_fns)
++
++    # RoboCasa365 scene distribution ("split") kwargs. The bare-groot gym id
++    # (robocasa_{alias}/{task}_{class}_Env) goes through RoboCasaEnv ->
++    # create_env_robosuite, which — unlike the native-eval env (robocasa/{task}
++    # -> RoboCasaGymEnv -> create_env(split=...)) — receives NO split and thus
++    # falls back to obj_instance_split="pretrain" + layout_and_style_ids=
++    # [[1,1],[2,2],[4,4],[6,9],[7,10]]. RLDX-1's SFT ckpt was trained on the
++    # `target` split (datasets/v1.0/target/composite/*) and native eval
++    # ran with --robocasa_split target => 43.6%; the pretrain fallback is
++    # an out-of-distribution scene set that ~halves rollout SR. These mirror
++    # robocasa.utils.env_utils.create_env's `split=="target"` branch exactly and
++    # ride the __init__ **kwargs passthrough (GrootRoboCasaEnv -> RoboCasaEnv ->
++    # create_env_robosuite) straight to robosuite.make, overriding the defaults.
++    #
++    # GATED on the (default-absent) cfg flag `rldx_robocasa_split`. GR00T
++    # configs never set it, so no split kwargs are passed and the GR00T
++    # train/eval path (gym.make with no scene kwargs) is byte-for-byte identical.
++    @staticmethod
++    def _split_scene_kwargs(split):
++        if split == "target":
++            return {
++                "obj_instance_split": "target",
++                "layout_ids": None,
++                "style_ids": None,
++                "layout_and_style_ids": list(zip(range(1, 11), range(1, 11))),
++            }
++        if split == "pretrain":
++            return {
++                "obj_instance_split": "pretrain",
++                "layout_ids": -2,
++                "style_ids": -2,
++                "layout_and_style_ids": None,
++            }
++        if split == "all":
++            return {
++                "obj_instance_split": None,
++                "layout_ids": -3,
++                "style_ids": -3,
++                "layout_and_style_ids": None,
++            }
++        raise ValueError(
++            f'rldx_robocasa_split must be one of {{target, pretrain, all}}, got {split!r}'
++        )
++
++    def get_env_fns(self):
++        env_fns = []
++        robot_alias = self.cfg.get("robot_alias", "panda_omron")
++        split = self.cfg.get("rldx_robocasa_split", None)
++        scene_kwargs = self._split_scene_kwargs(split) if split is not None else {}
++        for env_id in range(self.num_envs):
++            task_name = self.task_names[self.task_ids[env_id]]
++            env_seed = int(self.env_seeds[env_id])
++            env_class = self.cfg.get("env_class_suffix", "PandaOmron")
++            env_gym_id = f"robocasa_{robot_alias}/{task_name}_{env_class}_Env"
++
++            def env_fn(env_gym_id=env_gym_id, seed=env_seed, scene_kwargs=scene_kwargs):
++                import robocasa.utils.gym_utils.gymnasium_groot  # noqa: F401
++
++                env = gym.make(env_gym_id, disable_env_checker=True, **scene_kwargs)
++                env = env.unwrapped
++                env.reset(seed=seed)
++                return _ActionDictAdapter(env)
++
++            env_fns.append(env_fn)
++        return env_fns
++
++    def _extract_image_and_state(self, obs):
++        """Re-flatten GrootRoboCasaEnv GR00T-format dict obs into arrays.
++
++        Images are already vertically flipped and resized to 256x256 by
++        GrootRoboCasaEnv.get_basic_observation/process_img — DO NOT flip again.
++        """
++        main_images, extra_images, wrist_images, states = [], [], [], []
++
++        for env_id in range(len(obs)):
++            o = obs[env_id]
++            main_images.append(o[GROOT_IMAGE_KEY_MAPPING["main_images"]])
++            extra_images.append(o[GROOT_IMAGE_KEY_MAPPING["extra_view_images"]])
++            wrist_images.append(o[GROOT_IMAGE_KEY_MAPPING["wrist_images"]])
++
++            parts = [
++                np.asarray(o[key], dtype=np.float32).reshape(-1)[:dim]
++                for key, dim in GROOT_STATE_KEYS
++            ]
++            states.append(np.concatenate(parts, axis=-1))
++
++        return {
++            "main_images": np.array(main_images),
++            "extra_view_images": np.array(extra_images),
++            "wrist_images": np.array(wrist_images),
++            "state": np.array(states, dtype=np.float32),
++        }
++
++    def _extract_task_description(self, obs_list):
++        return [
++            o.get("annotation.human.action.task_description", "") for o in obs_list
++        ]
++
++    # ---------------------------------------------------------------- frame stack
++    # RLDX-1's SFT ckpt consumes a MULTI-FRAME temporal video stack per camera
++    # (video delta_indices = [-6,-4,-2,0], i.e. 4 frames at env-step stride 2),
++    # whereas GR00T is single-frame (delta_indices=[0]). The shared RoboCasa365
++    # env otherwise hands the model only the latest frame, which is an
++    # out-of-distribution obs for RLDX-1 and roughly halves its rollout SR.
++    #
++    # This override re-creates the exact stack RLDX-1's native MultiStepWrapper
++    # feeds. That wrapper keeps a deque(maxlen = max|delta|+1 = 7) and, after
++    # running the chunk, returns obs[i] for i in (delta_indices - 1) =
++    # [-7,-5,-3,-1]. Because the RL chunk length (num_action_chunks=16) is
++    # LARGER than that deque, every stacked frame is guaranteed to live inside
++    # the current chunk's own obs_list -- no cross-chunk history is ever needed
++    # (this is why we don't carry a per-env buffer or pad at chunk boundaries).
++    # `chunk_step`'s obs_list already holds all 16 per-env-step observations.
++    #
++    # GATED on the (default-absent) env cfg flag `rldx_frame_stack`. GR00T
++    # configs never set it, so `super().chunk_step` returns unchanged and the
++    # GR00T train/eval path is byte-for-byte identical.
++    _STACK_KEYS = ("main_images", "extra_view_images", "wrist_images")
++
++    def chunk_step(self, chunk_actions):
++        result = super().chunk_step(chunk_actions)
++        if not bool(self.cfg.get("rldx_frame_stack", False)):
++            return result
++
++        obs_list, chunk_rewards, chunk_terminations, chunk_truncations, infos_list = (
++            result
++        )
++        if not isinstance(obs_list, (list, tuple)) or len(obs_list) == 0:
++            return result
++
++        delta = list(
++            self.cfg.get("rldx_frame_stack_delta", [-6, -4, -2, 0])
++        )
++        chunk_len = len(obs_list)
++        # native takes obs[i] for i in (delta - 1); obs_list[-1] is the latest
++        # post-action frame. Clamp so a too-deep delta falls back to the oldest
++        # frame available in this chunk (never indexes past obs_list[0]).
++        stack_idx = [max(d - 1, -chunk_len) for d in delta]
++
++        # Envs that hit done THIS chunk were auto-reset: obs_list[-1] is the new
++        # episode's fresh reset frame. Native re-pads its deque with that frame,
++        # so the stack for those envs must be [reset_frame] * T (NOT a mix of
++        # old-episode frames). Under auto_reset the past done flags are folded
++        # into the last chunk slot (see RobocasaEnv.chunk_step).
++        past_dones = None
++        if bool(self.auto_reset):
++            term_last = chunk_terminations[:, -1]
++            trunc_last = chunk_truncations[:, -1]
++            past_dones = torch.logical_or(term_last, trunc_last)
++
++        last_obs = obs_list[-1]
++        for cam in self._STACK_KEYS:
++            if cam not in last_obs:
++                continue
++            frames = [obs_list[i][cam] for i in stack_idx]  # each [B,H,W,C]
++            stacked = torch.stack(frames, dim=1)  # [B, T, H, W, C]
++            if past_dones is not None and bool(past_dones.any()):
++                # overwrite reset envs with reset_frame repeated over T
++                reset_frame = last_obs[cam]  # [B,H,W,C]
++                T = stacked.shape[1]
++                reset_stack = reset_frame.unsqueeze(1).expand(-1, T, *([-1] * (reset_frame.dim() - 1)))
++                mask = past_dones.to(stacked.device).view(-1, *([1] * (stacked.dim() - 1)))
++                stacked = torch.where(mask, reset_stack, stacked)
++            last_obs[f"stacked_{cam}"] = stacked
++
++        return obs_list, chunk_rewards, chunk_terminations, chunk_truncations, infos_list
++
++    def _wrap_obs(self, obs_list, info_list):
++        extracted = self._extract_image_and_state(obs_list)
++        # Task description lives in the obs dict, not info, for GrootRoboCasaEnv.
++        task_descriptions = self._extract_task_description(obs_list)
++
++        per_env = []
++        for idx in range(self.num_envs):
++            per_env.append(
++                {
++                    "main_images": extracted["main_images"][idx],
++                    "extra_view_images": extracted["extra_view_images"][idx],
++                    "wrist_images": extracted["wrist_images"][idx],
++                    "state": extracted["state"][idx],
++                }
++            )
++        tensors = to_tensor(list_of_dict_to_dict_of_list(per_env))
++
++        obs = {
++            "states": tensors["state"],
++            "task_descriptions": task_descriptions,
++        }
++        for flat_key in ("main_images", "extra_view_images", "wrist_images"):
++            obs[flat_key] = torch.stack(
++                [v.clone() for v in tensors[flat_key]]
++            )
++        return obs
+diff --git a/rlinf/envs/robocasa365/venv.py b/rlinf/envs/robocasa365/venv.py
+new file mode 100644
+index 00000000..2469bc1a
+--- /dev/null
++++ b/rlinf/envs/robocasa365/venv.py
+@@ -0,0 +1,368 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""Subprocess vectorized environment for RoboCasa365 (GrootRoboCasaEnv).
++
++Unlike rlinf.envs.robocasa (which wraps a raw robosuite env returning 4 values
++and needs a _check_success hook), GrootRoboCasaEnv is a gymnasium env: reset ->
++(obs, info), step -> (obs, reward, terminated, truncated, info), and info
++already carries "success". So the worker just forwards the native returns.
++"""
++
++import multiprocessing
++from multiprocessing import connection
++from typing import Any, Callable, Optional, Union
++
++import gymnasium as gym
++import numpy as np
++
++from rlinf.envs.venv import (
++    BaseVectorEnv,
++    CloudpickleWrapper,
++    EnvWorker,
++    ShArray,
++    SubprocEnvWorker,
++    SubprocVectorEnv,
++    _setup_buf,
++)
++
++
++def _worker(
++    parent: connection.Connection,
++    p: connection.Connection,
++    env_fn_wrapper: CloudpickleWrapper,
++    obs_bufs: Optional[Union[dict, tuple, ShArray]] = None,
++) -> None:
++    def _encode_obs(
++        obs: Union[dict, tuple, np.ndarray], buffer: Union[dict, tuple, ShArray]
++    ) -> None:
++        if isinstance(obs, np.ndarray) and isinstance(buffer, ShArray):
++            buffer.save(obs)
++        elif isinstance(obs, tuple) and isinstance(buffer, tuple):
++            for o, b in zip(obs, buffer):
++                _encode_obs(o, b)
++        elif isinstance(obs, dict) and isinstance(buffer, dict):
++            for k in obs.keys():
++                _encode_obs(obs[k], buffer[k])
++        return None
++
++    parent.close()
++    env = env_fn_wrapper.data()
++    # Per-env latched state for incremental dense reward (variant C).
++    # Only fires reward on FIRST-TIME completion of each progress subtask
++    # and the outcome. Reset to 0 on env.reset().
++    #   _latched_n_done: max n_total_done seen so far this episode
++    #   _latched_outcome: True once env._check_success() ever fired
++    latched_n_done = 0
++    latched_outcome = False
++
++    # Per-env TimingReward (stage-based, demo-timing-budgeted dense reward).
++    # Built lazily on first step (we need the leaf env's class name to pick
++    # the task's stage def + budgets) and rebuilt on every env.reset() so each
++    # episode times from t=0. This is the SAME reward the offline video overlay
++    # (structrl/visualize_timing_reward.py) renders.
++    timing_reward = None
++    timing_data = None
++    timing_task_name = None
++    try:
++        while True:
++            try:
++                cmd, data = p.recv()
++            except EOFError:  # the pipe has been closed
++                p.close()
++                break
++            if cmd == "step":
++                # GrootRoboCasaEnv.step -> (obs, reward, terminated, truncated, info)
++                env_return = env.step(data)
++                # Inject dense subtask-progress reward into info dict so the
++                # main process can pick it up and (optionally) replace the
++                # sparse 0/1 outcome reward with it. Compute here in the
++                # subprocess because env.sim.data / env.coffee_machine etc.
++                # live in this process, not in the main process.
++                # ALWAYS write the keys (even on failure → 0.0 fallback) so
++                # list_of_dict_to_dict_of_list in the main process sees a
++                # consistent key set across all envs.
++                obs_, reward_, term_, trunc_, info_ = env_return
++                if not isinstance(info_, dict):
++                    info_ = dict(info_) if info_ else {}
++                # Variant C (latched / first-time-only) outputs:
++                #   _dr_total: incremental reward this step (0 most steps,
++                #              0..1/N_total at first completion of a progress,
++                #              1.0 at first outcome=True)
++                #   _dr_inst_*: also report the instantaneous (variant A) values
++                #              for diagnostics so we can compare side-by-side
++                _dr_total, _dr_prog_inc, _dr_out_inc = 0.0, 0.0, 0.0
++                _dr_inst_total, _dr_inst_prog, _dr_inst_out = 0.0, 0.0, 0.0
++                _dr_nd, _dr_nt = 0, 0
++                try:
++                    # The structrl copy in site-packages is a stale partial
++                    # (only __init__ + robocasa_data_config), missing the
++                    # timing-reward modules. The full source lives in the
++                    # project root, so prepend it to sys.path before importing
++                    # so we resolve to source, not the stale site-packages copy.
++                    # Independent of PYTHONPATH inheritance into spawned workers.
++                    import os
++                    import sys
++                    _proj_root = os.environ.get(
++                        "STRUCTRL_PROJECT_ROOT",
++                        os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..")),
++                    )
++                    # The sbatch heredoc may leave this as an unexpanded
++                    # literal (e.g. '"${PROJECT_ROOT}"') when eval'd in the
++                    # main shell. Validate it points at a real structrl dir;
++                    # fall back to the known absolute path otherwise.
++                    if not os.path.isdir(os.path.join(_proj_root, "structrl")):
++                        _proj_root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))
++                    if _proj_root not in sys.path:
++                        sys.path.insert(0, _proj_root)
++                    # Drop any already-imported stale structrl so the source
++                    # copy (with subtask_checker etc.) is the one loaded.
++                    _stale = getattr(
++                        sys.modules.get("structrl", None), "__file__", ""
++                    ) or ""
++                    if "site-packages" in _stale:
++                        for _m in list(sys.modules):
++                            if _m == "structrl" or _m.startswith("structrl."):
++                                del sys.modules[_m]
++                    from structrl.subtask_checker import get_subtask_states
++                    from structrl.timing_reward_builder import (
++                        build_timing_reward,
++                        load_timing_data,
++                    )
++                    # Reward variant (STRUCTRL_REWARD_VARIANT):
++                    #   structrl (= smooth_band): the paper's reward, gated
++                    #       subtask credit paced by beta / (1 + T / T_d);
++                    #   fixed (= flat): gated fixed subtask reward (ablation);
++                    #   smooth_band_cap10: beta = 1.0 (beta sweep);
++                    #   timing (default), smooth_timing: earlier variants with
++                    #       a persistent stuck penalty (not used in the paper).
++                    _reward_variant = os.environ.get(
++                        "STRUCTRL_REWARD_VARIANT", "timing"
++                    ).strip().lower()
++                    _reward_variant = {
++                        "structrl": "smooth_band", "fixed": "flat",
++                    }.get(_reward_variant, _reward_variant)
++                    # Unwrap to the leaf robosuite env. Layer chain in
++                    # rlinf/envs/robocasa365/robocasa365_env.py:get_env_fns:
++                    #   _ActionDictAdapter (env) -> GrootRoboCasaEnv (env)
++                    #     -> robosuite robocasa task env
++                    # So we need 3 levels of `.env`. Walk it dynamically in
++                    # case the wrapper depth changes.
++                    inner = env
++                    for _ in range(5):  # bounded; usually 2 hops
++                        if hasattr(inner, "_check_success"):
++                            break
++                        if not hasattr(inner, "env"):
++                            break
++                        inner = inner.env
++
++                    # Lazily build the reward object for this env's task.
++                    if timing_reward is None:
++                        if timing_data is None:
++                            timing_data = load_timing_data()
++                        timing_task_name = type(inner).__name__
++                        if _reward_variant == "flat":
++                            from structrl.flat_reward import build_flat_reward
++                            timing_reward = build_flat_reward(
++                                timing_task_name, timing_data
++                            )
++                        elif _reward_variant == "smooth_timing":
++                            # Full timing reward (#1+#2+#3) with ONLY the ratio
++                            # band's functional form swapped from the 3-piece
++                            # piecewise map to the smooth knob-free curve
++                            # 0.6/(1+ratio). persistent + outcome unchanged.
++                            from structrl.smooth_timing_reward import (
++                                build_smooth_timing_reward,
++                            )
++                            timing_reward = build_smooth_timing_reward(
++                                timing_task_name, timing_data
++                            )
++                        elif _reward_variant == "smooth_band":
++                            # Continuous band (#1 + #2 smooth 0.6/(1+ratio)) but
++                            # NO persistent stuck penalty (#3). Smooth-curve
++                            # counterpart of "band"; smooth_band vs smooth_timing
++                            # isolates r_persistent under the continuous band.
++                            from structrl.smooth_band_reward import (
++                                build_smooth_band_reward,
++                            )
++                            timing_reward = build_smooth_band_reward(
++                                timing_task_name, timing_data
++                            )
++                        elif _reward_variant == "smooth_band_cap10":
++                            # smooth_band with the continuous band cap raised
++                            # 0.6 -> 1.0 (numerator 1.0/(1+ratio); anchor at
++                            # ratio=1 moves 0.3 -> 0.5). No persistent penalty,
++                            # same form as smooth_band otherwise.
++                            from structrl.smooth_band_cap10_reward import (
++                                build_smooth_band_cap10_reward,
++                            )
++                            timing_reward = build_smooth_band_cap10_reward(
++                                timing_task_name, timing_data
++                            )
++                        else:
++                            timing_reward = build_timing_reward(
++                                timing_task_name, timing_data
++                            )
++
++                    grouped = get_subtask_states(inner)
++                    success = bool(inner._check_success())
++
++                    # Advance the timer in REAL sim-step units. robosuite's
++                    # env.timestep is the per-sim-step counter; budgets are
++                    # sim-step-based, so pass it explicitly (same as the video
++                    # overlay) rather than relying on TimingReward's internal
++                    # +1, which would count chunk-sub-steps inconsistently.
++                    sim_t = None
++                    try:
++                        sim_t = int(getattr(inner, "timestep"))
++                    except Exception:
++                        sim_t = None
++                    tinfo = timing_reward.step(grouped, success, sim_t=sim_t)
++
++                    # r_total is the per-step timing reward that DRIVES PPO.
++                    _dr_total = float(tinfo["r_total"])
++                    _dr_prog_inc = float(tinfo["r_event"]) + float(
++                        tinfo["r_persistent"]
++                    )
++                    _dr_out_inc = float(tinfo["r_outcome"])
++                    # Reuse the n_done/n_total channels for stage progress so
++                    # the existing env_worker diagnostics still populate.
++                    _dr_nd = int(tinfo["stage_idx_after"])
++                    _dr_nt = int(timing_reward.K)
++                    _dr_inst_total = float(tinfo["cumulative"])
++                    _dr_inst_prog = float(tinfo["cumulative_progress"])
++                    _dr_inst_out = float(tinfo["cumulative_outcome"])
++                    latched_outcome = bool(tinfo["cumulative_outcome"] > 0)
++                    latched_n_done = _dr_nd
++                except Exception as _e:
++                    # First-time error — log to stderr in subprocess so we
++                    # can see WHY dense reward fails. Subsequent errors
++                    # silenced to avoid spam.
++                    if not getattr(_worker, "_logged_dr_err", False):
++                        import sys
++                        import traceback
++                        print(f"[venv worker] timing_reward error: {type(_e).__name__}: {_e}", file=sys.stderr, flush=True)
++                        traceback.print_exc()
++                        _worker._logged_dr_err = True
++                # Timing reward (the one that actually replaces chunk_rewards
++                # in env_worker.py when dense_reward.enabled=True)
++                info_["dense_reward"] = _dr_total
++                info_["dense_reward_progress"] = _dr_prog_inc
++                info_["dense_reward_outcome"] = _dr_out_inc
++                info_["dense_reward_n_done"] = _dr_nd
++                info_["dense_reward_n_total"] = _dr_nt
++                # Side-channel: cumulative timing totals for logging
++                info_["dense_reward_inst"] = _dr_inst_total
++                info_["dense_reward_inst_progress"] = _dr_inst_prog
++                info_["dense_reward_inst_outcome"] = _dr_inst_out
++                # Latched state visible for plotting
++                info_["dense_reward_latched_n_done"] = latched_n_done
++                info_["dense_reward_latched_outcome"] = (
++                    1 if latched_outcome else 0
++                )
++                env_return = (obs_, reward_, term_, trunc_, info_)
++                if obs_bufs is not None:
++                    _encode_obs(env_return[0], obs_bufs)
++                    env_return = (None, *env_return[1:])
++                p.send(env_return)
++            elif cmd == "reset":
++                # GrootRoboCasaEnv.reset -> (obs, info)
++                retval = env.reset(**data)
++                reset_returns_info = (
++                    isinstance(retval, (tuple, list))
++                    and len(retval) == 2
++                    and isinstance(retval[1], dict)
++                )
++                if reset_returns_info:
++                    obs, info = retval
++                else:
++                    obs = retval
++                    info = {}
++                # CRITICAL: clear latched state on reset so each new episode
++                # starts fresh. Without this, the second episode's first
++                # progress completion would be silently swallowed.
++                latched_n_done = 0
++                latched_outcome = False
++                # Reset the TimingReward so the new episode times from t=0
++                # (stage_idx, subtask_start_step, cumulative all cleared).
++                if timing_reward is not None:
++                    timing_reward.reset()
++                if obs_bufs is not None:
++                    _encode_obs(obs, obs_bufs)
++                    obs = None
++                p.send((obs, info))
++            elif cmd == "close":
++                p.send(env.close())
++                p.close()
++                break
++            elif cmd == "render":
++                p.send(env.render(**data) if hasattr(env, "render") else None)
++            elif cmd == "seed":
++                if hasattr(env, "seed"):
++                    p.send(env.seed(data))
++                else:
++                    env.reset(seed=data)
++                    p.send(None)
++            elif cmd == "getattr":
++                p.send(getattr(env, data) if hasattr(env, data) else None)
++            elif cmd == "setattr":
++                setattr(env.unwrapped, data["key"], data["value"])
++            else:
++                p.close()
++                raise NotImplementedError(f"Unknown command: {cmd}")
++    except KeyboardInterrupt:
++        p.close()
++
++
++class RoboCasa365SubprocEnvWorker(SubprocEnvWorker):
++    def __init__(self, env_fn: Callable[[], gym.Env], share_memory: bool = False):
++        # spawn context to avoid MuJoCo/OpenGL fork issues
++        ctx = multiprocessing.get_context("spawn")
++        self.parent_remote, self.child_remote = ctx.Pipe()
++        self.share_memory = share_memory
++        self.buffer: Optional[Union[dict, tuple, ShArray]] = None
++        if self.share_memory:
++            dummy = env_fn()
++            obs_space = dummy.observation_space
++            dummy.close()
++            del dummy
++            self.buffer = _setup_buf(obs_space)
++        args = (
++            self.parent_remote,
++            self.child_remote,
++            CloudpickleWrapper(env_fn),
++            self.buffer,
++        )
++        self.process = ctx.Process(target=_worker, args=args, daemon=True)
++        self.process.start()
++        self.child_remote.close()
++        EnvWorker.__init__(self, env_fn)
++
++
++class RoboCasa365SubprocEnv(SubprocVectorEnv):
++    def __init__(self, env_fns: list[Callable[[], gym.Env]], **kwargs: Any) -> None:
++        def worker_fn(fn: Callable[[], gym.Env]) -> RoboCasa365SubprocEnvWorker:
++            # Robosuite dict observations work better without shared memory.
++            return RoboCasa365SubprocEnvWorker(fn, share_memory=False)
++
++        BaseVectorEnv.__init__(self, env_fns, worker_fn, **kwargs)
++
++    def step(self, action, id=None):
++        # GrootRoboCasaEnv is gymnasium-style: workers return 5 values
++        # (obs, reward, terminated, truncated, info). RobocasaEnv.step expects
++        # the robosuite 4-tuple (obs, reward, done, info) and recomputes
++        # terminations/truncations itself, so collapse the two done flags here.
++        obs, reward, terminated, truncated, info = super().step(action, id)
++        done = np.logical_or(terminated, truncated)
++        return obs, reward, done, info
+diff --git a/rlinf/models/__init__.py b/rlinf/models/__init__.py
+index 275b3e1c..978ce3ee 100644
+--- a/rlinf/models/__init__.py
++++ b/rlinf/models/__init__.py
+@@ -81,6 +81,11 @@ def _register_builtin_models():
+ 
+         return get_model(cfg, torch_dtype)
+ 
++    def _build_rldx1(cfg: DictConfig, torch_dtype):
++        from rlinf.models.embodiment.rldx1 import get_model
++
++        return get_model(cfg, torch_dtype)
++
+     def _build_cnn_policy(cfg: DictConfig, torch_dtype):
+         from rlinf.models.embodiment.cnn_policy import get_model
+ 
+@@ -158,6 +163,12 @@ def _register_builtin_models():
+         category="embodied",
+         force=True,
+     )
++    register_model(
++        "rldx1",
++        _build_rldx1,
++        category="embodied",
++        force=True,
++    )
+     register_model(
+         SupportedModel.CNN_POLICY.value,
+         _build_cnn_policy,
+diff --git a/rlinf/models/embodiment/gr00t/__init__.py b/rlinf/models/embodiment/gr00t/__init__.py
+index ee7bb248..3dac7292 100644
+--- a/rlinf/models/embodiment/gr00t/__init__.py
++++ b/rlinf/models/embodiment/gr00t/__init__.py
+@@ -47,6 +47,10 @@ def get_model(cfg: DictConfig, torch_dtype=torch.bfloat16):
+         data_config = load_data_config(
+             "rlinf.models.embodiment.gr00t.modality_config:ManiskillWidowXDataConfig"
+         )
++    elif cfg.embodiment_tag == "new_embodiment":
++        data_config = load_data_config(
++            "rlinf.models.embodiment.gr00t.modality_config:RobocasaPandaOmronDataConfig"
++        )
+     else:
+         raise ValueError(f"Invalid embodiment tag: {cfg.embodiment_tag}")
+     modality_config = data_config.modality_config()
+diff --git a/rlinf/models/embodiment/gr00t/embodiment_tags.py b/rlinf/models/embodiment/gr00t/embodiment_tags.py
+index b160ebb8..c75ba132 100644
+--- a/rlinf/models/embodiment/gr00t/embodiment_tags.py
++++ b/rlinf/models/embodiment/gr00t/embodiment_tags.py
+@@ -47,6 +47,11 @@ class EmbodimentTag(Enum):
+     The isaaclab Franka dataset.
+     """
+ 
++    NEW_EMBODIMENT = "new_embodiment"
++    """
++    The new_embodiment tag used by RoboCasa365-finetuned GR00T checkpoints.
++    """
++
+ 
+ # Embodiment tag string: to projector index in the Action Expert Module
+ EMBODIMENT_TAG_MAPPING = {
+@@ -56,4 +61,5 @@ EMBODIMENT_TAG_MAPPING = {
+     EmbodimentTag.GR1.value: 24,
+     EmbodimentTag.MANISKILL_WIDOWX.value: 30,
+     EmbodimentTag.ISAACLAB_FRANKA.value: 31,
++    EmbodimentTag.NEW_EMBODIMENT.value: 31,
+ }
+diff --git a/rlinf/models/embodiment/gr00t/gr00t_action_model.py b/rlinf/models/embodiment/gr00t/gr00t_action_model.py
+index e145c3b2..5b8f6b4d 100644
+--- a/rlinf/models/embodiment/gr00t/gr00t_action_model.py
++++ b/rlinf/models/embodiment/gr00t/gr00t_action_model.py
+@@ -108,6 +108,7 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+         idx: Optional[int | torch.Tensor],
+         mode: Literal["train", "eval"] = "train",
+         compute_values=False,
++        vl_attn_mask: Optional[torch.Tensor] = None,
+     ):
+         """
+         Sample the mean, variance and value of the action at a given timestep.
+@@ -158,6 +159,7 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+         model_output = self.model(
+             hidden_states=sa_embs,
+             encoder_hidden_states=vl_embs,
++            encoder_attention_mask=vl_attn_mask,
+             timestep=timesteps_tensor,
+         )
+         model_output = model_output[:, -self.action_horizon :]
+@@ -226,6 +228,7 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+         backbone_output = self.process_backbone_output(backbone_output)
+         # Get vision and language embeddings.
+         vl_embs = backbone_output.backbone_features
++        vl_attn_mask = backbone_output.get("backbone_attention_mask", None)
+         embodiment_id = action_input.embodiment_id
+         # Embed state.
+         state_features = self.state_encoder(action_input.state, embodiment_id)
+@@ -287,6 +290,7 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+                     mode="train",
+                     denoise_steps=num_steps,
+                     compute_values=compute_values,
++                    vl_attn_mask=vl_attn_mask,
+                 )
+             else:
+                 x_t_mean, x_t_std = self.sample_mean_var_val(
+@@ -298,6 +302,7 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+                     mode="eval",
+                     denoise_steps=num_steps,
+                     compute_values=compute_values,
++                    vl_attn_mask=vl_attn_mask,
+                 )
+ 
+             x_t = x_t_mean + self.sample_noise(x_t.shape, device) * x_t_std
+@@ -312,7 +317,7 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+             :, :, : self.action_chunk, : self.valid_action_dim
+         ]
+         if compute_values:
+-            values = self.get_value(vl_embs, state_features)
++            values = self.get_value(vl_embs, state_features, vl_attn_mask=vl_attn_mask)
+             values = values[:, None]
+         else:
+             values = torch.zeros((batch_size, 1), device=device, dtype=vl_embs.dtype)
+@@ -332,13 +337,26 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+         self,
+         backbone_output: BatchFeature,
+         action_input: BatchFeature,
+-        chains,
+-        denoise_inds,
++        chains=None,
++        denoise_inds=None,
+         compute_values=True,
++        mode: str = "rl",
+     ):
++        # IBRL: route BC forward through this wrapped class so FSDP hooks
++        # gather all submodule params (vlln, vl_self_attention, model, etc.).
++        if mode == "bc":
++            # Rebuild Beta dist with fp32 concentrations — `model.to(bf16)`
++            # would have cast its params, breaking _sample_dirichlet.
++            from torch.distributions import Beta
++            self.beta_dist = Beta(
++                float(self.config.noise_beta_alpha),
++                float(self.config.noise_beta_beta),
++            )
++            return FlowmatchingActionHead.forward(self, backbone_output, action_input)
+         backbone_output = self.process_backbone_output(backbone_output)
+         # Get vision and language embeddings.
+         vl_embs = backbone_output.backbone_features
++        vl_attn_mask = backbone_output.get("backbone_attention_mask", None)
+         embodiment_id = action_input.embodiment_id
+         # Embed state.
+         state_features = self.state_encoder(action_input.state, embodiment_id)
+@@ -370,13 +388,14 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+                 mode="train",
+                 denoise_steps=self.num_inference_timesteps,
+                 compute_values=compute_values,
++                vl_attn_mask=vl_attn_mask,
+             )
+             log_probs = self.get_logprob_norm(chains_next, x_t_mean, x_t_std)
+             chains_log_probs.append(log_probs)
+ 
+         chains_log_probs = torch.stack(chains_log_probs, dim=1)
+         if compute_values:
+-            chains_values = self.get_value(vl_embs, state_features)
++            chains_values = self.get_value(vl_embs, state_features, vl_attn_mask=vl_attn_mask)
+             chains_values = chains_values[:, None]
+         else:
+             chains_values = torch.zeros(
+@@ -393,7 +412,7 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+             device=device,
+         )
+ 
+-    def get_value(self, vl_embs, state_features):
++    def get_value(self, vl_embs, state_features, vl_attn_mask=None):
+         # TODO: add value vlm mode param
+         bsize = vl_embs.shape[0]
+         mask_length = vl_embs.shape[1]
+@@ -404,7 +423,12 @@ class FlowMatchingActionHeadForRLActionPrediction(FlowmatchingActionHead):
+         elif self.rl_config.value_vlm_mode == "first_token":
+             prefix_mask = [True] * 1 + [False] * (mask_length - 1)
+         vl_embs_value = vl_embs[:, prefix_mask, :]
+-        vl_embs_value = vl_embs_value.mean(dim=1, keepdim=False)
++        if self.rl_config.value_vlm_mode == "mean_token" and vl_attn_mask is not None:
++            # Exclude padded VL tokens from the mean so the value isn't diluted.
++            m = vl_attn_mask[:, prefix_mask].to(vl_embs_value.dtype).unsqueeze(-1)
++            vl_embs_value = (vl_embs_value * m).sum(dim=1) / m.sum(dim=1).clamp(min=1.0)
++        else:
++            vl_embs_value = vl_embs_value.mean(dim=1, keepdim=False)
+         # vl_embs_value = vl_embs_value.to(dtype=torch.float32)
+         state_features_value = state_features.reshape(bsize, -1)
+         if self.rl_config.use_vlm_value:
+@@ -493,9 +517,60 @@ class GR00T_N1_5_ForRLActionPrediction(GR00T_N1_5, BasePolicy):
+     def forward(self, forward_type=ForwardType.DEFAULT, **kwargs):
+         if forward_type == ForwardType.DEFAULT:
+             return self.default_forward(**kwargs)
++        elif forward_type == ForwardType.SFT:
++            return self.sft_forward(**kwargs)
+         else:
+             raise NotImplementedError
+ 
++    def _ensure_beta_dist_fp32(self) -> None:
++        """The Beta distribution used inside FlowmatchingActionHead.sample_time
++        breaks when its concentration params are cast to bf16 (dirichlet not
++        implemented for bf16). After `model.to(bfloat16)` cascades through the
++        action_head, those params become bf16 and the BC forward fails. Re-pin
++        them to fp32. The values are scalar python constants (1.5, 1.0) so this
++        only flips the dtype of two tiny tensors.
++        """
++        try:
++            from torch.distributions import Beta
++            cfg = self.action_head.config
++            self.action_head.beta_dist = Beta(
++                float(cfg.noise_beta_alpha), float(cfg.noise_beta_beta)
++            )
++        except Exception:
++            pass
++
++    def sft_forward(self, data, **kwargs) -> torch.Tensor:
++        """Compute the flow-matching BC loss on a (observation, action) batch
++        produced by an Isaac-GR00T LeRobot dataloader (already passed through
++        modality_transform).
++
++        `data` is a tuple `(observation_dict, actions_tensor_or_dict)`:
++            - observation_dict: dict with keys video.*/state.*/annotation.* etc.
++            - actions: either already merged into observation_dict under
++              action.* keys, OR a separate dict that we merge in here.
++
++        Returns a scalar loss tensor (mean MSE on velocity prediction with
++        action mask, as in FlowmatchingActionHead.forward).
++        """
++        observation, actions = data
++        # Merge action keys into the inputs dict if they came in separately.
++        inputs = dict(observation)
++        if isinstance(actions, dict):
++            for k, v in actions.items():
++                inputs[k] = v
++        elif actions is not None:
++            inputs["action"] = actions
++
++        self._ensure_beta_dist_fp32()
++        backbone_inputs, action_inputs = self.prepare_input(inputs)
++        backbone_outputs = self.backbone(backbone_inputs)
++        # Route through the wrapped action_head's forward with mode="bc" so
++        # FSDP gathers the submodule params before computing the BC loss.
++        action_head_outputs = self.action_head(
++            backbone_outputs, action_inputs, mode="bc"
++        )
++        return action_head_outputs["loss"]
++
+     def default_forward(
+         self,
+         forward_inputs: dict[str, torch.Tensor],
+@@ -567,6 +642,15 @@ class GR00T_N1_5_ForRLActionPrediction(GR00T_N1_5, BasePolicy):
+         mode: Literal["train", "eval"] = "train",
+         **kwargs,
+     ) -> tuple[torch.Tensor, dict[str, Any]]:
++        import os as _os
++
++        _dbg = _os.environ.get("RLINF_DUMP_DIR", "")
++        _do_dump = bool(_dbg) and not getattr(self, "_dumped_once", False)
++        if _do_dump:
++            _os.makedirs(_dbg, exist_ok=True)
++            _snap = {f"env_obs.{k}": (v.detach().cpu() if torch.is_tensor(v) else v)
++                     for k, v in env_obs.items()}
++
+         # Here we have a source causing tiny inference-training inconsistency,
+         # force convert the state to bf16 then back to float32 to reproduce the info loss in training.
+         env_obs["states"] = env_obs["states"].to(torch.bfloat16)
+@@ -591,6 +675,11 @@ class GR00T_N1_5_ForRLActionPrediction(GR00T_N1_5, BasePolicy):
+             if normalized_input[key].dtype == torch.float32:
+                 normalized_input[key] = normalized_input[key].to(torch.bfloat16)
+ 
++        # Pad eagle_input_ids/attention_mask to a fixed length so multi-task RL
++        # can cat/stack variable-length sequences. The padding mask (0 on pad)
++        # is threaded through vl_self_attention + DiT cross-attn + the critic's
++        # mean-token value, so padded tokens never contaminate real tokens
++        # (verified: padded-1024 === no-pad, max-diff 0).
+         normalized_input["eagle_input_ids"] = torch.nn.functional.pad(
+             normalized_input["eagle_input_ids"],
+             pad=(0, self.padding_value - normalized_input["eagle_input_ids"].shape[-1]),
+@@ -617,6 +706,21 @@ class GR00T_N1_5_ForRLActionPrediction(GR00T_N1_5, BasePolicy):
+             unnormalized_action, chunk_size=self.output_action_chunks
+         )
+ 
++        if _do_dump:
++            for k, v in normalized_input.items():
++                _snap[f"norm_in.{k}"] = (
++                    v.detach().cpu() if torch.is_tensor(v) else v
++                )
++            for k, v in unnormalized_action.items():
++                _snap[f"unnorm_act.{k}"] = (
++                    v.detach().cpu() if torch.is_tensor(v) else np.asarray(v)
++                )
++            _snap["raw_action"] = np.asarray(raw_action)
++            _snap["mode"] = mode
++            torch.save(_snap, _os.path.join(_dbg, "rlinf_frame0.pt"))
++            self._dumped_once = True
++            print(f"[RLINF_DUMP] wrote frame0 snapshot to {_dbg}", flush=True)
++
+         return torch.from_numpy(raw_action), result
+ 
+     def apply_transforms(self, obs: dict[str, Any]) -> dict[str, Any]:
+@@ -654,7 +758,10 @@ class GR00T_N1_5_ForRLActionPrediction(GR00T_N1_5, BasePolicy):
+         # Because the behavior of backbones remains the same for training and inference, we can use `forward` for backbones.
+         backbone_outputs = self.backbone(backbone_inputs)
+         action_head_outputs, rlinf_outputs = self.action_head.get_rl_action(
+-            backbone_outputs, action_inputs, mode=mode
++            backbone_outputs,
++            action_inputs,
++            mode=mode,
++            compute_values=self.action_head.rl_config.add_value_head,
+         )
+         actions = rlinf_outputs["actions"]
+         self.validate_data(action_head_outputs, backbone_outputs, is_training=False)
+diff --git a/rlinf/models/embodiment/gr00t/modality_config.py b/rlinf/models/embodiment/gr00t/modality_config.py
+index 91ea7533..00c56d6b 100644
+--- a/rlinf/models/embodiment/gr00t/modality_config.py
++++ b/rlinf/models/embodiment/gr00t/modality_config.py
+@@ -90,6 +90,103 @@ class ManiskillWidowXDataConfig(BaseDataConfig):
+         return ComposedModalityTransform(transforms=transforms)
+ 
+ 
++class RobocasaPandaOmronDataConfig(BaseDataConfig):
++    """RoboCasa365 PandaOmron config for the new_embodiment GR00T checkpoint.
++
++    Byte-for-byte replica of the SFT data config
++    (structrl.robocasa_data_config:RobocasaPandaOmronConfig, which is
++    SinglePandaGripperDataConfig with the RoboCasa365 video key names).
++    Keep keys, ordering, normalization modes and target rotations identical to
++    the SFT spec — any drift silently breaks RL inference alignment.
++    """
++
++    video_keys = [
++        "video.robot0_agentview_left",
++        "video.robot0_agentview_right",
++        "video.robot0_eye_in_hand",
++    ]
++    state_keys = [
++        "state.end_effector_position_relative",
++        "state.end_effector_rotation_relative",
++        "state.gripper_qpos",
++        "state.base_position",
++        "state.base_rotation",
++    ]
++    action_keys = [
++        "action.end_effector_position",
++        "action.end_effector_rotation",
++        "action.gripper_close",
++        "action.base_motion",
++        "action.control_mode",
++    ]
++    language_keys = ["annotation.human.action.task_description"]
++    observation_indices = [0]
++    action_indices = list(range(16))
++
++    state_normalization_modes = {
++        "state.end_effector_position_relative": "min_max",
++        "state.end_effector_rotation_relative": "min_max",
++        "state.gripper_qpos": "min_max",
++        "state.base_position": "min_max",
++        "state.base_rotation": "min_max",
++    }
++    state_target_rotations = {
++        "state.end_effector_rotation_relative": "rotation_6d",
++        "state.base_rotation": "rotation_6d",
++    }
++    action_normalization_modes = {
++        "action.end_effector_position": "min_max",
++        "action.end_effector_rotation": "min_max",
++        "action.gripper_close": "binary",
++        "action.base_motion": "min_max",
++        "action.control_mode": "binary",
++    }
++
++    def transform(self) -> ModalityTransform:
++        transforms = [
++            # video transforms
++            VideoToTensor(apply_to=self.video_keys),
++            VideoCrop(apply_to=self.video_keys, scale=0.95),
++            VideoResize(
++                apply_to=self.video_keys, height=224, width=224, interpolation="linear"
++            ),
++            VideoColorJitter(
++                apply_to=self.video_keys,
++                brightness=0.3,
++                contrast=0.4,
++                saturation=0.5,
++                hue=0.08,
++            ),
++            VideoToNumpy(apply_to=self.video_keys),
++            # state transforms
++            StateActionToTensor(apply_to=self.state_keys),
++            StateActionTransform(
++                apply_to=self.state_keys,
++                normalization_modes=self.state_normalization_modes,
++                target_rotations=self.state_target_rotations,
++            ),
++            # action transforms
++            StateActionToTensor(apply_to=self.action_keys),
++            StateActionTransform(
++                apply_to=self.action_keys,
++                normalization_modes=self.action_normalization_modes,
++            ),
++            # concat transforms
++            ConcatTransform(
++                video_concat_order=self.video_keys,
++                state_concat_order=self.state_keys,
++                action_concat_order=self.action_keys,
++            ),
++            GR00TTransform(
++                state_horizon=len(self.observation_indices),
++                action_horizon=len(self.action_indices),
++                max_state_dim=64,
++                max_action_dim=32,
++            ),
++        ]
++        return ComposedModalityTransform(transforms=transforms)
++
++
+ class LiberoFrankaDataConfig(BaseDataConfig):
+     video_keys = [
+         "video.image",
+diff --git a/rlinf/models/embodiment/gr00t/sft_data_config.py b/rlinf/models/embodiment/gr00t/sft_data_config.py
+new file mode 100644
+index 00000000..63b9c922
+--- /dev/null
++++ b/rlinf/models/embodiment/gr00t/sft_data_config.py
+@@ -0,0 +1,53 @@
++"""Data config for BC/SFT training on RoboCasa365 LeRobot datasets.
++
++Mirrors `PandaOmronDataConfig` from the robocasa-benchmark Isaac-GR00T fork
++(used by the official paper SFT) so that BC loss computed here lines up
++with the loss used to train the released `composite_seen/checkpoint-60000`
++ckpt we start from.
++"""
++from gr00t.experiment.data_config import BimanualPandaGripperDataConfig
++
++
++class RobocasaPandaOmronSFTConfig(BimanualPandaGripperDataConfig):
++    video_keys = [
++        "video.robot0_agentview_left",
++        "video.robot0_agentview_right",
++        "video.robot0_eye_in_hand",
++    ]
++    state_keys = [
++        "state.end_effector_position_relative",
++        "state.end_effector_rotation_relative",
++        "state.gripper_qpos",
++        "state.base_position",
++        "state.base_rotation",
++    ]
++    action_keys = [
++        "action.end_effector_position",
++        "action.end_effector_rotation",
++        "action.gripper_close",
++        "action.base_motion",
++        "action.control_mode",
++    ]
++
++    language_keys = ["annotation.human.task_description"]
++    observation_indices = [0]
++    action_indices = list(range(16))
++
++    state_normalization_modes = {
++        "state.end_effector_position_relative": "min_max",
++        "state.end_effector_rotation_relative": "min_max",
++        "state.gripper_qpos": "min_max",
++        "state.base_position": "min_max",
++        "state.base_rotation": "min_max",
++    }
++    state_target_rotations = {
++        "state.end_effector_rotation_relative": "rotation_6d",
++        "state.base_rotation": "rotation_6d",
++    }
++    action_normalization_modes = {
++        "action.end_effector_position": "min_max",
++        "action.end_effector_rotation": "min_max",
++        "action.gripper_close": "binary",
++        "action.base_motion": "min_max",
++        "action.control_mode": "binary",
++    }
+diff --git a/rlinf/models/embodiment/gr00t/simulation_io.py b/rlinf/models/embodiment/gr00t/simulation_io.py
+index 0c68a57d..fd099792 100644
+--- a/rlinf/models/embodiment/gr00t/simulation_io.py
++++ b/rlinf/models/embodiment/gr00t/simulation_io.py
+@@ -139,17 +139,99 @@ def convert_to_isaaclab_stack_cube_action(
+     return action_array
+ 
+ 
++def convert_robocasa365_obs_to_gr00t_format(env_obs):
++    """Convert the RLinf flat obs contract into GR00T modality keys for the
++    RoboCasa365 PandaOmron checkpoint (embodiment_tag=new_embodiment).
++
++    The env wrapper (RoboCasa365Env._wrap_obs) emits:
++        states            : [B, 16]  raw, SFT state_keys order:
++                            eef_pos_rel(3), eef_rot_rel(4 quat), gripper_qpos(2),
++                            base_pos(3), base_rot(4 quat)
++        main_images       : [B, 256, 256, 3]  robot0_agentview_left  (already vflip+resized)
++        extra_view_images : [B, 256, 256, 3]  robot0_agentview_right
++        wrist_images      : [B, 256, 256, 3]  robot0_eye_in_hand
++        task_descriptions : list[str]
++
++    Quaternion -> rotation_6d conversion is handled downstream by the
++    StateActionTransform configured in RobocasaPandaOmronDataConfig, so here we
++    only split the raw 16-D state into the named keys.
++    """
++    groot_obs = {}
++
++    # [B, H, W, C] -> [B, T(1), H, W, C]
++    groot_obs["video.robot0_agentview_left"] = (
++        env_obs["main_images"].unsqueeze(1).numpy()
++    )
++    groot_obs["video.robot0_agentview_right"] = (
++        env_obs["extra_view_images"].unsqueeze(1).numpy()
++    )
++    groot_obs["video.robot0_eye_in_hand"] = (
++        env_obs["wrist_images"].unsqueeze(1).numpy()
++    )
++
++    states = env_obs["states"].unsqueeze(1)  # [B, T(1), 16]
++    groot_obs["state.end_effector_position_relative"] = states[:, :, 0:3].numpy()
++    groot_obs["state.end_effector_rotation_relative"] = states[:, :, 3:7].numpy()
++    groot_obs["state.gripper_qpos"] = states[:, :, 7:9].numpy()
++    groot_obs["state.base_position"] = states[:, :, 9:12].numpy()
++    groot_obs["state.base_rotation"] = states[:, :, 12:16].numpy()
++
++    # SFT tokenized each task description as a Python list literal (e.g.
++    # "['Pick the kettle ...']"), because GR00T's batched transform splits a
++    # (B, 1) annotation array into a (1,) per-env value that str()-renders with
++    # brackets. Wrap each string in its own list so the prompt matches training;
++    # a bare (B,) array would render as a bracket-less string the model never
++    # saw, silently degrading the policy.
++    groot_obs["annotation.human.action.task_description"] = [
++        [desc] for desc in env_obs["task_descriptions"]
++    ]
++    return groot_obs
++
++
++def convert_to_robocasa365_action(
++    action_chunk: dict[str, np.array], chunk_size: int = 16
++) -> np.ndarray:
++    """Convert a GR00T action chunk dict into the flat 12-D RoboCasa365 action.
++
++    Layout (matches SFT action_keys order; RoboCasa365Env.step splits it back
++    into the dict GrootRoboCasaEnv expects):
++        [0:3]  action.end_effector_position
++        [3:6]  action.end_effector_rotation  (axis_angle)
++        [6:7]  action.gripper_close          (binary, already in {0,1} after unnorm)
++        [7:11] action.base_motion            (base xyz + torso)
++        [11:12] action.control_mode          (binary)
++
++    Do NOT call normalize_gripper_action here: gripper_close / control_mode use
++    `binary` normalization in the data config, so the GR00T output is already in
++    the env's expected convention.
++    """
++    action_components = [
++        action_chunk["action.end_effector_position"][:, :chunk_size],
++        action_chunk["action.end_effector_rotation"][:, :chunk_size],
++        action_chunk["action.gripper_close"][:, :chunk_size],
++        action_chunk["action.base_motion"][:, :chunk_size],
++        action_chunk["action.control_mode"][:, :chunk_size],
++    ]
++    action_array = np.concatenate(action_components, axis=-1)
++    assert action_array.shape[-1] == 12, (
++        f"Expected 12-dim action, got {action_array.shape[-1]}"
++    )
++    return action_array
++
++
+ # TODO: we need a unified embodiement data.
+ OBS_CONVERSION = {
+     "maniskill": convert_maniskill_obs_to_gr00t_format,
+     "libero": convert_libero_obs_to_gr00t_format,
+     "isaaclab_stack_cube": convert_libero_obs_to_gr00t_format,
++    "robocasa365": convert_robocasa365_obs_to_gr00t_format,
+ }
+ 
+ ACTION_CONVERSION = {
+     "libero": convert_to_libero_action,
+     "maniskill": convert_to_maniskill_action,
+     "isaaclab_stack_cube": convert_to_isaaclab_stack_cube_action,
++    "robocasa365": convert_to_robocasa365_action,
+ }
+ 
+ 
+diff --git a/rlinf/models/embodiment/openpi/dataconfig/__init__.py b/rlinf/models/embodiment/openpi/dataconfig/__init__.py
+index b00a32a8..aa2111c5 100644
+--- a/rlinf/models/embodiment/openpi/dataconfig/__init__.py
++++ b/rlinf/models/embodiment/openpi/dataconfig/__init__.py
+@@ -59,6 +59,9 @@ from rlinf.models.embodiment.openpi.dataconfig.realworld_dataconfig import (
+ from rlinf.models.embodiment.openpi.dataconfig.robocasa_dataconfig import (
+     LeRobotRobocasaDataConfig,
+ )
++from rlinf.models.embodiment.openpi.dataconfig.robocasa365_dataconfig import (
++    LeRobotRobocasa365DataConfig,
++)
+ from rlinf.models.embodiment.openpi.dataconfig.robotwin_aloha_dataconfig import (
+     LeRobotAlohaDataConfig,
+ )
+@@ -382,6 +385,42 @@ _CONFIGS = [
+         ),
+         pytorch_weight_path="checkpoints/torch/pi0_base",
+     ),
++    TrainConfig(
++        # RoboCasa365 (RC365) pi0 SFT: target_composite_seen, 16-D state / 3 views
++        # / 12-D action. action_horizon=50 and max_token_len=96 MUST match the SFT
++        # config (openpi-robocasa pi0_robocasa_finetune_target_composite_seen) since
++        # they are baked into the converted weight shapes. norm_stats live at
++        # <model_path>/robocasa365/norm_stats.json (asset_id="robocasa365"), copied
++        # from the JAX ckpt's assets/ during conversion post-processing.
++        name="pi0_robocasa365",
++        model=pi0_config.Pi0Config(
++            action_horizon=50,
++            max_token_len=96,
++        ),
++        data=LeRobotRobocasa365DataConfig(
++            base_config=DataConfig(prompt_from_task=True),
++            assets=AssetsConfig(asset_id="robocasa365"),
++        ),
++        pytorch_weight_path="checkpoints/torch/pi0_base",
++    ),
++    TrainConfig(
++        # RoboCasa365 (RC365) pi05 SFT: target_composite_seen. pi05=True,
++        # action_horizon=50, max_token_len=200, discrete_state_input=True — all
++        # match the SFT config (pi05_robocasa_finetune_target_composite_seen) and
++        # the converted weight shapes. Third camera view is used (pi05 needs all 3).
++        name="pi05_robocasa365",
++        model=pi0_config.Pi0Config(
++            pi05=True,
++            action_horizon=50,
++            max_token_len=200,
++            discrete_state_input=True,
++        ),
++        data=LeRobotRobocasa365DataConfig(
++            base_config=DataConfig(prompt_from_task=True),
++            assets=AssetsConfig(asset_id="robocasa365"),
++        ),
++        pytorch_weight_path="checkpoints/torch/pi05_base",
++    ),
+     TrainConfig(
+         name="pi05_isaaclab_stack_cube",
+         model=pi0_config.Pi0Config(
+diff --git a/rlinf/models/embodiment/openpi/dataconfig/robocasa365_dataconfig.py b/rlinf/models/embodiment/openpi/dataconfig/robocasa365_dataconfig.py
+new file mode 100644
+index 00000000..a77c504d
+--- /dev/null
++++ b/rlinf/models/embodiment/openpi/dataconfig/robocasa365_dataconfig.py
+@@ -0,0 +1,73 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""OpenPi data config for RoboCasa365 (RC365).
++
++Mirrors the SFT-time data pipeline (openpi-robocasa) so RL is consistent with
++finetuning: 16-D state, 3 camera views, 12-D action. Unlike the old-robocasa
++``LeRobotRobocasaDataConfig`` (which slices via ``rlinf.envs.robocasa.utils``
++for 25-D/2-view), RC365 uses the simple pad/slice transform in
++``robocasa365_policy`` and does NOT depend on the old robocasa env utils.
++"""
++import dataclasses
++import pathlib
++
++import openpi.models.model as _model
++import openpi.transforms as _transforms
++from openpi.training.config import DataConfig, DataConfigFactory, ModelTransformFactory
++from typing_extensions import override
++
++from rlinf.models.embodiment.openpi.policies import robocasa365_policy
++
++
++@dataclasses.dataclass(frozen=True)
++class LeRobotRobocasa365DataConfig(DataConfigFactory):
++    """Data config for RoboCasa365 (16-D state, 3 views, 12-D action)."""
++
++    @override
++    def create(
++        self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig
++    ) -> DataConfig:
++        # RLinf uses an empty repack transform at RL time (see
++        # rlinf/models/embodiment/openpi/__init__.py); the env obs_processor
++        # already emits the observation/* keys the input transform expects.
++        repack_transform = _transforms.Group()
++
++        data_transforms = _transforms.Group(
++            inputs=[
++                robocasa365_policy.Robocasa365Inputs(
++                    action_dim=model_config.action_dim,
++                    model_type=model_config.model_type,
++                )
++            ],
++            outputs=[robocasa365_policy.Robocasa365Outputs()],
++        )
++
++        # Model transforms (tokenize prompt, pack action targets). No changes needed.
++        model_transforms = ModelTransformFactory()(model_config)
++
++        # SFT alignment (CRITICAL): the RC365 pi05 SFT ran with mean/std
++        # normalization (use_quantile_norm=False) — its norm_stats therefore
++        # carry null q01/q99. This RLinf openpi build's create_base_config
++        # instead defaults pi05 to use_quantile_norm=True (model_type != PI0),
++        # so Normalize would assert on the missing quantiles and RL would apply
++        # a normalization the policy never saw. Force it back to False to match
++        # the SFT data pipeline exactly (verified against the SFT TrainConfig
++        # pi05_robocasa_finetune_target_composite_seen, which resolves to False).
++        return dataclasses.replace(
++            self.create_base_config(assets_dirs, model_config),
++            repack_transforms=repack_transform,
++            data_transforms=data_transforms,
++            model_transforms=model_transforms,
++            use_quantile_norm=False,
++        )
+diff --git a/rlinf/models/embodiment/openpi/policies/robocasa365_policy.py b/rlinf/models/embodiment/openpi/policies/robocasa365_policy.py
+new file mode 100644
+index 00000000..ac95f89c
+--- /dev/null
++++ b/rlinf/models/embodiment/openpi/policies/robocasa365_policy.py
+@@ -0,0 +1,151 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""OpenPi input/output transforms for RoboCasa365 (RC365).
++
++This mirrors the SFT-time transform used to finetune pi0/pi05 on RC365
++(see openpi-robocasa/src/openpi/policies/robocasa_policy.py) so that the
++RL-time observation pipeline is byte-for-byte consistent with training:
++
++  * state: 16-D RC365 proprio (eef_pos_rel 3 + eef_rot_rel quat 4 +
++    gripper_qpos 2 + base_pos 3 + base_rot quat 4), padded to the model
++    action_dim (32).
++  * images: 3 raw camera views (base / left wrist / right = extra view).
++    - pi0  : right view padded with zeros and masked out.
++    - pi05 : all 3 views used, right view required.
++  * actions: 12-D RC365 action, padded to model action_dim; output slices
++    the first 12 dims back out.
++
++The only difference vs the SFT transform is the key that carries the third
++camera: the RL env's obs_processor emits ``observation/extra_view_image``
++whereas the SFT dataset script used ``observation/right_image``. Both are
++accepted here.
++"""
++import dataclasses
++
++import einops
++import numpy as np
++from openpi import transforms
++from openpi.models import model as _model
++
++
++# RC365 real dims: state is 16-D, action is 12-D. Do not change for RC365.
++ROBOCASA365_STATE_DIM = 16
++ROBOCASA365_ACTION_DIM = 12
++
++
++def make_robocasa365_example() -> dict:
++    """Creates a random input example for the RoboCasa365 policy."""
++    return {
++        "observation/state": np.random.rand(ROBOCASA365_STATE_DIM),
++        "observation/image": np.random.randint(
++            256, size=(224, 224, 3), dtype=np.uint8
++        ),
++        "observation/wrist_image": np.random.randint(
++            256, size=(224, 224, 3), dtype=np.uint8
++        ),
++        "observation/extra_view_image": np.random.randint(
++            256, size=(224, 224, 3), dtype=np.uint8
++        ),
++        "prompt": "do something",
++    }
++
++
++def _parse_image(image) -> np.ndarray:
++    image = np.asarray(image)
++    if np.issubdtype(image.dtype, np.floating):
++        image = (255 * image).astype(np.uint8)
++    if image.shape[0] == 3:
++        image = einops.rearrange(image, "c h w -> h w c")
++    return image
++
++
++def _get_extra_view(data: dict):
++    """Third camera view: RL emits extra_view_image, SFT used right_image."""
++    if "observation/extra_view_image" in data:
++        return data["observation/extra_view_image"]
++    if "observation/right_image" in data:
++        return data["observation/right_image"]
++    return None
++
++
++@dataclasses.dataclass(frozen=True)
++class Robocasa365Inputs(transforms.DataTransformFn):
++    """Convert RC365 env/dataset observations into the pi0/pi05 model format."""
++
++    # The action dimension of the model. Used to pad state and actions.
++    action_dim: int
++
++    # Determines which model (pi0 vs pi05) will be used.
++    model_type: _model.ModelType = _model.ModelType.PI0
++
++    def __call__(self, data: dict) -> dict:
++        mask_padding = self.model_type == _model.ModelType.PI0
++
++        # Pad the 16-D proprio to the model action dimension.
++        state = transforms.pad_to_dim(data["observation/state"], self.action_dim)
++
++        base_image = _parse_image(data["observation/image"])
++        wrist_image = _parse_image(data["observation/wrist_image"])
++
++        # For pi05, use all 3 cameras (right view required). For pi0, the right
++        # view is padded with zeros and masked out.
++        if self.model_type == _model.ModelType.PI05:
++            extra = _get_extra_view(data)
++            if extra is None:
++                raise ValueError(
++                    "RC365 pi05 requires a third camera view "
++                    "(observation/extra_view_image or observation/right_image), "
++                    "but none was found in data."
++                )
++            right_image = _parse_image(extra)
++            right_mask = np.True_
++        else:
++            # pi0 was SFT'd with the third view zeroed + masked out. Match that
++            # exactly at RL time to avoid a train/inference distribution shift,
++            # regardless of whether the env provides a third view.
++            right_image = np.zeros_like(base_image)
++            right_mask = np.False_ if mask_padding else np.True_
++
++        inputs = {
++            "state": state,
++            "image": {
++                "base_0_rgb": base_image,
++                "left_wrist_0_rgb": wrist_image,
++                "right_wrist_0_rgb": right_image,
++            },
++            "image_mask": {
++                "base_0_rgb": np.True_,
++                "left_wrist_0_rgb": np.True_,
++                "right_wrist_0_rgb": right_mask,
++            },
++        }
++
++        # Actions only available during training; pad 12-D to model action_dim.
++        if "actions" in data:
++            actions = transforms.pad_to_dim(data["actions"], self.action_dim)
++            inputs["actions"] = actions
++
++        if "prompt" in data:
++            inputs["prompt"] = data["prompt"]
++
++        return inputs
++
++
++@dataclasses.dataclass(frozen=True)
++class Robocasa365Outputs(transforms.DataTransformFn):
++    """Convert model outputs back to the RC365 12-D action format (inference)."""
++
++    def __call__(self, data: dict) -> dict:
++        # Return only the first 12 (real RC365) action dims; the rest is padding.
++        return {"actions": np.asarray(data["actions"][:, :ROBOCASA365_ACTION_DIM])}
+diff --git a/rlinf/models/embodiment/rldx1/__init__.py b/rlinf/models/embodiment/rldx1/__init__.py
+new file mode 100644
+index 00000000..16e1b4b5
+--- /dev/null
++++ b/rlinf/models/embodiment/rldx1/__init__.py
+@@ -0,0 +1,102 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""RLDX-1 embodied-RL model builder for RLinf.
++
++Loads a native RLDX-1 checkpoint (model + processor) through RLDX-1's own
++PolicyLoader (which handles memory deactivation, processor statistics, etc.),
++then wraps it in ``RLDX1_ForRLActionPrediction`` and attaches the flow-matching
++RL head + value head. Value head is re-initialized post-load (checkpoint has no
++value head; uninitialized -> NaN, same as the GR00T builder).
++"""
++
++import torch
++from omegaconf import DictConfig
++
++
++def get_model(cfg: DictConfig, torch_dtype=torch.bfloat16):
++    import sys
++
++    # RLDX-1 model code lives outside RLinf; make it importable without editing
++    # RLDX-1 sources (env-isolation: read-only dependency).
++    rldx1_root = cfg.get("rldx1_repo_path", __import__("os").environ.get("RLDX1_ROOT", "RLDX-1"))
++    if rldx1_root not in sys.path:
++        sys.path.insert(0, rldx1_root)
++
++    from rldx.data.embodiment_tags import EmbodimentTag
++    from rldx.policy.policy_loader import PolicyLoader
++
++    from rlinf.models.embodiment.rldx1.rldx1_action_model import (
++        RLDX1_ForRLActionPrediction,
++    )
++
++    embodiment_tag = EmbodimentTag(cfg.embodiment_tag)
++
++    # device: PolicyLoader loads onto a device; RLinf worker moves it afterwards.
++    loaded = PolicyLoader.load(
++        embodiment_tag=embodiment_tag,
++        model_path=cfg.model_path,
++        device="cpu",
++        deactivate_memory=True,  # this ckpt has use_memory=false; force-off for safety
++    )
++
++    # RL trains ONLY the action head (MSAT) + value head; the VLM backbone stays
++    # frozen. The SFT ckpt was trained with tune_top_llm_layers>0, so ~14.6% of
++    # the backbone (top Qwen3-VL decoder layers) is left with requires_grad=True on
++    # load. Freeze the whole backbone (qwen_model + qwen_linear + cog_emb): this
++    # (a) honors the "no VLM training" constraint and (b) gives every FSDP unit
++    # inside the backbone a uniform requires_grad, which FSDP1 needs. (The frozen
++    # backbone + trainable action_model still mix at the FSDP root flat unit, which
++    # is why the configs also set fsdp_config.use_orig_params=True.)
++    loaded.model.backbone.requires_grad_(False)
++
++    adapter = RLDX1_ForRLActionPrediction(
++        rldx_model=loaded.model,
++        processor=loaded.processor,
++        rl_head_config=cfg.rl_head_config,
++        embodiment_tag=embodiment_tag,
++        output_action_chunks=cfg.num_action_chunks,
++        compute_dtype=torch_dtype,
++    )
++    adapter.to(torch_dtype)
++
++    if cfg.rl_head_config.add_value_head:
++        # re-init value head after loading (ckpt lacks it -> NaN otherwise)
++        adapter.rl_head.value_head._init_weights()
++
++    # Honor rl_head_config.disable_dropout, exactly like the GR00T builder
++    # (replace_dropout_with_identity). RLDX-1's MSAT DiT is built with
++    # diffusion_model_cfg.dropout=0.2 + final_dropout=True (see rldx.py:47-48),
++    # so any nn.Dropout stays live whenever the module is in .train() mode.
++    # The actor flips the model to .train() for the logprob recompute
++    # (fsdp_actor_worker.py:835) while the rollout runs it in .eval(): with
++    # dropout active only on the actor side, the two forwards see different
++    # masks and the PPO importance ratio is corrupted from step 0. Neutralize
++    # dropout so rollout and recompute are consistent (GR00T does the same).
++    if cfg.rl_head_config.get("disable_dropout", False):
++        import torch.nn as nn
++
++        for name, module in list(adapter.named_modules()):
++            if isinstance(
++                module,
++                (nn.Dropout, nn.Dropout1d, nn.Dropout2d, nn.Dropout3d, nn.AlphaDropout),
++            ):
++                parent = adapter
++                child = name
++                if "." in name:
++                    parent_name, child = name.rsplit(".", 1)
++                    parent = dict(adapter.named_modules())[parent_name]
++                setattr(parent, child, nn.Identity())
++
++    return adapter
+diff --git a/rlinf/models/embodiment/rldx1/rldx1_action_model.py b/rlinf/models/embodiment/rldx1/rldx1_action_model.py
+new file mode 100644
+index 00000000..da72817f
+--- /dev/null
++++ b/rlinf/models/embodiment/rldx1/rldx1_action_model.py
+@@ -0,0 +1,326 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""RLDX-1 RL policy adapter for RLinf.
++
++Wraps a native RLDX-1 model (backbone + MSAT action_model) plus its native
++RLDXProcessor (obs->tokens, action decode) and adds the flow-matching RL head
++(SDE logprob + value head). Implements the RLinf ``BasePolicy`` interface so the
++existing FSDP actor / HF rollout workers drive it exactly like GR00T.
++
++Design = composition, not subclassing RLDX: RLDX carries memory/physics/RTC
++branches irrelevant to this ckpt (all disabled), so we hold a reference and reuse
++only its backbone + ``action_model._encode_features`` (vlln + state encoder) +
++MSAT. RL sampling/logprob/value live in ``RLDX1RLHead`` (verified on the real
++ckpt: p1b/p2/p3 in RLDX-1/notes).
++
++IO is delegated to RLDX-1's native pipeline:
++  obs  : RLinf flat env_obs -> nested (simulation_io) -> per-sample VLAStepData
++         -> processor(...) -> collator -> collated model inputs
++  action: model action_pred -> processor.decode_action (unnorm + rel->abs)
++         -> flatten to 12-D RoboCasa365 action (simulation_io)
++"""
++
++from typing import Any, Literal
++
++import numpy as np
++import torch
++import torch.nn as nn
++
++from rlinf.models.embodiment.base_policy import BasePolicy, ForwardType
++from rlinf.models.embodiment.rldx1.rldx1_rl_head import RLDX1RLHead
++from rlinf.models.embodiment.rldx1.simulation_io import (
++    convert_robocasa365_obs_to_rldx_nested,
++    flatten_rldx_action,
++)
++
++
++class RLDX1_ForRLActionPrediction(nn.Module, BasePolicy):
++    """RLDX-1 policy for RL. Holds the native model + processor + RL head."""
++
++    # FSDP per-layer wrap targets (auto path in get_fsdp_wrap_policy reads this
++    # off the module since the adapter has no `.language_model` attr). Without it
++    # the 6.9B backbone is wrapped as one flat unit -> every rank holds all params
++    # -> OOM. Sharded at layer granularity:
++    #   Qwen3VLTextDecoderLayer / Qwen3VLVisionBlock : VTCQwen3VL backbone
++    #   DoubleStreamBlock (x4) / SingleStreamBlock (x8) : MSAT (use_physics=False,
++    #     so plain, not Expanded* blocks; depths from ckpt diffusion_model_cfg)
++    #   ValueHead : RL value head (present only when add_value_head=True; GRPO
++    #     turns it off, so the GRPO config overrides wrap_policy MINUS ValueHead,
++    #     mirroring the GR00T GRPO config).
++    _no_split_modules = [
++        "Qwen3VLTextDecoderLayer",
++        "Qwen3VLVisionBlock",
++        "DoubleStreamBlock",
++        "SingleStreamBlock",
++        "ValueHead",
++    ]
++
++    def __init__(
++        self,
++        rldx_model,           # native RLDX (PreTrainedModel)
++        processor,            # native RLDXProcessor (obs/action IO)
++        rl_head_config: dict[str, Any],
++        embodiment_tag,       # EmbodimentTag enum
++        output_action_chunks: int = 16,
++        compute_dtype: torch.dtype = torch.bfloat16,
++    ):
++        super().__init__()
++        self.model = rldx_model
++        self.processor = processor
++        self.embodiment_tag = embodiment_tag
++        self.output_action_chunks = output_action_chunks
++        self.compute_dtype = compute_dtype
++        self.rl_config = rl_head_config
++
++        am = self.model.action_model
++        backbone_dim = self.model.config.backbone_embedding_dim
++        state_dim = am.input_embedding_dim
++        self.rl_head = RLDX1RLHead(rl_head_config, backbone_dim=backbone_dim, state_dim=state_dim)
++
++        # Real (unpadded) action dim for RL slicing. RLDX pads actions to
++        # max_action_dim (64); logprob/loss must only cover the valid dims
++        # (RoboCasa365 = 3+3+1+4+1 = 12), mirroring GR00T's valid_action_dim.
++        self.valid_action_dim = self._compute_valid_action_dim()
++
++        # language key used by the native pipeline
++        self._language_key = "annotation.human.task_description"
++
++    def _compute_valid_action_dim(self) -> int:
++        emb = self.embodiment_tag.value
++        norm = self.processor.state_action_processor.norm_params[emb]["action"]
++        keys = self.processor.modality_configs[emb]["action"].modality_keys
++        return int(sum(norm[k]["dim"].item() for k in keys))
++
++    # ---- convenience passthroughs (worker may probe these) ----
++    @property
++    def value_head(self):
++        return self.rl_head.value_head if self.rl_head.add_value_head else None
++
++    def set_global_step(self, step: int):
++        self.rl_head.global_step = int(step)
++
++    def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs=None):
++        """Delegate GC to the native RLDX model (a PreTrainedModel with
++        supports_gradient_checkpointing=True). HF propagates it recursively to the
++        backbone Qwen3VLTextDecoderLayers and MSAT stream blocks. The FSDP manager
++        calls this with no args (use_reentrant=True) or with
++        gradient_checkpointing_kwargs (use_reentrant=False); mirror both."""
++        if gradient_checkpointing_kwargs is None:
++            self.model.gradient_checkpointing_enable()
++        else:
++            self.model.gradient_checkpointing_enable(
++                gradient_checkpointing_kwargs=gradient_checkpointing_kwargs
++            )
++
++    def gradient_checkpointing_disable(self):
++        self.model.gradient_checkpointing_disable()
++
++    @property
++    def device(self):
++        return next(self.parameters()).device
++
++    @property
++    def dtype(self):
++        return self.compute_dtype
++
++    # =========================================================== obs -> model
++    def _obs_to_collated(self, env_obs: dict[str, Any]) -> dict[str, Any]:
++        """RLinf flat env_obs -> collated model inputs via native processor."""
++        from rldx.data.types import VLAStepData
++
++        nested = convert_robocasa365_obs_to_rldx_nested(env_obs)
++        bsize = nested["video"]["robot0_agentview_left"].shape[0]
++
++        processed = []
++        states = []
++        for i in range(bsize):
++            per = {
++                "video": {k: v[i] for k, v in nested["video"].items()},
++                "state": {k: v[i] for k, v in nested["state"].items()},
++                "language": {k: v[i] for k, v in nested["language"].items()},
++            }
++            vla = VLAStepData(
++                images=per["video"],
++                states=per["state"],
++                actions={},
++                text=per["language"][self._language_key][0],
++                embodiment=self.embodiment_tag,
++                physics={},
++            )
++            states.append(vla.states)
++            processed.append(self.processor([{"type": "episode_step", "content": vla}]))
++
++        collated = self.processor.collator(processed)
++        collated = collated["inputs"] if "inputs" in collated else collated
++        # move to device + bf16 for floats (mirror RLDX prepare_input)
++        collated = self._to_device_dtype(collated)
++        return collated, states
++
++    def _to_device_dtype(self, batch):
++        def _map(x):
++            if not torch.is_tensor(x):
++                return x
++            if torch.is_floating_point(x):
++                return x.to(self.device, dtype=self.compute_dtype)
++            return x.to(self.device)
++
++        if isinstance(batch, dict):
++            return {k: self._to_device_dtype(v) for k, v in batch.items()}
++        return _map(batch)
++
++    def _backbone_encode(self, collated):
++        """Frozen backbone forward -> RAW features safe to cache in
++        forward_inputs. Returns:
++          raw_vl       [B, 64, 4096] : the 64 cog tokens, PRE-vlln (backbone is
++                                       frozen -> constant given the obs).
++          state        [B, 1, 64]    : raw proprio state (action_input.state).
++          embodiment_id[B]           : embodiment ids.
++          vl_attn_mask               : None (cog tokens carry no padding; the
++                                       backbone emits an all-True [B,64] mask).
++        vlln + state_encoder are NOT applied here -- they live in the trainable
++        action_model, so applying them at the cache boundary would sever their
++        gradients. They are re-applied on the actor side (_project_features)."""
++        backbone_inputs, action_inputs = self.model.prepare_input(dict(collated))
++        backbone_outputs = self.model.backbone(backbone_inputs)
++        raw_vl = backbone_outputs["backbone_features"]   # [B, 64, 4096] pre-vlln
++        state = action_inputs.state                       # [B, 1, 64]
++        embodiment_id = action_inputs.embodiment_id       # [B]
++        vl_attn_mask = backbone_outputs.get("backbone_attention_mask", None)
++        if vl_attn_mask is not None and vl_attn_mask.all():
++            vl_attn_mask = None
++        return raw_vl, state, embodiment_id, vl_attn_mask
++
++    def _project_features(self, raw_vl, state, embodiment_id):
++        """Apply the TRAINABLE vlln + state_encoder (both in action_model) to the
++        frozen backbone outputs -> (vl_embs [B,64,4096], state_features
++        [B,1,1536]). Gradients flow into vlln + state_encoder + (downstream) MSAT
++        + value head; the frozen 8B backbone is skipped entirely on the actor
++        side (its output was cached during rollout)."""
++        am = self.model.action_model
++        vl_embs = am.vlln(raw_vl)
++        state_features = am.state_encoder(state, embodiment_id)
++        return vl_embs, state_features
++
++    # =========================================================== BasePolicy
++    def forward(self, forward_type=ForwardType.DEFAULT, **kwargs):
++        if forward_type == ForwardType.DEFAULT:
++            return self.default_forward(**kwargs)
++        raise NotImplementedError(f"forward_type {forward_type} not supported for RLDX-1")
++
++    def default_forward(
++        self,
++        forward_inputs: dict[str, torch.Tensor],
++        compute_logprobs: bool = True,
++        compute_entropy: bool = False,
++        compute_values: bool = True,
++        use_cache: bool = False,
++        **kwargs,
++    ) -> dict[str, Any]:
++        """Actor recompute: re-project the CACHED frozen-backbone features
++        (raw cog tokens + raw state) through the trainable vlln + state_encoder,
++        then recompute logprob/value on the stored chains/denoise_inds. The 8B
++        backbone is NOT re-run (frozen -> its rollout output is exact); gradients
++        still flow into vlln + state_encoder + MSAT + value head. Returns logprobs
++        aligned to the sampled step."""
++        raw_vl = forward_inputs["raw_vl"]
++        state = forward_inputs["state"]
++        embodiment_id = forward_inputs["embodiment_id"]
++        vl_embs, state_features = self._project_features(raw_vl, state, embodiment_id)
++        vl_attn_mask = None  # cog tokens are unpadded (all-True mask -> None)
++        chains = forward_inputs["chains"]
++        denoise_inds = forward_inputs["denoise_inds"]
++
++        am = self.model.action_model
++        log_probs, values = self.rl_head.recompute_logprob_value(
++            am, vl_embs, state_features, embodiment_id, chains, denoise_inds,
++            vl_attn_mask=vl_attn_mask, compute_values=compute_values,
++        )
++
++        # slice to valid action chunk/dim (unpadded: RoboCasa365 = 12, not the
++        # 64-dim MSAT padding), mirroring GR00T's valid_action_dim slicing.
++        chunk = self.output_action_chunks
++        vdim = self.valid_action_dim
++        log_probs = log_probs[:, :chunk, :vdim]
++
++        # prev_logprobs (from rollout) at the sampled step, same slicing
++        bsize = log_probs.shape[0]
++        prev_logprobs = kwargs["prev_logprobs"]
++        prev_logprobs = prev_logprobs[
++            torch.arange(bsize, device=prev_logprobs.device),
++            denoise_inds[:, 0],
++            :chunk,
++            :vdim,
++        ]
++        values = values.mean(dim=-1)
++
++        return {
++            "logprobs": log_probs.float(),
++            "prev_logprobs": prev_logprobs.float(),
++            "values": values,
++            "entropy": None,
++        }
++
++    @torch.no_grad()
++    def predict_action_batch(
++        self,
++        env_obs,
++        mode: Literal["train", "eval"] = "train",
++        **kwargs,
++    ) -> tuple[torch.Tensor, dict[str, Any]]:
++        """Rollout: obs -> collated -> frozen backbone -> RL-head sample -> decode
++        action. Returns (raw_action[B,chunk,12], result dict for actor recompute).
++
++        forward_inputs caches the FROZEN backbone output (raw cog tokens + raw
++        state + embodiment_id), all batch-first fixed-shape tensors, NOT the raw
++        Qwen3-VL collated dict (whose pixel_values/image_grid_thw have dim0 = total
++        patches, not env count -> breaks _split_rollout_result's dim0 split; and
++        input_ids padding corrupts the cog tokens via MRoPE, maxdiff 8.0). The
++        trainable vlln + state_encoder are re-applied on the actor side."""
++        collated, states = self._obs_to_collated(env_obs)
++        raw_vl, state, embodiment_id, vl_attn_mask = self._backbone_encode(collated)
++        vl_embs, state_features = self._project_features(raw_vl, state, embodiment_id)
++
++        am = self.model.action_model
++        x0, res = self.rl_head.get_rl_action(
++            am, vl_embs, state_features, embodiment_id,
++            vl_attn_mask=vl_attn_mask, mode=mode,
++            compute_values=self.rl_head.add_value_head,
++        )
++
++        # decode action via native processor (unnorm + rel->abs)
++        normalized_action = x0.float().cpu().numpy()
++        batched_states = np.stack([s for s in states], axis=0) if len(states) else None
++        action_group = self.processor.decode_action(
++            normalized_action, self.embodiment_tag, state=batched_states
++        )
++        raw_action = flatten_rldx_action(action_group, chunk_size=self.output_action_chunks)
++
++        # Cache ONLY batch-first fixed-shape tensors (dim0 == num_envs) so
++        # _split_rollout_result's torch.split(..., dim=0) and the actor's
++        # per-env masking are valid. state keeps its [B,1,64] shape; embodiment_id
++        # is [B]. squeeze not needed -- dim0 is already the env axis.
++        forward_inputs = {
++            "chains": res["chains"],
++            "denoise_inds": res["denoise_inds"],
++            "raw_vl": raw_vl,
++            "state": state,
++            "embodiment_id": embodiment_id,
++        }
++        result = {
++            "prev_logprobs": res["prev_logprobs"],
++            "prev_values": res["prev_values"],
++            "forward_inputs": forward_inputs,
++        }
++        return torch.from_numpy(raw_action), result
+diff --git a/rlinf/models/embodiment/rldx1/rldx1_rl_head.py b/rlinf/models/embodiment/rldx1/rldx1_rl_head.py
+new file mode 100644
+index 00000000..0df34fc6
+--- /dev/null
++++ b/rlinf/models/embodiment/rldx1/rldx1_rl_head.py
+@@ -0,0 +1,311 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""RLDX-1 flow-matching RL head.
++
++Mirrors ``gr00t_action_model.FlowMatchingActionHeadForRLActionPrediction`` but
++targets RLDX-1's MSAT (Multi-Stream Action Transformer). RLDX-1 and GR00T use
++the *same* rectified-flow convention (t: 0->1, x0=noise, x1=data;
++velocity = data - noise), so GR00T's ODE->SDE logprob machinery transfers
++verbatim. Verified numerically on the real 6.9B ckpt in
++``RLDX-1/notes/p1b_real_msat_logprob.py`` (logprob finite, noise->0 degenerates
++to the deterministic Euler denoiser at 6e-8, differentiable w.r.t. MSAT params).
++
++This module operates purely on the tensors the RLDX backbone already produces
++(``backbone_features`` = 64 cog tokens @ dim 4096, ``state_features``,
++``embodiment_id``); it never touches the VLM backbone or RLDX-1's obs/action IO,
++which the adapter delegates to RLDX-1's native RLDXProcessor.
++"""
++
++import random
++from typing import Any, Literal, Optional
++
++import torch
++import torch.nn as nn
++from transformers.feature_extraction_utils import BatchFeature
++
++from rlinf.models.embodiment.modules.value_head import ValueHead
++
++
++class RLDX1RLHead(nn.Module):
++    """Owns the value head and the flow-matching SDE sampling/logprob logic.
++
++    A reference to the frozen-topology RLDX ``action_model`` (an
++    ``RLDXActionModel``) is passed into every call rather than stored, so this
++    head introduces no duplicate parameters and FSDP wraps a single module tree.
++    """
++
++    def __init__(self, rl_config: dict[str, Any], backbone_dim: int, state_dim: int):
++        super().__init__()
++        self.rl_config = rl_config
++        self.global_step = 0
++        self.add_value_head = rl_config.add_value_head
++
++        if self.add_value_head:
++            if rl_config.use_vlm_value:
++                input_dim = backbone_dim
++            else:
++                input_dim = backbone_dim + state_dim
++            self.value_head = ValueHead(
++                input_dim=input_dim,
++                hidden_sizes=(1024, 512, 256),
++                output_dim=1,
++                activation="relu",
++                bias_last=True,
++            )
++
++    # ------------------------------------------------------------------ logprob
++    def get_logprob_norm(self, sample, mu, sigma):
++        """Diagonal-Gaussian logprob; sigma==0 (eval/deterministic step) -> 0."""
++        mask = sigma == 0
++        sigma_safe = torch.where(mask, torch.ones_like(sigma), sigma)
++        constant_term = -torch.log(sigma_safe) - 0.5 * torch.log(
++            2 * torch.pi * torch.ones_like(sample)
++        )
++        exponent_term = -0.5 * torch.pow((sample - mu) / sigma_safe, 2)
++        log_prob = constant_term + exponent_term
++        return torch.where(mask, torch.zeros_like(log_prob), log_prob)
++
++    # ------------------------------------------------------- single MSAT step
++    def _msat_velocity(self, am, x_t, timesteps_tensor, embodiment_id,
++                       state_features, vl_embs, vl_attn_mask):
++        """One MSAT forward -> velocity, aligned with
++        RLDX get_action_with_features._dit_forward (rldx.py:623-718).
++
++        ``timesteps_tensor`` is the per-sample continuous t in [0,1], shape (B,).
++        The action encoder wants per-token timesteps (B, H)."""
++        horizon = am.config.action_horizon
++        t_tok = timesteps_tensor.unsqueeze(1).expand(-1, horizon)
++        action_features = am.action_encoder(x_t, t_tok, embodiment_id)
++        if am.config.add_pos_embed:
++            pos_ids = torch.arange(
++                action_features.shape[1], dtype=torch.long, device=x_t.device
++            )
++            action_features = action_features + am.position_embedding(pos_ids).unsqueeze(0)
++        sa_embs = torch.cat((state_features, action_features), dim=1)
++        model_output = am.model(
++            hidden_states=sa_embs,
++            encoder_hidden_states=vl_embs,
++            timestep=timesteps_tensor,
++            encoder_attention_mask=vl_attn_mask,
++        )
++        model_output = model_output["action"] if isinstance(model_output, dict) else model_output
++        v_t = am.action_decoder(model_output, embodiment_id)[:, -horizon:]
++        return v_t
++
++    # --------------------------------------------------- mean / std at step idx
++    def sample_mean_var_val(
++        self,
++        am,
++        vl_embs: torch.Tensor,
++        denoise_steps: int,
++        x_t: torch.Tensor,
++        embodiment_id: torch.Tensor,
++        state_features: torch.Tensor,
++        idx,
++        mode: Literal["train", "eval"] = "train",
++        vl_attn_mask: Optional[torch.Tensor] = None,
++    ):
++        """Mean & std of the (S)DE transition at denoise step ``idx``.
++
++        RLDX/GR00T time convention: t:0->1, x0=noise, x1=data. Direct transfer
++        of gr00t sample_mean_var_val (gr00t_action_model.py:101-219). ``idx`` is
++        an int (rollout) or a per-sample LongTensor (actor recompute)."""
++        bsize = vl_embs.shape[0]
++        device = vl_embs.device
++        if isinstance(idx, int):
++            idx = torch.tensor(idx, device=device).expand(bsize)
++        else:
++            idx = idx.to(device)
++
++        if self.rl_config.noise_anneal:
++            noise_start, noise_end, anneal_steps = self.rl_config.noise_params
++            noise_level = noise_start + (noise_end - noise_start) * min(
++                self.global_step, anneal_steps
++            ) / anneal_steps
++            noise_level = torch.tensor(noise_level).to(device)
++        else:
++            noise_level = torch.tensor(self.rl_config.noise_level).to(device)
++
++        # continuous t for the MSAT (RLDX feeds the raw fractional time, not buckets)
++        t_cont = idx.to(vl_embs.dtype) / float(denoise_steps)
++        v_t = self._msat_velocity(
++            am, x_t, t_cont, embodiment_id, state_features, vl_embs, vl_attn_mask
++        )
++
++        timesteps = torch.linspace(0, 1, denoise_steps + 1, device=device, dtype=vl_embs.dtype)
++        t_input = timesteps[idx]
++        delta = timesteps[idx + 1] - timesteps[idx]
++        delta = delta[:, None, None].expand_as(x_t)
++        t_input = t_input[:, None, None].expand_as(x_t)
++        # x0: noise direction, x1: data direction
++        x0_pred = x_t - v_t * t_input
++        x1_pred = x_t + v_t * (1 - t_input)
++
++        if mode == "eval":
++            x0_weight = 1 - (t_input + delta)
++            x1_weight = t_input + delta
++            x_t_std = torch.zeros_like(t_input)
++        elif mode == "train":
++            if self.rl_config.noise_method == "flow_sde":
++                sigmas = (
++                    noise_level
++                    * torch.sqrt(
++                        (1 - timesteps)
++                        / torch.where(timesteps == 0, timesteps[1], timesteps)
++                    )[:-1]
++                )
++                sigma_i = sigmas[idx][:, None, None].expand_as(x_t)
++                x0_weight = (
++                    torch.ones_like(t_input)
++                    - (t_input + delta)
++                    - sigma_i**2 * delta / (2 * (1 - t_input))
++                )
++                x1_weight = t_input + delta
++                x_t_std = torch.sqrt(delta) * sigma_i
++            elif self.rl_config.noise_method == "flow_cps":
++                pi = torch.pi
++                cos_term = torch.cos(pi * noise_level / 2).to(device)
++                sin_term = torch.sin(pi * noise_level / 2).to(device)
++                x0_weight = (torch.ones_like(t_input) - (t_input + delta)) * cos_term
++                x1_weight = t_input + delta
++                x_t_std = (1 - (t_input + delta)) * sin_term
++            else:
++                raise ValueError(f"Invalid noise method: {self.rl_config.noise_method}")
++        x_t_mean = x0_pred * x0_weight + x1_pred * x1_weight
++        return x_t_mean, x_t_std
++
++    def sample_noise(self, shape, device, dtype):
++        return torch.normal(mean=0.0, std=1.0, size=shape, dtype=dtype, device=device)
++
++    # -------------------------------------------------------------- value head
++    def get_value(self, vl_embs, state_features, vl_attn_mask=None):
++        """Pool the 64 cog tokens (mirror gr00t get_value:415-439) -> scalar."""
++        bsize = vl_embs.shape[0]
++        mask_length = vl_embs.shape[1]
++        if self.rl_config.value_vlm_mode == "mean_token":
++            prefix_mask = [True] * mask_length
++        elif self.rl_config.value_vlm_mode == "last_token":
++            prefix_mask = [False] * (mask_length - 1) + [True]
++        elif self.rl_config.value_vlm_mode == "first_token":
++            prefix_mask = [True] + [False] * (mask_length - 1)
++        vl_embs_value = vl_embs[:, prefix_mask, :]
++        if self.rl_config.value_vlm_mode == "mean_token" and vl_attn_mask is not None:
++            m = vl_attn_mask[:, prefix_mask].to(vl_embs_value.dtype).unsqueeze(-1)
++            vl_embs_value = (vl_embs_value * m).sum(dim=1) / m.sum(dim=1).clamp(min=1.0)
++        else:
++            vl_embs_value = vl_embs_value.mean(dim=1)
++        if self.rl_config.detach_critic_input:
++            vl_embs_value = vl_embs_value.detach()
++        if self.rl_config.use_vlm_value:
++            value_embs = vl_embs_value
++        else:
++            state_features_value = state_features.reshape(bsize, -1)
++            if self.rl_config.detach_critic_input:
++                state_features_value = state_features_value.detach()
++            value_embs = torch.cat((vl_embs_value, state_features_value), dim=1)
++        return self.value_head(value_embs)[:, 0]
++
++    # -------------------------------------------------------------- rollout
++    def get_rl_action(
++        self,
++        am,
++        vl_embs,
++        state_features,
++        embodiment_id,
++        vl_attn_mask=None,
++        mode: Literal["train", "eval"] = "train",
++        compute_values=True,
++    ):
++        """Denoise from noise, injecting SDE noise at one random step (train) so
++        that step carries a tractable logprob. Returns final action + chains +
++        per-step logprobs + values + the sampled denoise index."""
++        device = vl_embs.device
++        dtype = vl_embs.dtype
++        batch_size = vl_embs.shape[0]
++        horizon = am.config.action_horizon
++        action_dim = am.action_dim
++        num_steps = am.num_inference_timesteps
++
++        x_t = torch.randn(size=(batch_size, horizon, action_dim), dtype=dtype, device=device)
++        chains = [x_t]
++        log_probs = []
++
++        if mode == "train":
++            if self.rl_config.noise_method == "flow_sde" and self.rl_config.ignore_last:
++                denoise_inds = torch.tensor([random.randint(0, num_steps - 2)] * num_steps,
++                                            device=device)
++            else:
++                denoise_inds = torch.tensor([random.randint(0, num_steps - 1)] * num_steps,
++                                            device=device)
++        else:
++            denoise_inds = torch.tensor([-1] * num_steps, device=device)
++        denoise_inds = denoise_inds[None].repeat(batch_size, 1)
++
++        for idx in range(num_steps):
++            step_mode = "train" if idx == denoise_inds[0][idx] else "eval"
++            x_t_mean, x_t_std = self.sample_mean_var_val(
++                am, vl_embs=vl_embs, idx=idx, x_t=x_t, embodiment_id=embodiment_id,
++                state_features=state_features, mode=step_mode, denoise_steps=num_steps,
++                vl_attn_mask=vl_attn_mask,
++            )
++            x_t = x_t_mean + self.sample_noise(x_t.shape, device, dtype) * x_t_std
++            log_probs.append(self.get_logprob_norm(x_t, x_t_mean, x_t_std))
++            chains.append(x_t)
++
++        x_0 = x_t
++        chains = torch.stack(chains, dim=1)
++        log_probs = torch.stack(log_probs, dim=1)
++        if compute_values and self.add_value_head:
++            values = self.get_value(vl_embs, state_features, vl_attn_mask=vl_attn_mask)[:, None]
++        else:
++            values = torch.zeros((batch_size, 1), device=device, dtype=dtype)
++
++        return x_0, {
++            "chains": chains,
++            "prev_logprobs": log_probs,
++            "prev_values": values,
++            "denoise_inds": denoise_inds,
++        }
++
++    # -------------------------------------------------------------- recompute
++    def recompute_logprob_value(
++        self,
++        am,
++        vl_embs,
++        state_features,
++        embodiment_id,
++        chains,
++        denoise_inds,
++        vl_attn_mask=None,
++        compute_values=True,
++    ):
++        """Actor-side: recompute logprob (and value) for the stored action at the
++        stored denoise step under current params. Mirrors gr00t forward:336-404."""
++        device = vl_embs.device
++        batch_size = vl_embs.shape[0]
++        denoise_ind = denoise_inds[:, 0]
++        chains_pre = chains[torch.arange(batch_size), denoise_ind]
++        chains_next = chains[torch.arange(batch_size), denoise_ind + 1]
++        x_t_mean, x_t_std = self.sample_mean_var_val(
++            am, vl_embs=vl_embs, idx=denoise_ind, x_t=chains_pre,
++            embodiment_id=embodiment_id, state_features=state_features, mode="train",
++            denoise_steps=am.num_inference_timesteps, vl_attn_mask=vl_attn_mask,
++        )
++        log_probs = self.get_logprob_norm(chains_next, x_t_mean, x_t_std)
++        if compute_values and self.add_value_head:
++            values = self.get_value(vl_embs, state_features, vl_attn_mask=vl_attn_mask)[:, None]
++        else:
++            values = torch.zeros((batch_size, 1), device=device, dtype=vl_embs.dtype)
++        return log_probs, values
+diff --git a/rlinf/models/embodiment/rldx1/simulation_io.py b/rlinf/models/embodiment/rldx1/simulation_io.py
+new file mode 100644
+index 00000000..fbd7339f
+--- /dev/null
++++ b/rlinf/models/embodiment/rldx1/simulation_io.py
+@@ -0,0 +1,144 @@
++# Copyright 2025 The RLinf Authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     https://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""RoboCasa365 <-> RLDX-1 observation / action IO.
++
++The RLinf RoboCasa365 env emits the SAME flat obs contract regardless of model
++(states[B,16], main/extra/wrist images[B,256,256,3], task_descriptions). Here we
++split it into the *nested* dict layout RLDX-1's native RLDXProcessor consumes
++(video.* / state.* / language). Action decode is delegated to RLDX-1's
++processor.decode_action (unnormalize + relative->absolute), and we flatten the
++resulting group dict back to the 12-D array RoboCasa365Env.step expects.
++
++State split matches SFT state_keys order (RoboCasa365 PandaOmron):
++    eef_pos_rel(3), eef_rot_rel(4 quat), gripper_qpos(2), base_pos(3), base_rot(4)
++Action layout matches SFT action_keys order:
++    eef_pos(3), eef_rot(3 axis_angle), gripper_close(1), base_motion(4), control_mode(1)
++"""
++
++import os
++import sys
++
++import numpy as np
++
++# One-shot frame-stack diagnostic (gated on RLDX_FRAMESTACK_DIAG=1). Prints, ONCE
++# per camera per process, whether _video hit the pre-built temporal stack or fell
++# back to single-frame, the tensor shape, dtype, value range, and — for a real
++# stack — whether the T frames actually DIFFER (catches a stack of identical
++# frames). Env-var gated + one-shot so it never spams a real run and is a no-op
++# unless explicitly enabled. Model-specific file: GR00T never imports this.
++_DIAG_SEEN = set()
++
++
++def _diag_video(key, arr, hit):
++    if os.environ.get("RLDX_FRAMESTACK_DIAG", "0") != "1":
++        return
++    if key in _DIAG_SEEN:
++        return
++    _DIAG_SEEN.add(key)
++    T = arr.shape[1] if arr.ndim >= 2 else -1
++    frames_differ = None
++    if hit and arr.ndim == 5 and arr.shape[1] > 1:
++        # do frame[0] and frame[-1] differ for sample 0? (mean abs diff)
++        try:
++            diff = float(np.abs(arr[0, 0].astype(np.float32) - arr[0, -1].astype(np.float32)).mean())
++            frames_differ = diff
++        except Exception:
++            frames_differ = None
++    print(
++        f"[RLDX_FRAMESTACK_DIAG] key={key} hit_stacked={hit} shape={arr.shape} "
++        f"T={T} dtype={arr.dtype} min={float(arr.min()):.2f} max={float(arr.max()):.2f} "
++        f"frame0_vs_frameT_meanabsdiff={frames_differ}",
++        file=sys.stderr,
++        flush=True,
++    )
++
++
++def convert_robocasa365_obs_to_rldx_nested(env_obs):
++    """RLinf flat env_obs -> RLDX-1 nested obs (video / state / language).
++
++    env_obs (torch tensors, on cpu):
++        states            : [B, 16]
++        main_images       : [B, H, W, 3]  robot0_agentview_left
++        extra_view_images : [B, H, W, 3]  robot0_agentview_right
++        wrist_images      : [B, H, W, 3]  robot0_eye_in_hand
++        task_descriptions : list[str]     len B
++    Returns nested dict with a T=1 temporal axis on video/state.
++    """
++    states = env_obs["states"].unsqueeze(1)  # [B, T(1), 16]
++
++    # Video temporal stack. RLDX-1's SFT ckpt expects a MULTI-frame stack per
++    # camera (video delta_indices=[-6,-4,-2,0]). When the RoboCasa365 env runs
++    # with rldx_frame_stack=True it injects pre-built `stacked_*` keys ([B,T,
++    # H,W,C]) that reproduce native MultiStepWrapper's stack exactly; use them.
++    # Fallback (no stacked key: e.g. the very first obs of an episode, before
++    # any chunk has run, or GR00T-style single-frame configs): repeat the
++    # current frame, matching native's reset-time deque = [obs0]*T padding.
++    def _video(flat_key, stacked_key):
++        if stacked_key in env_obs:
++            v = env_obs[stacked_key].numpy()  # [B, T, H, W, C]
++            _diag_video(stacked_key, v, hit=True)
++            return v
++        v = env_obs[flat_key].unsqueeze(1).numpy()  # [B, 1, H, W, C]
++        _diag_video(flat_key, v, hit=False)
++        return v
++
++    nested = {
++        "video": {
++            "robot0_agentview_left": _video("main_images", "stacked_main_images"),
++            "robot0_agentview_right": _video("extra_view_images", "stacked_extra_view_images"),
++            "robot0_eye_in_hand": _video("wrist_images", "stacked_wrist_images"),
++        },
++        "state": {
++            "end_effector_position_relative": states[:, :, 0:3].numpy(),
++            "end_effector_rotation_relative": states[:, :, 3:7].numpy(),
++            "gripper_qpos": states[:, :, 7:9].numpy(),
++            "base_position": states[:, :, 9:12].numpy(),
++            "base_rotation": states[:, :, 12:16].numpy(),
++        },
++        # (B, 1) list-of-lists, matching RLDXPolicy's language format
++        "language": {
++            "annotation.human.task_description": [
++                [desc] for desc in env_obs["task_descriptions"]
++            ]
++        },
++    }
++    return nested
++
++
++# Action group order (RLDX-1 robocasa365 config action modality_keys).
++_ACTION_GROUP_ORDER = [
++    "end_effector_position",   # 3
++    "end_effector_rotation",   # 3 (axis_angle)
++    "gripper_close",           # 1
++    "base_motion",             # 4
++    "control_mode",            # 1
++]
++
++
++def flatten_rldx_action(action_group_dict, chunk_size: int = 16) -> np.ndarray:
++    """RLDX-1 decode_action group dict -> flat 12-D RoboCasa365 action.
++
++    action_group_dict: {group_key: np.ndarray [B, horizon, dim]} already
++    unnormalized by processor.decode_action. RoboCasa365Env.step re-splits the
++    flat 12-D array into the dict GrootRoboCasaEnv expects.
++    """
++    components = [
++        action_group_dict[k][:, :chunk_size] for k in _ACTION_GROUP_ORDER
++    ]
++    action_array = np.concatenate(components, axis=-1)
++    assert action_array.shape[-1] == 12, (
++        f"Expected 12-dim RoboCasa365 action, got {action_array.shape[-1]}"
++    )
++    return action_array
+diff --git a/rlinf/utils/metric_utils.py b/rlinf/utils/metric_utils.py
+index fa513722..dd99b5ec 100644
+--- a/rlinf/utils/metric_utils.py
++++ b/rlinf/utils/metric_utils.py
+@@ -150,6 +150,39 @@ def compute_rollout_metrics(data_buffer: dict) -> dict:
+         }
+         rollout_metrics.update(advantages_metrics)
+ 
++        # Per-chunk advantage profile so we can SEE the backward-propagation
++        # shape across the 182-chunk horizon. If done_shift is working, this
++        # should be a roughly increasing curve toward the success chunk; under
++        # the original done-at-success bug, you'd see [0, 0, ..., 0, spike].
++        # Shape coming in is either [n_chunk_step, bsz, num_action_chunks] or
++        # [n_chunk_step, bsz, 1] (chunk_level summed). We collapse env+chunk
++        # axes and probe ~9 sample chunks evenly across the horizon.
++        try:
++            adv_t = advantages.detach().float()
++            if adv_t.dim() >= 2:
++                # mean over everything except the leading time/chunk axis
++                profile = adv_t.reshape(adv_t.shape[0], -1).mean(dim=1)
++                # all-reduce so the value is a global avg across DP ranks
++                profile = profile.to(Worker.torch_platform.current_device())
++                torch.distributed.all_reduce(
++                    profile, op=torch.distributed.ReduceOp.AVG
++                )
++                T = profile.shape[0]
++                # 9 evenly-spaced sample chunks across the horizon, plus the
++                # last one explicitly.
++                idxs = sorted(set(
++                    [int(round(i * (T - 1) / 8)) for i in range(9)] + [T - 1]
++                ))
++                for i in idxs:
++                    rollout_metrics[f"advantages_profile/chunk_{i:03d}"] = (
++                        profile[i].item()
++                    )
++                # Also publish the full vector min/max for spot-check.
++                rollout_metrics["advantages_profile/first_chunk"] = profile[0].item()
++                rollout_metrics["advantages_profile/last_chunk"] = profile[-1].item()
++        except Exception:
++            pass
++
+     if data_buffer.get("returns", None) is not None:
+         returns = data_buffer["returns"]
+         mean_ret = torch.mean(returns).to(Worker.torch_platform.current_device())
+@@ -173,6 +206,31 @@ def compute_rollout_metrics(data_buffer: dict) -> dict:
+         }
+         rollout_metrics.update(returns_metrics)
+ 
++        # Per-chunk returns profile (same idea as advantages_profile above).
++        # This is the most direct picture of "is the success/final reward
++        # actually reaching chunk 0". Expect a nonzero, roughly decreasing
++        # curve at chunk 0 (the discounted reward-to-go from far away).
++        try:
++            ret_t = returns.detach().float()
++            if ret_t.dim() >= 2:
++                profile = ret_t.reshape(ret_t.shape[0], -1).mean(dim=1)
++                profile = profile.to(Worker.torch_platform.current_device())
++                torch.distributed.all_reduce(
++                    profile, op=torch.distributed.ReduceOp.AVG
++                )
++                T = profile.shape[0]
++                idxs = sorted(set(
++                    [int(round(i * (T - 1) / 8)) for i in range(9)] + [T - 1]
++                ))
++                for i in idxs:
++                    rollout_metrics[f"returns_profile/chunk_{i:03d}"] = (
++                        profile[i].item()
++                    )
++                rollout_metrics["returns_profile/first_chunk"] = profile[0].item()
++                rollout_metrics["returns_profile/last_chunk"] = profile[-1].item()
++        except Exception:
++            pass
++
+     return rollout_metrics
+ 
+ 
+diff --git a/rlinf/workers/actor/fsdp_actor_worker.py b/rlinf/workers/actor/fsdp_actor_worker.py
+index 107245a8..3f0af75f 100644
+--- a/rlinf/workers/actor/fsdp_actor_worker.py
++++ b/rlinf/workers/actor/fsdp_actor_worker.py
+@@ -749,6 +749,23 @@ class FSDPActor(FSDPModelManager, Worker):
+                     min=self.cfg.algorithm.importance_sampling_clip,
+                 )
+ 
++            # [DIAG opt-in] Drop zero-variance GRPO groups from the loss denominator.
++            # A GRPO group whose group_size trajectories share an identical score has
++            # advantage == 0 for every member (r - group_mean == 0), so it contributes
++            # nothing to the numerator but STILL inflates masked_mean's denominator
++            # (loss_mask.sum()), silently shrinking every live group's gradient. Gated
++            # behind algorithm.filter_zero_var_groups (default False) so PPO, the
++            # original GRPO runs, and every other config are byte-for-byte unaffected.
++            # Only the GR00T-N1.5 GRPO config enables it. A dead trajectory is identified purely
++            # from advantages (all-zero over its valid positions), no group-id plumbing.
++            if self.cfg.algorithm.get("filter_zero_var_groups", False):
++                flat_adv = advantages.reshape(advantages.shape[0], -1)
++                alive_traj = (flat_adv.abs() > 1e-8).any(dim=1)  # [bsz] bool
++                keep = alive_traj.view(-1, *([1] * (loss_mask.dim() - 1))).to(
++                    loss_mask.dtype
++                )
++                loss_mask = loss_mask * keep
++
+             loss, mbs_metrics_data = policy_loss(
+                 task_type=self.task_type,
+                 loss_type=self.cfg.algorithm.loss_type,
+@@ -988,6 +1005,31 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+         self.version = 0
+         if self.enable_sft_co_train:
+             self._build_sft_data_loader()
++        # IBRL state — used when actor.ibrl_mode in {fixed, dynamic, dynamic_per_task}.
++        self._ibrl_mode = cfg.actor.get("ibrl_mode", "off")
++        self._ibrl_lambda_max = float(cfg.actor.get("ibrl_lambda_max", 0.8))
++        self._ibrl_window_size = int(cfg.actor.get("ibrl_window_size", 128))
++        # Per-task mode: number of tasks for env.train (16 for composite_seen).
++        self._ibrl_num_tasks = int(cfg.actor.get("ibrl_num_tasks", 1))
++        if self._ibrl_mode == "fixed":
++            self._ibrl_lambda = self._ibrl_lambda_max
++        elif self._ibrl_mode == "dynamic_per_task":
++            # Per-task lambda vector, shape [num_tasks]. lambda_t = max * (1 - SR_t).
++            # Starts at 0 (warm-up: no BC) until each task's buffer is full.
++            self._ibrl_lambda = torch.zeros(self._ibrl_num_tasks)
++        else:
++            self._ibrl_lambda = 0.0
++        # Sliding window of trajectory success flags. Single deque for global
++        # dynamic mode; one deque per task for dynamic_per_task. All ranks
++        # maintain identical buffers via all-reduce of (success_count, total).
++        from collections import deque
++        if self._ibrl_mode == "dynamic_per_task":
++            self._ibrl_sr_buffer = [
++                deque(maxlen=self._ibrl_window_size)
++                for _ in range(self._ibrl_num_tasks)
++            ]
++        else:
++            self._ibrl_sr_buffer = deque(maxlen=self._ibrl_window_size)
+ 
+         # create weight syncer
+         weight_syncer_cfg = OmegaConf.select(cfg, "weight_syncer")
+@@ -1214,6 +1256,87 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+         if kwargs["loss_mask_sum"] is not None:
+             self.rollout_batch.update({"loss_mask_sum": kwargs["loss_mask_sum"]})
+ 
++        # ----- DIAGNOSTIC: dump one real success traj's reward/return/done -----
++        # Pick the first env in this rank's batch that hit a success during this
++        # rollout (per-step termination flips True at some chunk). Print:
++        #   reward[0..T], return[0..T], done[0..T], loss_mask[0..T]
++        # so we can VISUALLY confirm whether the success-chunk reward propagated
++        # back to chunks 0..k. Only rank 0, only when the dump file does not yet
++        # exist (so we capture exactly the FIRST GS to keep log noise low).
++        try:
++            import os
++            dump_path = os.path.join(
++                self.cfg.runner.logger.log_path, "first_traj_dump.txt"
++            )
++            if self._rank == 0 and not os.path.exists(dump_path):
++                rew = self.rollout_batch["rewards"]              # [T,B,K]
++                ret = self.rollout_batch.get("returns", None)
++                dones = self.rollout_batch["dones"]              # [T+1,B,K]
++                lm = self.rollout_batch.get("loss_mask", None)
++                # chunk_level summed already lives in adv preprocess; here
++                # rewards is [T,B,K]. Sum across K for "per-chunk reward",
++                # max across K for done-per-chunk.
++                r_chunk = rew.float().sum(dim=-1)                # [T,B]
++                d_chunk = dones.bool().any(dim=-1)               # [T+1,B]
++                # Pick first env with any success this rollout. terminations
++                # tensor sticky after success in raw env, but our done_shift
++                # latch flips first-done one chunk LATER, so the success-chunk
++                # itself has done=False; treat any chunk-with-done as the
++                # "post-success" boundary. The success chunk = (first done chunk - 1).
++                # If done_shift didn't fire (e.g. no env succeeded), pick env 0.
++                T, B = r_chunk.shape
++                target_env = None
++                first_done_chunk = None
++                for e in range(B):
++                    # find first chunk where done flips True (excluding the
++                    # appended +1 step at index T)
++                    fd = (d_chunk[:T, e]).nonzero(as_tuple=False)
++                    if fd.numel() > 0:
++                        target_env = e
++                        first_done_chunk = int(fd[0].item())
++                        break
++                if target_env is None:
++                    target_env, first_done_chunk = 0, -1
++
++                lines = []
++                lines.append(f"first_traj_dump  rank=0  env_in_batch={target_env}  "
++                             f"first_done_chunk={first_done_chunk}  "
++                             f"(success_chunk = first_done-1 if done_shift on)")
++                lines.append(f"shape: rewards={tuple(rew.shape)} "
++                             f"returns={None if ret is None else tuple(ret.shape)} "
++                             f"dones={tuple(dones.shape)}")
++                # rewards per chunk
++                lines.append("chunk |   reward    |   return    | done | loss_mask")
++                # returns shape after preprocess is [T,B] for chunk_level
++                ret_v = None if ret is None else ret.float()
++                if ret_v is not None and ret_v.dim() == 3:
++                    ret_v = ret_v.sum(dim=-1)
++                lm_v = None
++                if lm is not None:
++                    lm_t = lm.float()
++                    if lm_t.dim() == 3:
++                        lm_v = lm_t.any(dim=-1).bool()
++                    else:
++                        lm_v = lm_t.bool()
++                for c in range(T):
++                    rv = float(r_chunk[c, target_env].item())
++                    rt = (
++                        "   n/a   "
++                        if ret_v is None
++                        else f"{float(ret_v[c, target_env].item()):+9.4f}"
++                    )
++                    dv = "T" if bool(d_chunk[c, target_env].item()) else "."
++                    mv = "." if lm_v is None else ("T" if bool(lm_v[c, target_env].item()) else "F")
++                    lines.append(f" {c:4d} | {rv:+9.4f}  | {rt}   |  {dv}   |  {mv}")
++                with open(dump_path, "w") as f:
++                    f.write("\n".join(lines) + "\n")
++                self.log_info(f"[DIAGNOSTIC] dumped first traj to {dump_path}")
++        except Exception as _e:
++            try:
++                self.log_warning(f"[DIAGNOSTIC] dump failed: {_e!r}")
++            except Exception:
++                pass
++
+         rollout_metrics = compute_rollout_metrics(self.rollout_batch)
+         return rollout_metrics
+ 
+@@ -1247,35 +1370,189 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+             self.sft_iterator = iter(self.data_loader)
+             self.train_epoch = 0
+             self.sft_loss_weight = self.cfg.actor.get("sft_loss_weight", 0.1)
++        elif SupportedModel(self.cfg.actor.model.model_type) == SupportedModel.GR00T:
++            self._build_gr00t_sft_data_loader()
+         else:
+             raise KeyError(
+                 f"not support such model type {self.cfg.actor.model.model_type} for SFT right now."
+             )
+ 
+-    def _train_sft_epoch(
+-        self, metrics_data: dict[str, torch.Tensor], loss: torch.Tensor
+-    ):
++    def _build_gr00t_sft_data_loader(self):
++        """Build a LeRobot-backed BC dataloader for GR00T.
++
++        `actor.sft_data_path` may be either a string (single LeRobot dataset)
++        or a list of strings (multi-task BC mixture, equal-weighted via
++        LeRobotMixtureDataset). For a list, each entry's weight is set to 1.0
++        and `balance_dataset_weights=True` so per-task sampling probability is
++        proportional to that task's total trajectory length — yields a roughly
++        uniform per-task BC signal across heterogeneous demo set sizes.
+         """
+-        Train one epoch of SFT.
++        from gr00t.data.dataset import LeRobotSingleDataset, LeRobotMixtureDataset
++        from gr00t.experiment.data_config import DATA_CONFIG_MAP
++        from gr00t.model.transforms import DefaultDataCollator
++        from torch.utils.data import DataLoader
++
++        sft_data_path = self.cfg.actor.get("sft_data_path")
++        if sft_data_path is None:
++            raise ValueError(
++                "actor.sft_data_path must be set when enable_sft_co_train=True for GR00T"
++            )
++        # Map our structrl-namespaced data_config string back to a known config.
++        data_config_name = self.cfg.actor.get("sft_data_config", "panda_omron")
++        if data_config_name in DATA_CONFIG_MAP:
++            data_config_cls = DATA_CONFIG_MAP[data_config_name]
++        else:
++            # Allow "module.path:ClassName" form too (matches our structrl wrapper).
++            mod, cls = data_config_name.rsplit(":", 1) if ":" in data_config_name else (data_config_name, None)
++            import importlib
++            data_config_cls = getattr(importlib.import_module(mod), cls)() if cls else None
++            if data_config_cls is None:
++                raise ValueError(f"Unknown sft_data_config '{data_config_name}'")
++        if not hasattr(data_config_cls, "modality_config"):
++            data_config_cls = data_config_cls()  # instantiate if class
++
++        modality_config = data_config_cls.modality_config()
++        modality_transform = data_config_cls.transform()
++        embodiment_tag = self.cfg.actor.model.get("embodiment_tag", "new_embodiment")
++        video_backend = self.cfg.actor.get("sft_video_backend", "decord")
++
++        # OmegaConf yaml lists arrive as ListConfig (not a Python list) — coerce
++        # so isinstance below + LeRobot's Path() both accept it.
++        from omegaconf import ListConfig, OmegaConf
++        if isinstance(sft_data_path, ListConfig):
++            sft_data_path = OmegaConf.to_container(sft_data_path, resolve=True)
++
++        if isinstance(sft_data_path, (list, tuple)):
++            singles = [
++                LeRobotSingleDataset(
++                    dataset_path=str(p),
++                    modality_configs=modality_config,
++                    transforms=modality_transform,
++                    embodiment_tag=embodiment_tag,
++                    video_backend=video_backend,
++                )
++                for p in sft_data_path
++            ]
++            data_mixture = [(ds, 1.0) for ds in singles]
++            dataset = LeRobotMixtureDataset(
++                data_mixture=data_mixture,
++                mode="train",
++                balance_dataset_weights=True,
++                balance_trajectory_weights=True,
++            )
++            n_samples = sum(len(ds) for ds in singles)
++            ds_summary = f"mixture(n_tasks={len(singles)}, n_samples={n_samples})"
++        else:
++            dataset = LeRobotSingleDataset(
++                dataset_path=sft_data_path,
++                modality_configs=modality_config,
++                transforms=modality_transform,
++                embodiment_tag=embodiment_tag,
++                video_backend=video_backend,
++            )
++            ds_summary = f"single(path={sft_data_path}, n_samples={len(dataset)})"
++
++        # Per-rank micro-batch size matches PPO so each step pairs one BC
++        # forward with one PPO forward.
++        bsz = int(self.cfg.actor.micro_batch_size)
++        self.data_loader = DataLoader(
++            dataset,
++            batch_size=bsz,
++            shuffle=True,
++            num_workers=int(self.cfg.actor.get("sft_num_workers", 2)),
++            drop_last=True,
++            pin_memory=True,
++            collate_fn=DefaultDataCollator(),
++        )
++        self.sft_iterator = iter(self.data_loader)
++        self.train_epoch = 0
++        self.sft_loss_weight = self.cfg.actor.get("sft_loss_weight", 0.1)
++        self.logger.info(
++            f"[GR00T SFT] dataset={ds_summary}, "
++            f"batch_size={bsz}, sft_loss_weight={self.sft_loss_weight}"
++        )
++
++    def _train_sft_epoch(
++        self,
++        metrics_data: dict[str, torch.Tensor],
++        loss: torch.Tensor,
++        task_ids: Optional[torch.Tensor] = None,
++    ) -> torch.Tensor:
++        """Mix one BC step with the current PPO loss into a single loss.
++
++        Returns the new (mixed) loss so the caller can run ONE combined
++        backward. Both the PPO forward and this BC forward must keep their
++        FSDP params resident until that single backward runs -- so these IBRL
++        runs use `sharding_strategy=shard_grad_op` (no reshard-after-forward).
++        With `full_shard`, the second forward reshards (frees) the params the
++        first forward's autograd graph still references, and the combined
++        backward hits a zeroed storage.
++
++        Three IBRL knobs (read from cfg.actor):
++            * `ibrl_mode`: 'off' | 'fixed' | 'dynamic'   (default 'off')
++            * `ibrl_lambda_max`:  scalar, default 0.8
++            * `ibrl_window_size`: int, default 128 (only for dynamic mode)
++
++        - off:     loss_total = loss_ppo + sft_loss_weight * loss_bc
++        - fixed:   loss_total = (1 - lambda_max) * loss_ppo
++                                + lambda_max * sft_loss_weight * loss_bc
++        - dynamic: lambda = lambda_max * (1 - SR), where SR is the success
++                   rate of the most recent `ibrl_window_size` rollout
++                   trajectories. While the buffer is not yet full, lambda=0
++                   (pure RL warmup).
+         """
+         metrics_data["ppo_loss"] = loss.clone().detach().item()
+ 
+-        # Get next data batch
+-        try:
+-            observation, actions = next(self.sft_iterator)
+-        except StopIteration:
+-            self.train_epoch += 1
+-            self.data_loader.set_epoch(self.train_epoch)
+-            self.sft_iterator = iter(self.data_loader)
+-            observation, actions = next(self.sft_iterator)
++        # Get next data batch. OpenPI yields (obs, actions); GR00T yields a
++        # single transformed dict where actions are merged into the dict
++        # under action.* keys.
++        def _next():
++            try:
++                return next(self.sft_iterator)
++            except StopIteration:
++                self.train_epoch += 1
++                if hasattr(self.data_loader, "set_epoch"):
++                    self.data_loader.set_epoch(self.train_epoch)
++                self.sft_iterator = iter(self.data_loader)
++                return next(self.sft_iterator)
++
++        batch = _next()
++        if isinstance(batch, (tuple, list)) and len(batch) == 2:
++            observation, actions = batch
++        else:
++            observation, actions = batch, None
+ 
+-        sft_loss = self.model(
+-            data=(observation, actions),
+-            forward_type=ForwardType.SFT,
+-        )
++        with self.amp_context:
++            sft_loss = self.model(
++                data=(observation, actions),
++                forward_type=ForwardType.SFT,
++            )
+         metrics_data["sft_loss"] = sft_loss.detach().item()
+-        total_loss = loss + self.sft_loss_weight * sft_loss
+-        loss = total_loss
++
++        ibrl_mode = self.cfg.actor.get("ibrl_mode", "off")
++        if ibrl_mode == "off":
++            total_loss = loss + self.sft_loss_weight * sft_loss
++            metrics_data["ibrl_lambda"] = 0.0
++        elif ibrl_mode == "dynamic_per_task":
++            # Per-task lambda controls the BC weight only. PPO is never
++            # suppressed — its coefficient stays 1.0 regardless of lambda.
++            #   total_loss = loss_ppo + lam * sft_loss_weight * loss_bc
++            # SR-low task -> high lam -> stronger BC pull on top of PPO.
++            # SR-high task -> low lam -> BC fades out, pure PPO.
++            # lam is the average per-task lambda over the task ids in this
++            # micro batch's PPO samples.
++            if task_ids is None or not isinstance(self._ibrl_lambda, torch.Tensor):
++                lam = 0.0
++            else:
++                tids = task_ids.reshape(-1).to(torch.long)
++                lam_vec = self._ibrl_lambda.to(tids.device)
++                lam = float(lam_vec[tids].mean().item())
++            metrics_data["ibrl_lambda"] = lam
++            total_loss = loss + lam * self.sft_loss_weight * sft_loss
++        else:
++            lam = float(self._ibrl_lambda) if hasattr(self, "_ibrl_lambda") else 0.0
++            metrics_data["ibrl_lambda"] = lam
++            total_loss = (1.0 - lam) * loss + lam * self.sft_loss_weight * sft_loss
+ 
+         metrics_data["loss_ratio"] = (
+             np.abs(metrics_data["sft_loss"]) / np.abs(metrics_data["ppo_loss"])
+@@ -1291,6 +1568,106 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+                 f"sft_loss_weight={self.sft_loss_weight:.6f}"
+             )
+ 
++        return total_loss
++
++    def _update_ibrl_lambda(self) -> None:
++        """Push this rollout's per-traj success flags into the sliding window
++        and recompute lambda.
++
++        success_per_traj is computed locally from rollout rewards (sum across
++        chunk steps + action chunks > 0). Then we all-reduce the success flag
++        sum + count across DP ranks so every rank sees the same SR window.
++
++        For dynamic_per_task mode, we maintain 16 separate buffers (one per
++        task) and emit a [num_tasks] lambda vector.
++        """
++        rewards = self.rollout_batch.get("rewards", None)
++        if rewards is None:
++            return
++        # rewards: [n_chunk_step, batch_per_rank, num_action_chunks]
++        # per-trajectory total reward; with use_rel_reward=True, sum is in {0, +1}.
++        per_traj = rewards.sum(dim=0).sum(dim=-1)  # [batch_per_rank]
++        success_local = (per_traj > 0.5).float()  # [batch_per_rank]
++        device = Worker.torch_platform.current_device()
++
++        if self._ibrl_mode == "dynamic_per_task":
++            # task_ids: [n_chunk_step, batch_per_rank] — same task for all chunk
++            # steps of a given env (env.task_ids is static), take dim 0 slice.
++            task_ids = self.rollout_batch.get("task_ids", None)
++            if task_ids is None:
++                self.logger.warning(
++                    "[IBRL] dynamic_per_task requested but rollout_batch has no "
++                    "task_ids; falling back to lambda=0."
++                )
++                return
++            task_per_traj = task_ids[0].to(torch.long)  # [batch_per_rank]
++            num_tasks = self._ibrl_num_tasks
++            # Per-task local successes / totals.
++            success_local = success_local.to(device)
++            task_per_traj = task_per_traj.to(device)
++            n_local = torch.zeros(num_tasks, device=device, dtype=torch.float32)
++            s_local = torch.zeros(num_tasks, device=device, dtype=torch.float32)
++            n_local.scatter_add_(
++                0, task_per_traj, torch.ones_like(success_local)
++            )
++            s_local.scatter_add_(0, task_per_traj, success_local)
++            torch.distributed.all_reduce(n_local, op=torch.distributed.ReduceOp.SUM)
++            torch.distributed.all_reduce(s_local, op=torch.distributed.ReduceOp.SUM)
++
++            srs = []
++            for t in range(num_tasks):
++                n_g = int(n_local[t].item())
++                s_g = int(s_local[t].item())
++                buf = self._ibrl_sr_buffer[t]
++                for i in range(n_g):
++                    buf.append(1 if i < s_g else 0)
++                if len(buf) >= self._ibrl_window_size:
++                    sr_t = sum(buf) / len(buf)
++                    self._ibrl_lambda[t] = self._ibrl_lambda_max * (1.0 - sr_t)
++                else:
++                    sr_t = sum(buf) / max(1, len(buf))
++                    self._ibrl_lambda[t] = 0.0  # warmup
++                srs.append(sr_t)
++
++            sr_str = ",".join(f"{x:.2f}" for x in srs)
++            lam_str = ",".join(
++                f"{self._ibrl_lambda[t].item():.2f}" for t in range(num_tasks)
++            )
++            self.logger.info(
++                f"[IBRL per-task] window_min="
++                f"{min(len(b) for b in self._ibrl_sr_buffer)}/"
++                f"{self._ibrl_window_size} SR=[{sr_str}] lambda=[{lam_str}]"
++            )
++            return
++
++        # Single-buffer global modes (legacy fixed/dynamic).
++        n_local = torch.tensor(
++            [success_local.numel()], device=device, dtype=torch.float32
++        )
++        s_local = torch.tensor(
++            [float(success_local.sum().item())], device=device, dtype=torch.float32
++        )
++        # All-reduce sum across all DP ranks so the global SR is identical
++        # everywhere. Avoids each rank applying a different lambda.
++        torch.distributed.all_reduce(n_local, op=torch.distributed.ReduceOp.SUM)
++        torch.distributed.all_reduce(s_local, op=torch.distributed.ReduceOp.SUM)
++        n_global = int(n_local.item())
++        s_global = int(s_local.item())
++        for i in range(n_global):
++            self._ibrl_sr_buffer.append(1 if i < s_global else 0)
++
++        if len(self._ibrl_sr_buffer) >= self._ibrl_window_size:
++            sr = sum(self._ibrl_sr_buffer) / len(self._ibrl_sr_buffer)
++            self._ibrl_lambda = self._ibrl_lambda_max * (1.0 - sr)
++        else:
++            sr = sum(self._ibrl_sr_buffer) / max(1, len(self._ibrl_sr_buffer))
++            self._ibrl_lambda = 0.0  # warmup: pure RL until window fills
++        self.logger.info(
++            f"[IBRL] window={len(self._ibrl_sr_buffer)}/{self._ibrl_window_size} "
++            f"SR={sr:.3f} lambda={self._ibrl_lambda:.3f} "
++            f"(this_step succ={s_global}/{n_global})"
++        )
++
+     @Worker.timer("run_training")
+     def run_training(self) -> None:
+         """
+@@ -1302,12 +1679,23 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+             self.load_optimizer(self.device)
+ 
+         self.model.train()
++        # IBRL: update sliding-window SR + dynamic lambda from this rollout.
++        if (
++            self._ibrl_mode in ("dynamic", "dynamic_per_task")
++            and self.enable_sft_co_train
++        ):
++            self._update_ibrl_lambda()
+         rollout_size = (
+             self.rollout_batch["prev_logprobs"].shape[0]
+             * self.rollout_batch["prev_logprobs"].shape[1]
+         )
+         g = torch.Generator()
+         g.manual_seed(self.cfg.actor.seed + self._rank)
++        # Per-rank single-task setup: each rank's rollout is already a single
++        # task (RoboCasa365Env assigns task_idx = seed_offset % num_tasks),
++        # so plain random shuffle within rank keeps the GPU on its own task.
++        # Cross-rank all-reduce then mixes 16 tasks at gradient level, with
++        # each rank applying its own task's lambda in the loss.
+         shuffle_id = torch.randperm(rollout_size, generator=g)
+ 
+         with torch.no_grad():
+@@ -1386,9 +1774,9 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+                             self.cfg.algorithm.sampling_params.temperature_train
+                         )
+                         kwargs["top_k"] = self.cfg.algorithm.sampling_params.top_k
+-                    elif (
+-                        SupportedModel(self.cfg.actor.model.model_type)
+-                        == SupportedModel.GR00T
++                    elif SupportedModel(self.cfg.actor.model.model_type) in (
++                        SupportedModel.GR00T,
++                        SupportedModel.RLDX1,
+                     ):
+                         kwargs["prev_logprobs"] = prev_logprobs
+ 
+@@ -1406,9 +1794,9 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+                             **kwargs,
+                         )
+ 
+-                    if (
+-                        SupportedModel(self.cfg.actor.model.model_type)
+-                        == SupportedModel.GR00T
++                    if SupportedModel(self.cfg.actor.model.model_type) in (
++                        SupportedModel.GR00T,
++                        SupportedModel.RLDX1,
+                     ):
+                         prev_logprobs = output_dict["prev_logprobs"]
+ 
+@@ -1455,7 +1843,11 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
+                     metrics_data["actor/entropy_loss"] = entropy_loss.detach().item()
+ 
+                     if self.enable_sft_co_train:
+-                        self._train_sft_epoch(metrics_data, loss)
++                        loss = self._train_sft_epoch(
++                            metrics_data,
++                            loss,
++                            task_ids=batch.get("task_ids", None),
++                        )
+ 
+                     loss /= self.gradient_accumulation
+                     with backward_ctx:
+diff --git a/rlinf/workers/env/env_worker.py b/rlinf/workers/env/env_worker.py
+index c2f8acb9..a6062c7e 100644
+--- a/rlinf/workers/env/env_worker.py
++++ b/rlinf/workers/env/env_worker.py
+@@ -169,6 +169,36 @@ class EnvWorker(Worker):
+                 ]
+                 self.history_lengths = [{} for _ in range(self.stage_num)]
+ 
++            # Cache per-stage task_ids tensor for per-task IBRL dynamic lambda.
++            # Each stage's env was constructed with num_envs=num_envs_per_stage and
++            # the env class assigns task_id = env_id % num_tasks (see RoboCasa365Env).
++            # We cache as torch.long tensor shape [num_envs_per_stage] so it can be
++            # appended to ChunkStepResult cheaply each chunk step. If the underlying
++            # env class doesn't expose task_ids (e.g. non-multi-task env), we fall
++            # back to all zeros — downstream code reads it but ignores when
++            # ibrl_mode != dynamic_per_task.
++            self._train_task_ids_per_stage = []
++            for stage_id in range(self.stage_num):
++                env = self.env_list[stage_id]
++                # Walk through gym.Wrapper chain to find task_ids.
++                inner = env
++                task_ids_arr = None
++                for _ in range(8):
++                    if hasattr(inner, "task_ids"):
++                        task_ids_arr = inner.task_ids
++                        break
++                    if hasattr(inner, "env"):
++                        inner = inner.env
++                    else:
++                        break
++                if task_ids_arr is None:
++                    task_ids_t = torch.zeros(
++                        self.train_num_envs_per_stage, dtype=torch.long
++                    )
++                else:
++                    task_ids_t = torch.as_tensor(task_ids_arr, dtype=torch.long)
++                self._train_task_ids_per_stage.append(task_ids_t)
++
+     def update_env_cfg(self):
+         if not self.only_eval:
+             # train env
+@@ -411,10 +441,315 @@ class EnvWorker(Worker):
+         obs_list, chunk_rewards, chunk_terminations, chunk_truncations, infos_list = (
+             self.env_list[stage_id].chunk_step(chunk_actions)
+         )
++        # Optional: replace raw 0/1 outcome reward with the dense subtask
++        # reward (structrl/dense_reward.py). The dense reward is precomputed
++        # in the env subprocess (rlinf/envs/robocasa365/venv.py) and surfaced
++        # via info["dense_reward"] for each step in the chunk. Same scalar
++        # formula the video overlay shows. Gated by
++        # env.train.dense_reward.enabled (default False).
++        if bool(self.cfg.env.train.get("dense_reward", {}).get("enabled", False)):
++            # infos_list: list of length chunk_size, each is dict with
++            # per-env arrays (after list_of_dict_to_dict_of_list).
++            # We pull info["dense_reward"] from the per-step info_lists
++            # before list_of_dict_to_dict_of_list collapsed them.
++            try:
++                # chunk_rewards shape: [num_envs, chunk_size]
++                num_envs, chunk_size = chunk_rewards.shape
++                dense = torch.zeros_like(chunk_rewards)
++                # `infos_list` from chunk_step is a list with len=chunk_size.
++                # Each element infos_list[t] is dict-of-list (per-env values).
++                for t in range(chunk_size):
++                    info_t = infos_list[t]
++                    if isinstance(info_t, dict) and "dense_reward" in info_t:
++                        dr = info_t["dense_reward"]
++                        # dr could be list/array of len num_envs
++                        for env_idx in range(num_envs):
++                            try:
++                                dense[env_idx, t] = float(dr[env_idx])
++                            except Exception:
++                                pass
++                # Per-trajectory cumulative dense reward. `dense` is the EXACT
++                # tensor fed to PPO (chunk_rewards is overwritten with it
++                # below), so summing it per env across the episode gives the
++                # true per-traj return under the timing reward. We accumulate
++                # each chunk's per-env sum, then snapshot+reset on episode done.
++                # The min/max/mean of these snapshots is what lets us confirm
++                # from the side that the timing reward is actually applied
++                # (expected roughly -1.x .. ~3 for these tasks, NOT all-zero).
++                if not hasattr(self, "_dense_ep_cum") or (
++                    self._dense_ep_cum is not None
++                    and self._dense_ep_cum.shape[0] != num_envs
++                ):
++                    self._dense_ep_cum = torch.zeros(num_envs)
++                self._dense_ep_cum = self._dense_ep_cum + dense.sum(dim=1).cpu()
++                # Episode boundary this chunk: ONLY truncation (the env is
++                # actually reset by RLinf at step horizon). Do NOT use
++                # `terminations` here — under `auto_reset: False`, a success
++                # makes terminations=True every subsequent chunk while the env
++                # keeps running, which would (a) snapshot the cumulative early
++                # then (b) clear it, so the real per-traj total ends up split
++                # across many "n=1, max=0" lines. Truncation fires once per
++                # episode at horizon and matches the actual env reset.
++                _chunk_done = chunk_truncations[:, -1].cpu()
++                _ep_returns = None
++                if bool(_chunk_done.any()):
++                    _ep_returns = self._dense_ep_cum[_chunk_done].clone()
++                    self._dense_ep_cum[_chunk_done] = 0.0
++                # Log every chunk so we can see dense_reward distribution
++                # evolve over training. Also publish stats to env_info so
++                # they show up in tensorboard as env/dense_reward_*.
++                d_max = float(dense.max())
++                d_mean = float(dense.mean())
++                d_min = float(dense.min())
++                d_pos_frac = float((dense > 0).float().mean())
++                # Aggregate the side-channel instantaneous (variant-A) and
++                # latched-progress diagnostics for logging. These are NOT
++                # added to chunk_rewards — they're informational only so
++                # we can compare incremental vs instantaneous side-by-side
++                # in tensorboard and confirm the latching logic.
++                inst_sum = 0.0
++                inst_count = 0
++                latched_nd_max = 0
++                latched_outcome_frac = 0.0
++                latched_outcome_n = 0
++                latched_outcome_total = 0
++                for t in range(chunk_size):
++                    info_t = infos_list[t]
++                    if not isinstance(info_t, dict):
++                        continue
++                    inst = info_t.get("dense_reward_inst")
++                    if inst is not None:
++                        for v in inst:
++                            try:
++                                inst_sum += float(v)
++                                inst_count += 1
++                            except Exception:
++                                pass
++                    nd = info_t.get("dense_reward_latched_n_done")
++                    if nd is not None:
++                        for v in nd:
++                            try:
++                                latched_nd_max = max(latched_nd_max, int(v))
++                            except Exception:
++                                pass
++                    outc = info_t.get("dense_reward_latched_outcome")
++                    if outc is not None:
++                        for v in outc:
++                            try:
++                                latched_outcome_n += int(v)
++                                latched_outcome_total += 1
++                            except Exception:
++                                pass
++                inst_mean = (inst_sum / inst_count) if inst_count > 0 else 0.0
++                if latched_outcome_total > 0:
++                    latched_outcome_frac = (
++                        latched_outcome_n / latched_outcome_total
++                    )
++                # Per-traj cumulative return stats (only on chunks where some
++                # episode finished). This is the headline diagnostic the user
++                # asked for: 512 trajectories should span ~ -1.x .. ~3.
++                _ep_str = ""
++                if _ep_returns is not None and _ep_returns.numel() > 0:
++                    _ep_str = (
++                        f" ep_cum[n={_ep_returns.numel()}]: "
++                        f"min={float(_ep_returns.min()):.3f} "
++                        f"max={float(_ep_returns.max()):.3f} "
++                        f"mean={float(_ep_returns.mean()):.3f}"
++                    )
++                try:
++                    self.log_info(
++                        "[dense_reward] swap chunk_rewards: "
++                        f"sparse_max={float(chunk_rewards.max()):.3f} "
++                        f"sparse_mean={float(chunk_rewards.mean()):.3f} "
++                        f"inc_max={d_max:.3f} inc_mean={d_mean:.4f} "
++                        f"inc_pos_frac={d_pos_frac:.3f} "
++                        f"inst_mean={inst_mean:.3f} "
++                        f"latched_nd_max={latched_nd_max} "
++                        f"latched_outc_frac={latched_outcome_frac:.3f} "
++                        f"shape={tuple(dense.shape)}"
++                        f"{_ep_str}"
++                    )
++                except Exception:
++                    pass
++                # env_metrics later does torch.cat on each value, so wrap
++                # scalars in 1-D tensors of shape (1,). All published as
++                # env/dense_reward/* in tensorboard.
++                _t = lambda x: torch.tensor([float(x)])
++                env_info["dense_reward/inc_max"] = _t(d_max)
++                env_info["dense_reward/inc_mean"] = _t(d_mean)
++                env_info["dense_reward/inc_min"] = _t(d_min)
++                env_info["dense_reward/inc_pos_frac"] = _t(d_pos_frac)
++                env_info["dense_reward/inst_mean"] = _t(inst_mean)
++                env_info["dense_reward/sparse_mean"] = _t(chunk_rewards.mean())
++                env_info["dense_reward/latched_nd_max"] = _t(latched_nd_max)
++                env_info["dense_reward/latched_outc_frac"] = _t(
++                    latched_outcome_frac
++                )
++                # Per-traj cumulative return distribution (only when episodes
++                # finished this chunk). These confirm the timing reward is
++                # applied: expected ~ -1.x .. ~3, NOT all zero.
++                if _ep_returns is not None and _ep_returns.numel() > 0:
++                    env_info["dense_reward/ep_cum_min"] = _t(_ep_returns.min())
++                    env_info["dense_reward/ep_cum_max"] = _t(_ep_returns.max())
++                    env_info["dense_reward/ep_cum_mean"] = _t(_ep_returns.mean())
++                chunk_rewards = dense
++            except Exception as _e:
++                if not getattr(self, "_dense_reward_err_logged", False):
++                    try:
++                        self.log_warning(f"[dense_reward] swap failed: {_e!r}")
++                    except Exception:
++                        pass
++                    self._dense_reward_err_logged = True
++        # ----- Final-only timing reward variant -----
++        # Accumulate the per-step timing reward (info["dense_reward"]) across
++        # the whole episode and deliver it ONLY at the success chunk (or, for
++        # failed traj, at the truncation chunk). All other chunks: reward=0.
++        # Same TOTAL signal as the dense path, but no intermediate shaping —
++        # PPO/GAE has to propagate the one terminal number back along all
++        # 182 chunks. Pairs with done_shift (separate block below) to guarantee
++        # the delivered reward flows back to chunks 0..k without leaking
++        # forward into chunk k. Mutually exclusive with dense_reward.
++        elif bool(self.cfg.env.train.get("final_only_reward", {}).get("enabled", False)):
++            try:
++                num_envs, chunk_size = chunk_rewards.shape
++                dev = chunk_rewards.device
++                dense_step = torch.zeros_like(chunk_rewards)
++                for t in range(chunk_size):
++                    info_t = infos_list[t]
++                    if isinstance(info_t, dict) and "dense_reward" in info_t:
++                        dr = info_t["dense_reward"]
++                        for env_idx in range(num_envs):
++                            try:
++                                dense_step[env_idx, t] = float(dr[env_idx])
++                            except Exception:
++                                pass
++                # Per-env episode state. Latch is monotonic within an episode
++                # (robust to terminations flicker under auto_reset=False).
++                if (not hasattr(self, "_fo_ep_cum")) or (
++                    self._fo_ep_cum.shape[0] != num_envs
++                ):
++                    self._fo_ep_cum = torch.zeros(num_envs)
++                    self._fo_done_latch = torch.zeros(num_envs, dtype=torch.bool)
++                success_now = chunk_terminations.any(dim=1).cpu()
++                first_success = success_now & (~self._fo_done_latch)
++                trunc_now = chunk_truncations[:, -1].cpu()
++                # Accumulate dense reward only while not yet latched; anything
++                # after success is masked out by loss_mask anyway, and we don't
++                # want it leaking into the delivered total.
++                active = ~self._fo_done_latch
++                self._fo_ep_cum = (
++                    self._fo_ep_cum + dense_step.sum(dim=1).cpu() * active.float()
++                )
++                # Deliver the full cumulative reward at the FIRST-done chunk:
++                #   success traj -> success chunk
++                #   failure traj -> truncation chunk (only if not already latched)
++                deliver = first_success | (trunc_now & active)
++                final_only = torch.zeros_like(chunk_rewards)
++                _ep_returns = None
++                if bool(deliver.any()):
++                    final_only[deliver.to(dev), -1] = self._fo_ep_cum[deliver].to(
++                        dev, dtype=final_only.dtype
++                    )
++                    _ep_returns = self._fo_ep_cum[deliver].clone()
++                # Advance latch AFTER delivery this chunk; reset on truncation
++                # (env actually resets at rollout boundary -> latch must reset).
++                self._fo_done_latch = self._fo_done_latch | first_success
++                if bool(trunc_now.any()):
++                    self._fo_ep_cum[trunc_now] = 0.0
++                    self._fo_done_latch[trunc_now] = False
++                _t = lambda x: torch.tensor([float(x)])
++                env_info["final_only_reward/sparse_max"] = _t(float(final_only.max()))
++                env_info["final_only_reward/sparse_min"] = _t(float(final_only.min()))
++                env_info["final_only_reward/sparse_pos_frac"] = _t(
++                    float((final_only != 0).float().mean())
++                )
++                _ep_str = ""
++                if _ep_returns is not None and _ep_returns.numel() > 0:
++                    env_info["final_only_reward/ep_cum_min"] = _t(_ep_returns.min())
++                    env_info["final_only_reward/ep_cum_max"] = _t(_ep_returns.max())
++                    env_info["final_only_reward/ep_cum_mean"] = _t(_ep_returns.mean())
++                    _ep_str = (
++                        f" ep_cum[n={_ep_returns.numel()}]: "
++                        f"min={float(_ep_returns.min()):.3f} "
++                        f"max={float(_ep_returns.max()):.3f} "
++                        f"mean={float(_ep_returns.mean()):.3f}"
++                    )
++                try:
++                    self.log_info(
++                        "[final_only] swap chunk_rewards: "
++                        f"n_first_success={int(first_success.sum())} "
++                        f"n_trunc_deliver={int((trunc_now & active).sum())} "
++                        f"final_max={float(final_only.max()):.3f} "
++                        f"final_min={float(final_only.min()):.3f}"
++                        f"{_ep_str}"
++                    )
++                except Exception:
++                    pass
++                chunk_rewards = final_only
++            except Exception as _e:
++                if not getattr(self, "_finalonly_err_logged", False):
++                    try:
++                        self.log_warning(f"[final_only] swap failed: {_e!r}")
++                    except Exception:
++                        pass
++                    self._finalonly_err_logged = True
+         if isinstance(obs_list, (list, tuple)):
+             extracted_obs = obs_list[-1] if obs_list else None
+         if isinstance(infos_list, (list, tuple)):
+             infos = infos_list[-1] if infos_list else None
++        # ----- DONE SHIFT (credit-assignment fix, all reward modes) -----
++        # Root bug: robocasa_env sets `terminations = success`, so the success
++        # chunk emits done=True. In chunk_level GAE the `~dones[step+1]` flag
++        # then cuts the chunk-(k-1)->chunk-k boundary, so the success reward
++        # (sparse +1, or timing's +2.0 outcome) can NEVER propagate back to the
++        # earlier chunks that actually earned it. Fix: shift the success-driven
++        # termination forward by exactly ONE chunk. The done GAE sees for this
++        # chunk is the per-env latch state BEFORE this chunk, so:
++        #   - the success chunk itself is NOT done  -> chunk(k-1)->k propagates
++        #   - the NEXT chunk IS done                -> chunk k isolated from k+1
++        # Net: reward@success flows back to chunk 0..k, and any post-success
++        # reward (timing keeps firing, or env knocks something over) can never
++        # leak into the success chunk's return. Verified end-to-end against the
++        # real GAE + compute_loss_mask (env succeeds @ arbitrary chunk, garbage
++        # reward after success stays out of the success-chunk return).
++        # Truncation-driven dones are untouched. Gated by done_shift.enabled.
++        # Success-rate metrics use infos["episode"]["success_once"], NOT
++        # chunk_terminations, so this does not perturb reported SR.
++        if (
++            bool(self.cfg.env.train.get("done_shift", {}).get("enabled", False))
++            and not self.cfg.env.train.auto_reset
++            and not self.cfg.env.train.ignore_terminations
++        ):
++            num_envs, chunk_size = chunk_terminations.shape
++            if (not hasattr(self, "_ds_latch")) or (
++                self._ds_latch.shape[0] != num_envs
++            ):
++                self._ds_latch = torch.zeros(num_envs, dtype=torch.bool)
++            latch = self._ds_latch.to(chunk_terminations.device)
++            success_now = chunk_terminations.any(dim=1)
++            first_success = success_now & (~latch)
++            # Emit the PRE-update latch as this chunk's termination: success
++            # chunk -> False (not yet latched), next chunk -> True.
++            shifted = latch.clone()
++            chunk_terminations = (
++                shifted.view(num_envs, 1).expand(num_envs, chunk_size).clone()
++            )
++            # Advance latch for next chunk; clear envs that truncated (rollout
++            # boundary: env is actually reset, latch must reset too).
++            new_latch = latch | first_success
++            trunc_now = chunk_truncations[:, -1]
++            if bool(trunc_now.any()):
++                new_latch = new_latch & (~trunc_now)
++            self._ds_latch = new_latch.cpu()
++            try:
++                self.log_info(
++                    "[done_shift] "
++                    f"n_first_success={int(first_success.sum())} "
++                    f"n_latched_active={int(shifted.sum())} "
++                    f"n_trunc={int(trunc_now.sum())}"
++                )
++            except Exception:
++                pass
+         chunk_dones = torch.logical_or(chunk_terminations, chunk_truncations)
+         final_obs = (
+             self._build_chunk_final_obs(obs_list, infos_list)
+@@ -1087,6 +1422,11 @@ class EnvWorker(Worker):
+                         truncations=env_output.truncations,
+                         terminations=env_output.terminations,
+                         rewards=rewards,
++                        task_ids=(
++                            self._train_task_ids_per_stage[stage_id]
++                            if hasattr(self, "_train_task_ids_per_stage")
++                            else None
++                        ),
+                     )
+                     self.rollout_results[stage_id].append_step_result(chunk_step_result)
+                     if (
+diff --git a/rlinf/workers/rollout/hf/huggingface_worker.py b/rlinf/workers/rollout/hf/huggingface_worker.py
+index ea603e85..524e78f3 100644
+--- a/rlinf/workers/rollout/hf/huggingface_worker.py
++++ b/rlinf/workers/rollout/hf/huggingface_worker.py
+@@ -260,6 +260,7 @@ class MultiStepRolloutWorker(Worker):
+             SupportedModel.OPENPI,
+             SupportedModel.MLP_POLICY,
+             SupportedModel.GR00T,
++            SupportedModel.RLDX1,
+             SupportedModel.DREAMZERO,
+             SupportedModel.CNN_POLICY,
+             SupportedModel.CFG_MODEL,
+diff --git a/scripts/patch_modality_rotation.py b/scripts/patch_modality_rotation.py
+new file mode 100644
+index 00000000..9db91c2a
+--- /dev/null
++++ b/scripts/patch_modality_rotation.py
+@@ -0,0 +1,64 @@
++#!/usr/bin/env python3
++"""Add rotation_type fields to a LeRobot modality.json so PandaOmronDataConfig
++loads cleanly. The official RC365 SFT pipeline assumes these fields are
++present; our HF-downloaded datasets are missing them.
++
++Mapping (from PandaOmronDataConfig.state_target_rotations + size convention):
++  state.end_effector_rotation_relative  4-dim -> quaternion
++  state.base_rotation                   4-dim -> quaternion
++  action.end_effector_rotation          3-dim -> axis_angle
++
++Run:
++  python patch_modality_rotation.py /path/to/lerobot/meta/modality.json
++"""
++import argparse
++import json
++import sys
++from pathlib import Path
++
++
++ROTATION_TYPE_MAP = {
++    ("state", "base_rotation"): "quaternion",
++    ("state", "end_effector_rotation_relative"): "quaternion",
++    ("action", "end_effector_rotation"): "axis_angle",
++}
++
++
++def patch(path: Path) -> bool:
++    data = json.loads(path.read_text())
++    changed = False
++    for (modality, key), rotation_type in ROTATION_TYPE_MAP.items():
++        block = data.get(modality, {}).get(key)
++        if block is None:
++            continue
++        if block.get("rotation_type") != rotation_type:
++            block["rotation_type"] = rotation_type
++            changed = True
++    if changed:
++        path.write_text(json.dumps(data, indent=4))
++        print(f"[patched] {path}")
++    else:
++        print(f"[unchanged] {path}")
++    return changed
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("paths", nargs="+", help="Paths to modality.json files (or dirs containing them)")
++    args = ap.parse_args()
++    for p in args.paths:
++        path = Path(p)
++        if path.is_dir():
++            target = path / "modality.json"
++            if not target.exists():
++                target = path / "meta" / "modality.json"
++        else:
++            target = path
++        if not target.exists():
++            print(f"[skip] {target} not found")
++            continue
++        patch(target)
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/tools/verify_done_shift.py b/tools/verify_done_shift.py
+new file mode 100644
+index 00000000..6a61c471
+--- /dev/null
++++ b/tools/verify_done_shift.py
+@@ -0,0 +1,112 @@
++#!/usr/bin/env python
++"""Offline verifier for the done-shift credit-assignment fix.
++
++Replays the EXACT per-chunk latch logic from env_worker.py through the REAL
++GAE (rlinf.algorithms) + compute_loss_mask, with envs that succeed at
++DIFFERENT, caller-chosen chunks (proves nothing is hardcoded to 75). Confirms,
++per env:
++  (1) reward propagates backward to chunk 0 (return > 0 before success)
++  (2) success chunk gets full credit
++  (3) post-success garbage reward stays isolated in its own chunk
++  (4) loss_mask keeps 0..success, drops success+1..end
++Run:  .venv-rlinf/bin/python RLinf/tools/verify_done_shift.py --chunks 120 43 7
++"""
++import argparse
++import sys
++
++import torch
++
++sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1]))
++from rlinf.algorithms.advantages import compute_gae_advantages_and_returns
++from rlinf.algorithms.utils import preprocess_embodied_advantages_inputs
++from rlinf.utils.metric_utils import compute_loss_mask
++
++
++def replay(success_chunks, mode, NC=182, CS=16, gamma=0.99, lam=0.95,
++           garbage_after=5, garbage_val=9.0, timing_per_step=0.02,
++           outcome=2.0, done_shift=True):
++    BSZ = len(success_chunks)
++    latch = torch.zeros(BSZ, dtype=torch.bool)
++    terms, truncs, rews = [], [], []
++    for c in range(NC):
++        rew = torch.zeros(BSZ, CS)
++        raw_succ = torch.zeros(BSZ, dtype=torch.bool)
++        for e, sc in enumerate(success_chunks):
++            if c >= sc:
++                raw_succ[e] = True  # sticky success
++            if mode == "timing":
++                if c <= sc:
++                    rew[e, :] = timing_per_step
++                if c == sc:
++                    rew[e, -1] += outcome
++            else:  # sparse 0/1 (use_rel_reward): +1 only at first success step
++                if c == sc:
++                    rew[e, 0] = 1.0
++            if c == sc + garbage_after:
++                rew[e, 0] += garbage_val
++        trunc_now = torch.tensor([c == NC - 1] * BSZ)
++        if done_shift:
++            first_success = raw_succ & (~latch)
++            shifted = latch.clone()
++            latch = latch | first_success
++            if trunc_now.any():
++                latch = latch & (~trunc_now)
++            term = shifted.view(BSZ, 1).expand(BSZ, CS).clone()
++        else:
++            term = raw_succ.view(BSZ, 1).expand(BSZ, CS).clone()
++        trunc = torch.zeros(BSZ, CS, dtype=torch.bool)
++        trunc[:, -1] = trunc_now
++        terms.append(term)
++        truncs.append(trunc)
++        rews.append(rew)
++
++    term = torch.stack(terms, 0)
++    trunc = torch.stack(truncs, 0)
++    rews = torch.stack(rews, 0)
++    dones = term | trunc
++    dones_p1 = torch.cat([dones, dones[-1:].clone()], 0)
++    values = torch.zeros(NC + 1, BSZ, 1)
++    kw = preprocess_embodied_advantages_inputs(
++        rewards=rews, dones=dones_p1, values=values,
++        reward_type="chunk_level", adv_type="gae")
++    adv, ret = compute_gae_advantages_and_returns(
++        rewards=kw["rewards"], values=kw["values"], dones=kw["dones"],
++        gamma=gamma, gae_lambda=lam, normalize_advantages=False)
++    lm, _ = compute_loss_mask(dones_p1)
++    return ret, lm.any(dim=-1)
++
++
++def check(success_chunks, mode, done_shift=True):
++    ret, lm = replay(success_chunks, mode, done_shift=done_shift)
++    print(f"\n{'=' * 64}\nmode={mode}  done_shift={done_shift}  "
++          f"success_chunks={success_chunks}")
++    allok = True
++    for e, sc in enumerate(success_chunks):
++        r0 = ret[0, e].item()
++        rsucc = ret[sc, e].item()
++        rgar = ret[sc + 5, e].item() if sc + 5 < ret.shape[0] else None
++        lm_pre = bool(lm[max(sc - 1, 0), e])
++        lm_post = bool(lm[sc + 1, e]) if sc + 1 < lm.shape[0] else None
++        c1 = r0 > 1e-4
++        c2 = rsucc > 0
++        c3 = (abs(rgar - 9.0) < 1e-3) if rgar is not None else True
++        c4 = lm_pre and (lm_post is False)
++        ok = c1 and c2 and c3 and c4
++        allok &= ok
++        print(f"  env{e} succ@{sc:3d}: ret[0]={r0:+.4f} ret[succ]={rsucc:+.4f} "
++              f"ret[garbage@succ+5]={None if rgar is None else round(rgar, 3)} "
++              f"lm[pre]={lm_pre} lm[post]={lm_post}  -> {'OK' if ok else 'FAIL'}")
++    print(f"  RESULT: {'ALL OK' if allok else 'FAIL'}")
++    return allok
++
++
++if __name__ == "__main__":
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--chunks", type=int, nargs="+", default=[120, 43, 7])
++    args = ap.parse_args()
++    ok = True
++    check(args.chunks, "sparse", done_shift=False)  # CURRENT broken behavior
++    ok &= check(args.chunks, "sparse", done_shift=True)
++    ok &= check(args.chunks, "timing", done_shift=True)
++    print(f"\n{'#' * 64}\nOVERALL: {'PASS' if ok else 'FAIL'}\n{'#' * 64}")
++    sys.exit(0 if ok else 1)

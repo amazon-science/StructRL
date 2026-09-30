@@ -1,0 +1,2397 @@
+{
+  "DeliverStraw": {
+    "task": "DeliverStraw",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 846.5,
+      "mean": 867.81,
+      "min": 640,
+      "max": 1308
+    },
+    "success": {
+      "median": 830.5,
+      "mean": 851.13,
+      "std": 134.4753996089991,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_straw__s2": {
+        "median": 215.0,
+        "mean": 228.46,
+        "std": 46.340785491832136,
+        "min": 161,
+        "max": 430,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "straw_in_glass_cup__s2": {
+        "median": 594.0,
+        "mean": 602.21,
+        "std": 97.6668106369815,
+        "min": 433,
+        "max": 1009,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 215.0,
+          "mean": 228.46,
+          "std": 46.340785491832136,
+          "min": 161,
+          "max": 430,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_straw__s2"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 368.0,
+          "mean": 373.75,
+          "std": 75.94568783018559,
+          "min": 226,
+          "max": 649,
+          "n": 100,
+          "subtasks_in_stage": [
+            "straw_in_glass_cup__s2"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 238.5,
+      "mean": 248.92,
+      "std": 72.23831116519821,
+      "min": 128,
+      "max": 524,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "GetToastedBread": {
+    "task": "GetToastedBread",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 1296.5,
+      "mean": 1315.14,
+      "min": 1122,
+      "max": 1951
+    },
+    "success": {
+      "median": 1274.5,
+      "mean": 1299.388888888889,
+      "std": 142.12900591008034,
+      "n_success": 72,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "toaster_on__s3": {
+        "median": 91.0,
+        "mean": 91.77,
+        "std": 23.91311564811244,
+        "min": 51,
+        "max": 164,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_toast__s1": {
+        "median": 840.5,
+        "mean": 841.7,
+        "std": 145.77678141597173,
+        "min": 189,
+        "max": 1454,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "toast_on_plate__s3": {
+        "median": 1179.5,
+        "mean": 1200.09,
+        "std": 120.09755159868998,
+        "min": 998,
+        "max": 1781,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 91.0,
+          "mean": 91.77,
+          "std": 23.91311564811244,
+          "min": 51,
+          "max": 164,
+          "n": 100,
+          "subtasks_in_stage": [
+            "toaster_on__s3"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 753.5,
+          "mean": 749.93,
+          "std": 138.7260793794736,
+          "min": 82,
+          "max": 1352,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_toast__s1"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 338.0,
+          "mean": 358.39,
+          "std": 111.06861798005771,
+          "min": 240,
+          "max": 982,
+          "n": 100,
+          "subtasks_in_stage": [
+            "toast_on_plate__s3"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 97.0,
+      "mean": 99.52777777777777,
+      "std": 24.933228733193147,
+      "min": 51,
+      "max": 167,
+      "n": 72
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "KettleBoiling": {
+    "task": "KettleBoiling",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 443.5,
+      "mean": 449.47,
+      "min": 289,
+      "max": 825
+    },
+    "success": {
+      "median": 427.5,
+      "mean": 433.47,
+      "std": 103.10988846856542,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_kettle__s1": {
+        "median": 53.0,
+        "mean": 55.57,
+        "std": 17.806321911051704,
+        "min": 18,
+        "max": 120,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_stove__s2": {
+        "median": 121.0,
+        "mean": 104.95,
+        "std": 66.34280292541158,
+        "min": 0,
+        "max": 243,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "kettle_on_active_burner__s4": {
+        "median": 398.5,
+        "mean": 405.4,
+        "std": 102.41044868566878,
+        "min": 205,
+        "max": 780,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 53.0,
+          "mean": 55.57,
+          "std": 17.806321911051704,
+          "min": 18,
+          "max": 120,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_kettle__s1"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 74.0,
+          "mean": 79.86842105263158,
+          "std": 28.613275399469256,
+          "min": 39,
+          "max": 193,
+          "n": 76,
+          "subtasks_in_stage": [
+            "kettle_on_stove__s2"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 271.0,
+          "mean": 274.2236842105263,
+          "std": 86.17234852076672,
+          "min": 148,
+          "max": 562,
+          "n": 76,
+          "subtasks_in_stage": [
+            "kettle_on_active_burner__s4"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 9.5,
+      "mean": 28.07,
+      "std": 39.39397288926315,
+      "min": 4,
+      "max": 279,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "LoadDishwasher": {
+    "task": "LoadDishwasher",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 713.0,
+      "mean": 753.7,
+      "min": 480,
+      "max": 1326
+    },
+    "success": {
+      "median": 697.0,
+      "mean": 737.15,
+      "std": 167.55604286327605,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_dish0__s2": {
+        "median": 139.0,
+        "mean": 185.48,
+        "std": 116.31934318934233,
+        "min": 44,
+        "max": 636,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dish0_on_rack__s2": {
+        "median": 248.5,
+        "mean": 308.56,
+        "std": 144.9858834507691,
+        "min": 136,
+        "max": 802,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_dish1__s2": {
+        "median": 159.0,
+        "mean": 220.65,
+        "std": 133.93374294777252,
+        "min": 32,
+        "max": 497,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dish1_on_rack__s2": {
+        "median": 335.0,
+        "mean": 320.77,
+        "std": 176.19783511723406,
+        "min": 0,
+        "max": 760,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "door_half_closed__s2": {
+        "median": 683.0,
+        "mean": 694.82,
+        "std": 161.26675912909022,
+        "min": 405,
+        "max": 1063,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "dishwasher_closed__s2": {
+        "median": 690.5,
+        "mean": 731.09,
+        "std": 166.34585026384036,
+        "min": 461,
+        "max": 1305,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 106.0,
+          "mean": 104.31,
+          "std": 54.14493420441104,
+          "min": 0,
+          "max": 292,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "dish0_on_rack__s2",
+            "grasp_dish1__s2",
+            "dish1_on_rack__s2"
+          ]
+        },
+        "1": {
+          "median": 80.0,
+          "mean": 70.81,
+          "std": 36.68942490691289,
+          "min": 1,
+          "max": 158,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "dish0_on_rack__s2",
+            "grasp_dish1__s2",
+            "dish1_on_rack__s2"
+          ]
+        },
+        "2": {
+          "median": 131.0,
+          "mean": 130.8,
+          "std": 62.54374469121593,
+          "min": 9,
+          "max": 264,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "dish0_on_rack__s2",
+            "grasp_dish1__s2",
+            "dish1_on_rack__s2"
+          ]
+        },
+        "3": {
+          "median": 110.0,
+          "mean": 144.19,
+          "std": 89.40130815597722,
+          "min": 56,
+          "max": 450,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_dish0__s2",
+            "dish0_on_rack__s2",
+            "grasp_dish1__s2",
+            "dish1_on_rack__s2"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 223.5,
+          "mean": 244.71,
+          "std": 102.79010604138902,
+          "min": 79,
+          "max": 591,
+          "n": 100,
+          "subtasks_in_stage": [
+            "door_half_closed__s2"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 2.0,
+          "mean": 41.96551724137931,
+          "std": 74.72700480897764,
+          "min": 0,
+          "max": 363,
+          "n": 87,
+          "subtasks_in_stage": [
+            "dishwasher_closed__s2"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 5.0,
+      "mean": 5.82,
+      "std": 5.933599244977705,
+      "min": 1,
+      "max": 58,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "PackIdenticalLunches": {
+    "task": "PackIdenticalLunches",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 1427.0,
+      "mean": 1425.54,
+      "min": 838,
+      "max": 2286
+    },
+    "success": {
+      "median": 1411.0,
+      "mean": 1408.24,
+      "std": 276.77424446649655,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_vegetable0__s3": {
+        "median": 584.0,
+        "mean": 633.12,
+        "std": 439.84759360487584,
+        "min": 42,
+        "max": 1820,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "vegetable0_packed__s2": {
+        "median": 779.5,
+        "mean": 829.51,
+        "std": 452.2133455571606,
+        "min": 123,
+        "max": 2005,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable1__s3": {
+        "median": 508.0,
+        "mean": 571.62,
+        "std": 449.1271263239396,
+        "min": 40,
+        "max": 1670,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "vegetable1_packed__s2": {
+        "median": 714.0,
+        "mean": 763.66,
+        "std": 455.9617795385925,
+        "min": 139,
+        "max": 1899,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat0__s3": {
+        "median": 444.0,
+        "mean": 519.42,
+        "std": 434.17098429075156,
+        "min": 38,
+        "max": 1457,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat0_packed__s3": {
+        "median": 638.5,
+        "mean": 724.35,
+        "std": 446.3875530298756,
+        "min": 157,
+        "max": 1669,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat1__s3": {
+        "median": 511.0,
+        "mean": 575.15,
+        "std": 468.47406278256216,
+        "min": 42,
+        "max": 1939,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat1_packed__s2": {
+        "median": 702.5,
+        "mean": 739.38,
+        "std": 474.69160051553473,
+        "min": 134,
+        "max": 2145,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 61.5,
+          "mean": 65.05,
+          "std": 17.044867262610172,
+          "min": 38,
+          "max": 124,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s3",
+            "vegetable0_packed__s2",
+            "grasp_vegetable1__s3",
+            "vegetable1_packed__s2",
+            "grasp_meat0__s3",
+            "meat0_packed__s3",
+            "grasp_meat1__s3",
+            "meat1_packed__s2"
+          ]
+        },
+        "1": {
+          "median": 125.0,
+          "mean": 111.86,
+          "std": 59.4792434383626,
+          "min": 0,
+          "max": 226,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s3",
+            "vegetable0_packed__s2",
+            "grasp_vegetable1__s3",
+            "vegetable1_packed__s2",
+            "grasp_meat0__s3",
+            "meat0_packed__s3",
+            "grasp_meat1__s3",
+            "meat1_packed__s2"
+          ]
+        },
+        "2": {
+          "median": 202.0,
+          "mean": 203.75,
+          "std": 66.34114484993457,
+          "min": 13,
+          "max": 393,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s3",
+            "vegetable0_packed__s2",
+            "grasp_vegetable1__s3",
+            "vegetable1_packed__s2",
+            "grasp_meat0__s3",
+            "meat0_packed__s3",
+            "grasp_meat1__s3",
+            "meat1_packed__s2"
+          ]
+        },
+        "3": {
+          "median": 136.5,
+          "mean": 161.75,
+          "std": 104.21855640911555,
+          "min": 3,
+          "max": 512,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s3",
+            "vegetable0_packed__s2",
+            "grasp_vegetable1__s3",
+            "vegetable1_packed__s2",
+            "grasp_meat0__s3",
+            "meat0_packed__s3",
+            "grasp_meat1__s3",
+            "meat1_packed__s2"
+          ]
+        },
+        "4": {
+          "median": 218.0,
+          "mean": 218.58,
+          "std": 63.50231176894272,
+          "min": 86,
+          "max": 378,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s3",
+            "vegetable0_packed__s2",
+            "grasp_vegetable1__s3",
+            "vegetable1_packed__s2",
+            "grasp_meat0__s3",
+            "meat0_packed__s3",
+            "grasp_meat1__s3",
+            "meat1_packed__s2"
+          ]
+        },
+        "5": {
+          "median": 147.0,
+          "mean": 172.05,
+          "std": 104.14983197298015,
+          "min": 3,
+          "max": 525,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s3",
+            "vegetable0_packed__s2",
+            "grasp_vegetable1__s3",
+            "vegetable1_packed__s2",
+            "grasp_meat0__s3",
+            "meat0_packed__s3",
+            "grasp_meat1__s3",
+            "meat1_packed__s2"
+          ]
+        },
+        "6": {
+          "median": 234.5,
+          "mean": 228.72,
+          "std": 59.809544388834794,
+          "min": 69,
+          "max": 374,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s3",
+            "vegetable0_packed__s2",
+            "grasp_vegetable1__s3",
+            "vegetable1_packed__s2",
+            "grasp_meat0__s3",
+            "meat0_packed__s3",
+            "grasp_meat1__s3",
+            "meat1_packed__s2"
+          ]
+        },
+        "7": {
+          "median": 156.5,
+          "mean": 173.63,
+          "std": 76.55842932035635,
+          "min": 84,
+          "max": 450,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable0__s3",
+            "vegetable0_packed__s2",
+            "grasp_vegetable1__s3",
+            "vegetable1_packed__s2",
+            "grasp_meat0__s3",
+            "meat0_packed__s3",
+            "grasp_meat1__s3",
+            "meat1_packed__s2"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 72.0,
+      "mean": 72.85,
+      "std": 25.040916516773105,
+      "min": 17,
+      "max": 143,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "PreSoakPan": {
+    "task": "PreSoakPan",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 747.5,
+      "mean": 768.44,
+      "min": 479,
+      "max": 1442
+    },
+    "success": {
+      "median": 731.5,
+      "mean": 752.44,
+      "std": 147.05905752451972,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_pan__s4": {
+        "median": 115.0,
+        "mean": 152.47,
+        "std": 119.26377949738134,
+        "min": 77,
+        "max": 690,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_in_sink__s4": {
+        "median": 209.5,
+        "mean": 248.23,
+        "std": 135.47803179851707,
+        "min": 110,
+        "max": 790,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_sponge__s3": {
+        "median": 360.0,
+        "mean": 343.74,
+        "std": 105.23189820581972,
+        "min": 64,
+        "max": 531,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "sponge_in_sink__s4": {
+        "median": 477.0,
+        "mean": 474.03,
+        "std": 100.02954113660624,
+        "min": 141,
+        "max": 721,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "water_on__s2": {
+        "median": 648.5,
+        "mean": 674.4,
+        "std": 131.35790802231892,
+        "min": 426,
+        "max": 1239,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 108.0,
+          "mean": 113.43,
+          "std": 26.49537884235664,
+          "min": 64,
+          "max": 205,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s4",
+            "pan_in_sink__s4",
+            "grasp_sponge__s3",
+            "sponge_in_sink__s4",
+            "water_on__s2"
+          ]
+        },
+        "1": {
+          "median": 90.5,
+          "mean": 102.03,
+          "std": 59.5571078881438,
+          "min": 25,
+          "max": 409,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s4",
+            "pan_in_sink__s4",
+            "grasp_sponge__s3",
+            "sponge_in_sink__s4",
+            "water_on__s2"
+          ]
+        },
+        "2": {
+          "median": 166.5,
+          "mean": 178.42,
+          "std": 53.488724045353706,
+          "min": 92,
+          "max": 394,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s4",
+            "pan_in_sink__s4",
+            "grasp_sponge__s3",
+            "sponge_in_sink__s4",
+            "water_on__s2"
+          ]
+        },
+        "3": {
+          "median": 102.0,
+          "mean": 101.82,
+          "std": 38.049541390140305,
+          "min": 0,
+          "max": 201,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s4",
+            "pan_in_sink__s4",
+            "grasp_sponge__s3",
+            "sponge_in_sink__s4",
+            "water_on__s2"
+          ]
+        },
+        "4": {
+          "median": 177.0,
+          "mean": 178.7,
+          "std": 54.368832983612954,
+          "min": 58,
+          "max": 449,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s4",
+            "pan_in_sink__s4",
+            "grasp_sponge__s3",
+            "sponge_in_sink__s4",
+            "water_on__s2"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 68.0,
+      "mean": 78.04,
+      "std": 31.656885506947773,
+      "min": 37,
+      "max": 199,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "PrepareCoffee": {
+    "task": "PrepareCoffee",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 548.5,
+      "mean": 560.51,
+      "min": 316,
+      "max": 1092
+    },
+    "success": {
+      "median": 532.5,
+      "mean": 544.47,
+      "std": 143.12843567928772,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_mug__s3": {
+        "median": 99.0,
+        "mean": 100.77,
+        "std": 27.278143265259093,
+        "min": 45,
+        "max": 188,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "mug_at_machine__s4": {
+        "median": 243.0,
+        "mean": 237.76,
+        "std": 88.59030646746855,
+        "min": 0,
+        "max": 424,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "machine_turned_on__s4": {
+        "median": 423.0,
+        "mean": 453.62,
+        "std": 129.67280208278063,
+        "min": 160,
+        "max": 879,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 99.0,
+          "mean": 100.77,
+          "std": 27.278143265259093,
+          "min": 45,
+          "max": 188,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_mug__s3"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 152.0,
+          "mean": 146.52083333333334,
+          "std": 63.56623500443367,
+          "min": 36,
+          "max": 305,
+          "n": 96,
+          "subtasks_in_stage": [
+            "mug_at_machine__s4"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 189.0,
+          "mean": 211.66315789473686,
+          "std": 110.46834369378747,
+          "min": 63,
+          "max": 578,
+          "n": 95,
+          "subtasks_in_stage": [
+            "machine_turned_on__s4"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 86.5,
+      "mean": 90.65,
+      "std": 36.95980925275454,
+      "min": 36,
+      "max": 200,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "RinseSinkBasin": {
+    "task": "RinseSinkBasin",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 402.0,
+      "mean": 402.83,
+      "min": 227,
+      "max": 661
+    },
+    "success": {
+      "median": 386.0,
+      "mean": 386.83,
+      "std": 80.66462111731512,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "water_on__s2": {
+        "median": 84.0,
+        "mean": 89.52,
+        "std": 30.773521085504665,
+        "min": 49,
+        "max": 186,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "washed_left__s4": {
+        "median": 302.0,
+        "mean": 302.57,
+        "std": 71.21295598414659,
+        "min": 163,
+        "max": 460,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "washed_center__s6": {
+        "median": 156.5,
+        "mean": 162.54,
+        "std": 38.395682048897115,
+        "min": 93,
+        "max": 283,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "washed_right__s4": {
+        "median": 348.5,
+        "mean": 355.78,
+        "std": 87.30940155561713,
+        "min": 206,
+        "max": 626,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 84.0,
+          "mean": 89.52,
+          "std": 30.773521085504665,
+          "min": 49,
+          "max": 186,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s2"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 70.0,
+          "mean": 73.02,
+          "std": 22.04040834467456,
+          "min": 35,
+          "max": 152,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left__s4",
+            "washed_center__s6",
+            "washed_right__s4"
+          ]
+        },
+        "1": {
+          "median": 117.0,
+          "mean": 118.83,
+          "std": 30.041323206543353,
+          "min": 40,
+          "max": 224,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left__s4",
+            "washed_center__s6",
+            "washed_right__s4"
+          ]
+        },
+        "2": {
+          "median": 82.5,
+          "mean": 95.61,
+          "std": 46.74503075194197,
+          "min": 42,
+          "max": 298,
+          "n": 100,
+          "subtasks_in_stage": [
+            "washed_left__s4",
+            "washed_center__s6",
+            "washed_right__s4"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 9.0,
+      "mean": 9.85,
+      "std": 4.102133591193733,
+      "min": 4,
+      "max": 32,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "ScrubCuttingBoard": {
+    "task": "ScrubCuttingBoard",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 429.5,
+      "mean": 452.34,
+      "min": 263,
+      "max": 801
+    },
+    "success": {
+      "median": 414.5,
+      "mean": 439.01063829787233,
+      "std": 124.38183272632115,
+      "n_success": 94,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_sponge__s2": {
+        "median": 40.5,
+        "mean": 41.95,
+        "std": 12.338861373724889,
+        "min": 22,
+        "max": 91,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "contact_1step__s3": {
+        "median": 134.5,
+        "mean": 136.45,
+        "std": 38.73638470482242,
+        "min": 69,
+        "max": 254,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "contact_3steps__s2": {
+        "median": 199.0,
+        "mean": 207.47,
+        "std": 69.50359055473321,
+        "min": 86,
+        "max": 463,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "sweep_range_0p05m__s2": {
+        "median": 206.0,
+        "mean": 212.34,
+        "std": 69.50384449798443,
+        "min": 98,
+        "max": 463,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "contact_5steps__s3": {
+        "median": 206.0,
+        "mean": 215.22,
+        "std": 70.071760360362,
+        "min": 98,
+        "max": 463,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "sweep_range_0p1m__s2": {
+        "median": 212.0,
+        "mean": 222.95,
+        "std": 73.78500863996696,
+        "min": 98,
+        "max": 595,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 40.5,
+          "mean": 41.95,
+          "std": 12.338861373724889,
+          "min": 22,
+          "max": 91,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_sponge__s2"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 89.0,
+          "mean": 94.5,
+          "std": 32.75591549628861,
+          "min": 44,
+          "max": 215,
+          "n": 100,
+          "subtasks_in_stage": [
+            "contact_1step__s3"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 63.0,
+          "mean": 73.21428571428571,
+          "std": 55.3693074191978,
+          "min": 6,
+          "max": 323,
+          "n": 98,
+          "subtasks_in_stage": [
+            "contact_3steps__s2",
+            "sweep_range_0p05m__s2"
+          ]
+        },
+        "1": {
+          "median": 1.0,
+          "mean": 4.46875,
+          "std": 13.129922192108884,
+          "min": 0,
+          "max": 96,
+          "n": 96,
+          "subtasks_in_stage": [
+            "contact_3steps__s2",
+            "sweep_range_0p05m__s2"
+          ],
+          "median_raw": 0.0,
+          "clamped": true
+        }
+      },
+      "3": {
+        "0": {
+          "median": 1.0,
+          "mean": 3.0,
+          "std": 12.073559265325754,
+          "min": 0,
+          "max": 93,
+          "n": 96,
+          "subtasks_in_stage": [
+            "contact_5steps__s3",
+            "sweep_range_0p1m__s2"
+          ],
+          "median_raw": 0.0,
+          "clamped": true
+        },
+        "1": {
+          "median": 1.0,
+          "mean": 6.25,
+          "std": 19.285681216902866,
+          "min": 0,
+          "max": 132,
+          "n": 96,
+          "subtasks_in_stage": [
+            "contact_5steps__s3",
+            "sweep_range_0p1m__s2"
+          ],
+          "median_raw": 0.0,
+          "clamped": true
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 186.0,
+      "mean": 220.01063829787233,
+      "std": 106.78228941933737,
+      "min": 84,
+      "max": 529,
+      "n": 94
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "SearingMeat": {
+    "task": "SearingMeat",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 865.0,
+      "mean": 871.32,
+      "min": 507,
+      "max": 1305
+    },
+    "success": {
+      "median": 849.0,
+      "mean": 854.04,
+      "std": 182.8940086498188,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_pan__s2": {
+        "median": 540.5,
+        "mean": 513.3,
+        "std": 198.65173042286847,
+        "min": 88,
+        "max": 889,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_on_stove__s3": {
+        "median": 299.5,
+        "mean": 309.24,
+        "std": 73.09871681500299,
+        "min": 165,
+        "max": 485,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "pan_on_active_knob__s3": {
+        "median": 551.5,
+        "mean": 419.74,
+        "std": 389.51584358020665,
+        "min": 0,
+        "max": 1174,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_meat__s2": {
+        "median": 493.0,
+        "mean": 486.62,
+        "std": 101.8724476980896,
+        "min": 282,
+        "max": 700,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat_in_pan__s2": {
+        "median": 520.0,
+        "mean": 497.44,
+        "std": 185.3655480395427,
+        "min": 0,
+        "max": 833,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 133.0,
+          "mean": 153.38,
+          "std": 152.41337080453278,
+          "min": 0,
+          "max": 485,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s2",
+            "pan_on_stove__s3",
+            "pan_on_active_knob__s3"
+          ]
+        },
+        "1": {
+          "median": 264.0,
+          "mean": 269.58,
+          "std": 77.16698516852917,
+          "min": 89,
+          "max": 457,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s2",
+            "pan_on_stove__s3",
+            "pan_on_active_knob__s3"
+          ]
+        },
+        "2": {
+          "median": 211.5,
+          "mean": 242.98,
+          "std": 136.48091295122552,
+          "min": 78,
+          "max": 796,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_pan__s2",
+            "pan_on_stove__s3",
+            "pan_on_active_knob__s3"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 158.0,
+          "mean": 146.1818181818182,
+          "std": 86.9208816650032,
+          "min": 24,
+          "max": 294,
+          "n": 11,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "meat_in_pan__s2"
+          ]
+        },
+        "1": {
+          "median": 111.0,
+          "mean": 117.55555555555556,
+          "std": 30.634443618294576,
+          "min": 77,
+          "max": 180,
+          "n": 9,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "meat_in_pan__s2"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 93.0,
+      "mean": 161.44,
+      "std": 152.9011654631841,
+      "min": 5,
+      "max": 545,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "SetUpCuttingStation": {
+    "task": "SetUpCuttingStation",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 630.5,
+      "mean": 659.24,
+      "min": 369,
+      "max": 1157
+    },
+    "success": {
+      "median": 612.0,
+      "mean": 641.55,
+      "std": 175.56960870264535,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_meat__s2": {
+        "median": 474.0,
+        "mean": 479.98,
+        "std": 131.0353372186297,
+        "min": 257,
+        "max": 804,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "meat_on_board__s1": {
+        "median": 525.5,
+        "mean": 537.73,
+        "std": 138.0773591143747,
+        "min": 300,
+        "max": 852,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_knife__s1": {
+        "median": 145.0,
+        "mean": 149.82,
+        "std": 54.00303324814264,
+        "min": 36,
+        "max": 290,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "knife_on_board__s2": {
+        "median": 293.5,
+        "mean": 246.99,
+        "std": 187.24750972976918,
+        "min": 0,
+        "max": 617,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 125.0,
+          "mean": 108.73,
+          "std": 88.73689818784517,
+          "min": 0,
+          "max": 290,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "meat_on_board__s1",
+            "grasp_knife__s1",
+            "knife_on_board__s2"
+          ]
+        },
+        "1": {
+          "median": 159.0,
+          "mean": 179.35,
+          "std": 83.52944091755913,
+          "min": 17,
+          "max": 456,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "meat_on_board__s1",
+            "grasp_knife__s1",
+            "knife_on_board__s2"
+          ]
+        },
+        "2": {
+          "median": 169.5,
+          "mean": 191.9,
+          "std": 91.88084675273733,
+          "min": 69,
+          "max": 521,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "meat_on_board__s1",
+            "grasp_knife__s1",
+            "knife_on_board__s2"
+          ]
+        },
+        "3": {
+          "median": 54.0,
+          "mean": 57.75,
+          "std": 19.377499838730486,
+          "min": 27,
+          "max": 132,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_meat__s2",
+            "meat_on_board__s1",
+            "grasp_knife__s1",
+            "knife_on_board__s2"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 83.0,
+      "mean": 103.82,
+      "std": 55.59467240662544,
+      "min": 42,
+      "max": 341,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "StackBowlsCabinet": {
+    "task": "StackBowlsCabinet",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 323.5,
+      "mean": 340.27,
+      "min": 218,
+      "max": 698
+    },
+    "success": {
+      "median": 307.5,
+      "mean": 324.25,
+      "std": 86.92345770849201,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_any_bowl__s2": {
+        "median": 35.0,
+        "mean": 41.53,
+        "std": 23.903746568268332,
+        "min": 17,
+        "max": 149,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowls_stacked__s3": {
+        "median": 110.0,
+        "mean": 124.96,
+        "std": 66.4889344176909,
+        "min": 68,
+        "max": 601,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "any_bowl_in_cabinet__s1": {
+        "median": 92.0,
+        "mean": 96.26,
+        "std": 27.0291028337975,
+        "min": 58,
+        "max": 184,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "both_bowls_in_cabinet__s4": {
+        "median": 275.0,
+        "mean": 287.64,
+        "std": 78.27943791315826,
+        "min": 173,
+        "max": 615,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 35.0,
+          "mean": 41.53,
+          "std": 23.903746568268332,
+          "min": 17,
+          "max": 149,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_any_bowl__s2"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 71.5,
+          "mean": 83.43,
+          "std": 58.509188167329754,
+          "min": 39,
+          "max": 541,
+          "n": 100,
+          "subtasks_in_stage": [
+            "bowls_stacked__s3"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 152.5,
+          "mean": 162.68,
+          "std": 48.572395452561324,
+          "min": 3,
+          "max": 302,
+          "n": 100,
+          "subtasks_in_stage": [
+            "any_bowl_in_cabinet__s1",
+            "both_bowls_in_cabinet__s4"
+          ]
+        },
+        "1": {
+          "median": 152.5,
+          "n": 0,
+          "fallback": true,
+          "subtasks_in_stage": [
+            "any_bowl_in_cabinet__s1",
+            "both_bowls_in_cabinet__s4"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 32.5,
+      "mean": 36.61,
+      "std": 12.287306458292639,
+      "min": 20,
+      "max": 82,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "SteamInMicrowave": {
+    "task": "SteamInMicrowave",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 963.5,
+      "mean": 955.12,
+      "min": 578,
+      "max": 1388
+    },
+    "success": {
+      "median": 944.5,
+      "mean": 938.64,
+      "std": 177.3423536552958,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_vegetable__s3": {
+        "median": 88.5,
+        "mean": 89.11,
+        "std": 23.131318596223604,
+        "min": 45,
+        "max": 145,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg_in_bowl__s3": {
+        "median": 190.0,
+        "mean": 195.78,
+        "std": 44.488780608148836,
+        "min": 109,
+        "max": 300,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_bowl__s2": {
+        "median": 197.5,
+        "mean": 199.83,
+        "std": 47.59770057471265,
+        "min": 106,
+        "max": 310,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_micro__s2": {
+        "median": 492.5,
+        "mean": 494.31,
+        "std": 88.74341609381509,
+        "min": 303,
+        "max": 712,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "door_half_closed__s3": {
+        "median": 786.5,
+        "mean": 778.24,
+        "std": 130.37086484333835,
+        "min": 481,
+        "max": 1108,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "door_closed__s3": {
+        "median": 812.5,
+        "mean": 806.06,
+        "std": 134.09681726275238,
+        "min": 501,
+        "max": 1133,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 88.5,
+          "mean": 89.11,
+          "std": 23.131318596223604,
+          "min": 45,
+          "max": 145,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable__s3",
+            "veg_in_bowl__s3"
+          ]
+        },
+        "1": {
+          "median": 104.5,
+          "mean": 106.67,
+          "std": 28.59302537333187,
+          "min": 53,
+          "max": 199,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_vegetable__s3",
+            "veg_in_bowl__s3"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 5.5,
+          "mean": 49.74,
+          "std": 102.83828275501298,
+          "min": 0,
+          "max": 351,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s2",
+            "bowl_in_micro__s2"
+          ]
+        },
+        "1": {
+          "median": 303.5,
+          "mean": 296.17857142857144,
+          "std": 60.19099772792435,
+          "min": 169,
+          "max": 417,
+          "n": 84,
+          "subtasks_in_stage": [
+            "grasp_bowl__s2",
+            "bowl_in_micro__s2"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 287.0,
+          "mean": 287.5238095238095,
+          "std": 64.72128452991191,
+          "min": 164,
+          "max": 466,
+          "n": 84,
+          "subtasks_in_stage": [
+            "door_half_closed__s3",
+            "door_closed__s3"
+          ]
+        },
+        "1": {
+          "median": 27.0,
+          "mean": 28.13095238095238,
+          "std": 7.826663465215073,
+          "min": 15,
+          "max": 53,
+          "n": 84,
+          "subtasks_in_stage": [
+            "door_half_closed__s3",
+            "door_closed__s3"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 126.5,
+      "mean": 132.58,
+      "std": 56.93982437626586,
+      "min": 45,
+      "max": 290,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "StirVegetables": {
+    "task": "StirVegetables",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 788.0,
+      "mean": 818.52,
+      "min": 481,
+      "max": 1558
+    },
+    "success": {
+      "median": 757.0,
+      "mean": 788.7894736842105,
+      "std": 208.94032866306173,
+      "n_success": 95,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_veg1__s3": {
+        "median": 78.0,
+        "mean": 122.32,
+        "std": 90.43371937502073,
+        "min": 36,
+        "max": 381,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg1_in_pot__s3": {
+        "median": 170.0,
+        "mean": 225.18,
+        "std": 109.1997600729965,
+        "min": 88,
+        "max": 494,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_veg2__s2": {
+        "median": 60.5,
+        "mean": 68.44,
+        "std": 44.278057771316035,
+        "min": 25,
+        "max": 317,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "veg2_in_pot__s3": {
+        "median": 305.0,
+        "mean": 306.75,
+        "std": 135.49711251535953,
+        "min": 101,
+        "max": 724,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "spatula_grasped__s2": {
+        "median": 82.0,
+        "mean": 157.45,
+        "std": 170.8147168718199,
+        "min": 29,
+        "max": 1028,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "stir_t1__s3": {
+        "median": 630.5,
+        "mean": 671.25,
+        "std": 182.46881240365434,
+        "min": 403,
+        "max": 1433,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "stir_t3__s1": {
+        "median": 719.0,
+        "mean": 756.16,
+        "std": 199.29880682031188,
+        "min": 462,
+        "max": 1472,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "task_complete__s5": {
+        "median": 757.0,
+        "mean": 788.7894736842105,
+        "std": 208.94032866306173,
+        "min": 467,
+        "max": 1541,
+        "coverage": 0.95,
+        "n": 95
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 59.0,
+          "mean": 60.71,
+          "std": 22.843946681779837,
+          "min": 25,
+          "max": 178,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s3",
+            "veg1_in_pot__s3",
+            "grasp_veg2__s2",
+            "veg2_in_pot__s3"
+          ]
+        },
+        "1": {
+          "median": 14.5,
+          "mean": 37.76,
+          "std": 41.76508589719408,
+          "min": 0,
+          "max": 168,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s3",
+            "veg1_in_pot__s3",
+            "grasp_veg2__s2",
+            "veg2_in_pot__s3"
+          ]
+        },
+        "2": {
+          "median": 82.5,
+          "mean": 91.57,
+          "std": 32.82750523570136,
+          "min": 44,
+          "max": 187,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s3",
+            "veg1_in_pot__s3",
+            "grasp_veg2__s2",
+            "veg2_in_pot__s3"
+          ]
+        },
+        "3": {
+          "median": 172.5,
+          "mean": 183.43,
+          "std": 87.83635409100266,
+          "min": 48,
+          "max": 484,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_veg1__s3",
+            "veg1_in_pot__s3",
+            "grasp_veg2__s2",
+            "veg2_in_pot__s3"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 128.0,
+          "mean": 158.0,
+          "std": 73.68989075850229,
+          "min": 95,
+          "max": 304,
+          "n": 10,
+          "subtasks_in_stage": [
+            "spatula_grasped__s2"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 174.5,
+          "mean": 179.3,
+          "std": 81.47275618266514,
+          "min": 100,
+          "max": 405,
+          "n": 10,
+          "subtasks_in_stage": [
+            "stir_t1__s3",
+            "stir_t3__s1"
+          ]
+        },
+        "1": {
+          "median": 56.0,
+          "mean": 78.2,
+          "std": 51.060356442155786,
+          "min": 24,
+          "max": 197,
+          "n": 10,
+          "subtasks_in_stage": [
+            "stir_t1__s3",
+            "stir_t3__s1"
+          ]
+        }
+      },
+      "3": {
+        "0": {
+          "median": 21.0,
+          "mean": 23.88888888888889,
+          "std": 20.60983823562828,
+          "min": 3,
+          "max": 69,
+          "n": 9,
+          "subtasks_in_stage": [
+            "task_complete__s5"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 0.0,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0,
+      "max": 0,
+      "n": 95
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "StoreLeftoversInBowl": {
+    "task": "StoreLeftoversInBowl",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 777.5,
+      "mean": 759.7,
+      "min": 434,
+      "max": 1007
+    },
+    "success": {
+      "median": 760.5,
+      "mean": 742.85,
+      "std": 107.20348641718702,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "grasp_chicken__s2": {
+        "median": 216.5,
+        "mean": 206.19,
+        "std": 70.01124124024655,
+        "min": 37,
+        "max": 354,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "chicken_in_bowl__s3": {
+        "median": 316.0,
+        "mean": 313.92,
+        "std": 79.62470470902858,
+        "min": 123,
+        "max": 510,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_vegetable__s3": {
+        "median": 55.0,
+        "mean": 79.65,
+        "std": 78.31364823579605,
+        "min": 26,
+        "max": 377,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "vegetable_in_bowl__s3": {
+        "median": 112.0,
+        "mean": 134.37,
+        "std": 85.49943333145549,
+        "min": 3,
+        "max": 434,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "grasp_bowl__s3": {
+        "median": 140.5,
+        "mean": 163.96,
+        "std": 96.06892525681756,
+        "min": 71,
+        "max": 692,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "bowl_in_fridge__s3": {
+        "median": 636.5,
+        "mean": 628.75,
+        "std": 98.37706795793419,
+        "min": 343,
+        "max": 856,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 51.0,
+          "mean": 53.63,
+          "std": 19.812952833941736,
+          "min": 3,
+          "max": 112,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s2",
+            "chicken_in_bowl__s3",
+            "grasp_vegetable__s3",
+            "vegetable_in_bowl__s3"
+          ]
+        },
+        "1": {
+          "median": 53.5,
+          "mean": 63.06,
+          "std": 33.60232730035228,
+          "min": 27,
+          "max": 210,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s2",
+            "chicken_in_bowl__s3",
+            "grasp_vegetable__s3",
+            "vegetable_in_bowl__s3"
+          ]
+        },
+        "2": {
+          "median": 115.0,
+          "mean": 114.94,
+          "std": 34.278512219756564,
+          "min": 41,
+          "max": 205,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s2",
+            "chicken_in_bowl__s3",
+            "grasp_vegetable__s3",
+            "vegetable_in_bowl__s3"
+          ]
+        },
+        "3": {
+          "median": 92.5,
+          "mean": 100.55,
+          "std": 34.72070707805358,
+          "min": 29,
+          "max": 218,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_chicken__s2",
+            "chicken_in_bowl__s3",
+            "grasp_vegetable__s3",
+            "vegetable_in_bowl__s3"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 290.5,
+          "mean": 272.11,
+          "std": 98.40883039646391,
+          "min": 13,
+          "max": 426,
+          "n": 100,
+          "subtasks_in_stage": [
+            "grasp_bowl__s3",
+            "bowl_in_fridge__s3"
+          ]
+        },
+        "1": {
+          "median": 227.0,
+          "mean": 225.1818181818182,
+          "std": 87.81573495555979,
+          "min": 31,
+          "max": 345,
+          "n": 11,
+          "subtasks_in_stage": [
+            "grasp_bowl__s3",
+            "bowl_in_fridge__s3"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 112.0,
+      "mean": 113.79,
+      "std": 27.710754230081868,
+      "min": 65,
+      "max": 210,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  },
+  "WashLettuce": {
+    "task": "WashLettuce",
+    "n_episodes": 100,
+    "horizon": {
+      "median": 466.5,
+      "mean": 477.63,
+      "min": 335,
+      "max": 1072
+    },
+    "success": {
+      "median": 450.5,
+      "mean": 461.61,
+      "std": 104.17829860388392,
+      "n_success": 100,
+      "n_total": 100
+    },
+    "subtask_timing": {
+      "water_on__s3": {
+        "median": 133.5,
+        "mean": 149.81,
+        "std": 52.34093904392622,
+        "min": 86,
+        "max": 412,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "lettuce_under_water__s3": {
+        "median": 376.5,
+        "mean": 390.24,
+        "std": 100.858625808604,
+        "min": 104,
+        "max": 927,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "wash_t5__s2": {
+        "median": 427.5,
+        "mean": 438.15,
+        "std": 104.09422414332123,
+        "min": 296,
+        "max": 1033,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "wash_t10__s2": {
+        "median": 432.5,
+        "mean": 443.15,
+        "std": 104.09422414332123,
+        "min": 301,
+        "max": 1038,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "wash_t15__s2": {
+        "median": 437.5,
+        "mean": 448.54,
+        "std": 104.17969283886374,
+        "min": 306,
+        "max": 1043,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "wash_t20__s2": {
+        "median": 442.5,
+        "mean": 453.54,
+        "std": 104.17969283886374,
+        "min": 311,
+        "max": 1048,
+        "coverage": 1.0,
+        "n": 100
+      },
+      "task_complete__s2": {
+        "median": 447.5,
+        "mean": 458.54,
+        "std": 104.17969283886374,
+        "min": 316,
+        "max": 1053,
+        "coverage": 1.0,
+        "n": 100
+      }
+    },
+    "rank_budgets": {
+      "0": {
+        "0": {
+          "median": 133.5,
+          "mean": 149.81,
+          "std": 52.34093904392622,
+          "min": 86,
+          "max": 412,
+          "n": 100,
+          "subtasks_in_stage": [
+            "water_on__s3"
+          ]
+        }
+      },
+      "1": {
+        "0": {
+          "median": 233.0,
+          "mean": 245.1919191919192,
+          "std": 63.24086978741055,
+          "min": 161,
+          "max": 515,
+          "n": 99,
+          "subtasks_in_stage": [
+            "lettuce_under_water__s3"
+          ]
+        }
+      },
+      "2": {
+        "0": {
+          "median": 40.0,
+          "mean": 45.676767676767675,
+          "std": 21.753359560728754,
+          "min": 18,
+          "max": 121,
+          "n": 99,
+          "subtasks_in_stage": [
+            "wash_t5__s2",
+            "wash_t10__s2",
+            "wash_t15__s2",
+            "wash_t20__s2"
+          ]
+        },
+        "1": {
+          "median": 5.0,
+          "mean": 5.0,
+          "std": 0.0,
+          "min": 5,
+          "max": 5,
+          "n": 99,
+          "subtasks_in_stage": [
+            "wash_t5__s2",
+            "wash_t10__s2",
+            "wash_t15__s2",
+            "wash_t20__s2"
+          ]
+        },
+        "2": {
+          "median": 5.0,
+          "mean": 5.393939393939394,
+          "std": 2.8948515141983004,
+          "min": 5,
+          "max": 31,
+          "n": 99,
+          "subtasks_in_stage": [
+            "wash_t5__s2",
+            "wash_t10__s2",
+            "wash_t15__s2",
+            "wash_t20__s2"
+          ]
+        },
+        "3": {
+          "median": 5.0,
+          "mean": 5.0,
+          "std": 0.0,
+          "min": 5,
+          "max": 5,
+          "n": 99,
+          "subtasks_in_stage": [
+            "wash_t5__s2",
+            "wash_t10__s2",
+            "wash_t15__s2",
+            "wash_t20__s2"
+          ]
+        }
+      },
+      "3": {
+        "0": {
+          "median": 5.0,
+          "mean": 5.0,
+          "std": 0.0,
+          "min": 5,
+          "max": 5,
+          "n": 99,
+          "subtasks_in_stage": [
+            "task_complete__s2"
+          ]
+        }
+      }
+    },
+    "finalize_budget": {
+      "median": 3.0,
+      "mean": 3.07,
+      "std": 0.6964912059746338,
+      "min": 3,
+      "max": 10,
+      "n": 100
+    },
+    "provenance": {
+      "stage_config": "/fsx/sangminw/step_followup/density-midslice/actibench_root/actibench/stage_config.py",
+      "raw_glob": "/fsx/sangminw/step_followup/raw_v6/raw_*.json",
+      "min_budget": 1.0
+    }
+  }
+}
